@@ -95,9 +95,6 @@ if __name__ == '__main__':
                 session_path = os.path.join(
                     bids_path, "sub-" + sub, "ses-" + ses
                 )
-                all_sequences = glob.glob(
-                    os.path.join(session_path, "*", "*.nii.gz"))
-                sequences_found = []
 
                 # Get T1w and convert to MIF
                 all_sequences_t1 = layout.get(

@@ -68,13 +68,11 @@ def prepare_abcd_acquistions(bids_directory, sub, ses, preproc_directory):
     dwi_json = dwi_1_nifti.replace("nii.gz", "json")
 
     # Get both pepolar sequences
-    print(acq)
     all_sequences_pepolar_ap = layout.get(
         subject=sub, session=ses, extension='nii.gz',
         suffix='epi', acquisition=acq, direction='AP',
         return_type='filename'
     )
-    print(all_sequences_pepolar_ap)
     pepolar_ap_nifti = all_sequences_pepolar_ap[0]
     result, msg, pepolar_ap = convert_nifti_to_mif(
         pepolar_ap_nifti, preproc_directory, diff=False
