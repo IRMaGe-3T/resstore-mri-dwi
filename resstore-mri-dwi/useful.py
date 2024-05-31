@@ -117,6 +117,7 @@ def convert_mif_to_nifti(in_file, out_directory, diff=True):
 def convert_nifti_to_mif(in_file, out_directory, diff=True):
     """Convert NIfTI into MIF format"""
     in_file_mif = None
+    
     # Check inputs files and get files name
     valid_bool, ext, file_name = check_file_ext(in_file, EXT_NIFTI)
     if not valid_bool:
@@ -125,9 +126,15 @@ def convert_nifti_to_mif(in_file, out_directory, diff=True):
             "recognized (nii or nii.gz needed)...!"
         )
         return 0, msg, in_file_mif
+    
+    # Check if output MIF file already exists
+    in_file_mif = os.path.join(out_directory, file_name + ".mif")
+    if os.path.exists(in_file_mif):
+        print(f"Skipping conversion of {in_file} to MIF format as MIF file already exists.")
+        return 1, "", in_file_mif
 
     # Convert diffusions into ".mif" format (mrtrix format)
-    in_file_mif = os.path.join(out_directory, file_name + ".mif")
+    #in_file_mif = os.path.join(out_directory, file_name + ".mif")
     if diff:
         bvec = in_file.replace(ext, "bvec")
         bval = in_file.replace(ext, "bval")
