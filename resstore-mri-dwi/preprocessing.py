@@ -88,71 +88,75 @@ def run_preproc_dwi(
     else:
         print(f"Skipping unringing step, {dwi_degibbs} already exists.")
 
-    # Create b0 pair for motion distortion correction
-    if pe_dir=="j" and in_pepolar_AP:
-        # Check for fmap files encoding direction (PA)
-        if in_pepolar_PA==None:
-            # Extract b0 (PA) from dwi 
-            in_pepolar_PA = in_dwi.replace(".mif", "_bzero.mif")
-            cmd = ["dwiextract", in_dwi, in_pepolar_PA, "-bzero"]
-            result, stderrl, sdtoutl = execute_command(cmd)
-            if result != 0:
-                msg = f"Can not launch dwiextract (exit code {result})"
-                return 0, msg, info
-        # Concatenate both b0 mean
-        b0_pair = os.path.join(dir_name, "b0_pair.mif")
-        cmd = ["mrcat", in_pepolar_PA, in_pepolar_AP, b0_pair]
-        result, stderrl, sdtoutl = execute_command(cmd)
-        if result != 0:
-            msg = f"Can not launch mrcat to create b0_pair (exit code {result})"
-            return 0, msg, info
-    if pe_dir=="j-" and in_pepolar_PA:
-        # Check for fmap files encoding direction (AP)
-        if in_pepolar_AP==None:
-        # Extract b0 (AP) from dwi 
-            in_pepolar_AP = in_dwi.replace(".mif", "_bzero.mif")
-            cmd = ["dwiextract", in_dwi, in_pepolar_AP, "-bzero"]
-            result, stderrl, sdtoutl = execute_command(cmd)
-            if result != 0:
-                msg = f"Can not launch dwiextract (exit code {result})"
-                return 0, msg, info
-        # Concatenate both b0 mean
-        b0_pair = os.path.join(dir_name, "b0_pair.mif")
-        cmd = ["mrcat", in_pepolar_AP, in_pepolar_PA, b0_pair]
-        result, stderrl, sdtoutl = execute_command(cmd)
-        if result != 0:
-            msg = f"Can not launch mrcat to create b0_pair (exit code {result})"
-            return 0, msg, info
-        
-    
 
-    # Motion distortion correction
-    # if rpe == "all":
-    #     # In this case issue with dwifslpreproc
-    #     # use directly corrected image for in_dwi
-    #     dwi_out = in_dwi
-    #     mylog.info("Motion distorsion correction not done")
-    # else:
-    #     # fslpreproc (topup and Eddy)
-    #     dwi_out = dwi_degibbs.replace(".mif", "_fslpreproc.mif")
-    #     if in_pepolar:
-    #         cmd = get_dwifslpreproc_command(
-    #             dwi_degibbs, dwi_out, pe_dir, readout_time, b0_pair, rpe, shell
-    #         )
-    #     else:
-    #         cmd = get_dwifslpreproc_command(
-    #             dwi_degibbs,
-    #             dwi_out,
-    #             pe_dir,
-    #             readout_time,
-    #             b0_pair=None,
-    #             rpe=rpe,
-    #             shell=shell,
-    #         )
-    #     result, stderrl, sdtoutl = execute_command(cmd)
-    #     if result != 0:
-    #         msg = f"Can not lunch dwifslpreproc (exit code {result})"
-    #         return 0, msg, info
+    dwi_preproc = dwi_degibbs.replace("_degibbs.mif", "_degibbs_preproc.mif")
+    if not os.path.exists(dwi_preproc):
+        # Create b0 pair for motion distortion correction
+        if pe_dir=="j" and in_pepolar_AP:
+            # Check for fmap files encoding direction (PA)
+            if in_pepolar_PA==None:
+                # Extract b0 (PA) from dwi 
+                in_pepolar_PA = in_dwi.replace(".mif", "_bzero.mif")
+                cmd = ["dwiextract", in_dwi, in_pepolar_PA, "-bzero"]
+                result, stderrl, sdtoutl = execute_command(cmd)
+                if result != 0:
+                    msg = f"Can not launch dwiextract (exit code {result})"
+                    return 0, msg, info
+            # Concatenate both b0 mean
+            b0_pair = os.path.join(dir_name, "b0_pair.mif")
+            cmd = ["mrcat", in_pepolar_PA, in_pepolar_AP, b0_pair]
+            result, stderrl, sdtoutl = execute_command(cmd)
+            if result != 0:
+                msg = f"Can not launch mrcat to create b0_pair (exit code {result})"
+                return 0, msg, info
+        if pe_dir=="j-" and in_pepolar_PA:
+            # Check for fmap files encoding direction (AP)
+            if in_pepolar_AP==None:
+            # Extract b0 (AP) from dwi 
+                in_pepolar_AP = in_dwi.replace(".mif", "_bzero.mif")
+                cmd = ["dwiextract", in_dwi, in_pepolar_AP, "-bzero"]
+                result, stderrl, sdtoutl = execute_command(cmd)
+                if result != 0:
+                    msg = f"Can not launch dwiextract (exit code {result})"
+                    return 0, msg, info
+            # Concatenate both b0 mean
+            b0_pair = os.path.join(dir_name, "b0_pair.mif")
+            cmd = ["mrcat", in_pepolar_AP, in_pepolar_PA, b0_pair]
+            result, stderrl, sdtoutl = execute_command(cmd)
+            if result != 0:
+                msg = f"Can not launch mrcat to create b0_pair (exit code {result})"
+                return 0, msg, info
+            
+        
+
+        # Motion distortion correction
+        if rpe == "all":
+            # In this case issue with dwifslpreproc
+            # use directly corrected image for in_dwi
+            dwi_out = in_dwi
+        else:
+            # fslpreproc (topup and Eddy)
+            dwi_out = dwi_degibbs.replace(".mif", "_fslpreproc.mif")
+            if b0_pair:
+                cmd = get_dwifslpreproc_command(
+                    dwi_degibbs, dwi_out, pe_dir, readout_time, b0_pair, rpe, shell
+                )
+            else:
+                cmd = get_dwifslpreproc_command(
+                    dwi_degibbs,
+                    dwi_out,
+                    pe_dir,
+                    readout_time,
+                    b0_pair=None,
+                    rpe=rpe,
+                    shell=shell,
+                )
+            result, stderrl, sdtoutl = execute_command(cmd)
+            if result != 0:
+                msg = f"Can not lunch dwifslpreproc (exit code {result})"
+                return 0, msg, info
+    else:
+        print(f"Skipping motion correction step, {dwi_preproc} already exists.")
 
     # # Bias correction
     # dwi_unbias = os.path.join(dir_name, dwi_out.replace(".mif", "_unbias.mif"))
