@@ -145,6 +145,8 @@ if __name__ == '__main__':
 
             # TODO: add function to launch preprocessing
             run_preproc_dwi(in_dwi, pe_dir, readout_time, rpe=None, shell=True, in_pepolar=None)
+            
+            
             # Take inspiration from https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/preprocessing.py#L59
             # adapt function to abdc acquistions (2 pepolar sequences)
             # Compare with Fabrice Hanneau code

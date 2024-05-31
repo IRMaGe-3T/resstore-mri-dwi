@@ -68,49 +68,59 @@ def run_preproc_dwi(
 
     # Denoise
     dwi_denoise = os.path.join(dir_name, file_name + "_denoise.mif")
-    cmd = ["dwidenoise", in_dwi, dwi_denoise]
-    result, stderrl, sdtoutl = execute_command(cmd)
-    if result != 0:
-        msg = f"Can not lunch mrdegibbs (exit code {result})"
-        return 0, msg, info
+    if not os.path.exists(dwi_denoise):
+        cmd = ["dwidenoise", in_dwi, dwi_denoise]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"Can not lunch mrdegibbs (exit code {result})"
+            return 0, msg, info
+    else:
+        print(f"Skipping denoise step, {dwi_denoise} already exists.")
 
     # DeGibbs / Unringing
     dwi_degibbs = dwi_denoise.replace("_denoise.mif", "_denoise_degibbs.mif")
-    cmd = ["mrdegibbs", dwi_denoise, dwi_degibbs]
-    result, stderrl, sdtoutl = execute_command(cmd)
-    if result != 0:
-        msg = f"Can not lunch mrdegibbs (exit code {result})"
-        return 0, msg, info
+    if not os.path.exists(dwi_degibbs):
+        cmd = ["mrdegibbs", dwi_denoise, dwi_degibbs]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"Can not lunch mrdegibbs (exit code {result})"
+            return 0, msg, info
+    else:
+        print(f"Skipping unringing step, {dwi_degibbs} already exists.")
 
-    # # Create b0 pair for motion distortion correction
-    # if in_pepolar:
-    #     # Average b0 pepolar
-    #     in_pepolar_mean = in_pepolar.replace(".mif", "_mean.mif")
-    #     cmd = ["mrmath", in_pepolar, "mean", in_pepolar_mean, "-axis", "3"]
-    #     result, stderrl, sdtoutl = execute_command(cmd)
-    #     if result != 0:
-    #         msg = f"Can not lunch mrmath (exit code {result})"
-    #         return 0, msg, info
-    #     # Extract b0 from dwi and average data
-    #     in_dwi_b0 = in_dwi.replace(".mif", "_bzero.mif")
-    #     cmd = ["dwiextract", in_dwi, in_dwi_b0, "-bzero"]
-    #     result, stderrl, sdtoutl = execute_command(cmd)
-    #     if result != 0:
-    #         msg = f"Can not lunch dwiextract (exit code {result})"
-    #         return 0, msg, info
-    #     in_dwi_b0_mean = in_dwi_b0.replace(".mif", "_mean.mif")
-    #     cmd = ["mrmath", in_dwi_b0, "mean", in_dwi_b0_mean, "-axis", "3"]
-    #     result, stderrl, sdtoutl = execute_command(cmd)
-    #     if result != 0:
-    #         msg = f"Can not lunch mrmath (exit code {result})"
-    #         return 0, msg, info
-    #     # Concatenate both b0 mean
-    #     b0_pair = os.path.join(dir_name, "b0_pair.mif")
-    #     cmd = ["mrcat", in_dwi_b0_mean, in_pepolar_mean, b0_pair]
-    #     result, stderrl, sdtoutl = execute_command(cmd)
-    #     if result != 0:
-    #         msg = f"Can not lunch mrcat (exit code {result})"
-    #         return 0, msg, info
+    # Create b0 pair for motion distortion correction
+    if in_pepolar:
+        # # Possible to do average b0 pepolar (PA) but not required with our images 
+        # in_pepolar_mean = in_pepolar.replace(".mif", "_mean.mif")
+        # cmd = ["mrmath", in_pepolar, "mean", in_pepolar_mean, "-axis", "3"]
+        # result, stderrl, sdtoutl = execute_command(cmd)
+        # if result != 0:
+        #     msg = f"Can not lunch mrmath (exit code {result})"
+        #     return 0, msg, info
+
+        # Extract b0 (PA) from dwi and average data
+        in_dwi_b0 = in_dwi.replace(".mif", "_bzero.mif")
+        cmd = ["dwiextract", in_dwi, in_dwi_b0, "-bzero"]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"Can not launch dwiextract (exit code {result})"
+            return 0, msg, info
+        
+        # # Possible to do average b0 not pepolar (AP) but not required with our images
+        # in_dwi_b0_mean = in_dwi_b0.replace(".mif", "_mean.mif")
+        # cmd = ["mrmath", in_dwi_b0, "mean", in_dwi_b0_mean, "-axis", "3"]
+        # result, stderrl, sdtoutl = execute_command(cmd)
+        # if result != 0:
+        #     msg = f"Can not lunch mrmath (exit code {result})"
+        #     return 0, msg, info
+        
+        # Concatenate both b0 mean
+        b0_pair = os.path.join(dir_name, "b0_pair.mif")
+        cmd = ["mrcat", in_dwi_b0, in_pepolar, b0_pair]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"Can not launch mrcat to create b0_pair (exit code {result})"
+            return 0, msg, info
 
     # Motion distortion correction
     # if rpe == "all":
