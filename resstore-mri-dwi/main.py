@@ -144,6 +144,10 @@ if __name__ == '__main__':
             # Launch preprocessing
 
             # TODO: add function to launch preprocessing
+            # if "b0_AP exists in OUTPUT":
+            #     in_pepolar="b0_AP.mif"
+            # else:
+            #     in_pepolar=None
             run_preproc_dwi(in_dwi, pe_dir, readout_time, rpe=None, shell=True, in_pepolar=None)
             
             

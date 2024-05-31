@@ -83,20 +83,17 @@ def run_preproc_dwi(
         cmd = ["mrdegibbs", dwi_denoise, dwi_degibbs]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not lunch mrdegibbs (exit code {result})"
+            msg = f"Can not launch mrdegibbs (exit code {result})"
             return 0, msg, info
     else:
         print(f"Skipping unringing step, {dwi_degibbs} already exists.")
 
     # Create b0 pair for motion distortion correction
     if in_pepolar:
-        # # Possible to do average b0 pepolar (PA) but not required with our images 
-        # in_pepolar_mean = in_pepolar.replace(".mif", "_mean.mif")
-        # cmd = ["mrmath", in_pepolar, "mean", in_pepolar_mean, "-axis", "3"]
-        # result, stderrl, sdtoutl = execute_command(cmd)
-        # if result != 0:
-        #     msg = f"Can not lunch mrmath (exit code {result})"
-        #     return 0, msg, info
+        # Possible to do average b0 pepolar (AP) but not required with our images 
+        
+        # Check for fmap files encoding direction (PA)
+        # If it exists we use, else we extract
 
         # Extract b0 (PA) from dwi and average data
         in_dwi_b0 = in_dwi.replace(".mif", "_bzero.mif")
@@ -106,13 +103,7 @@ def run_preproc_dwi(
             msg = f"Can not launch dwiextract (exit code {result})"
             return 0, msg, info
         
-        # # Possible to do average b0 not pepolar (AP) but not required with our images
-        # in_dwi_b0_mean = in_dwi_b0.replace(".mif", "_mean.mif")
-        # cmd = ["mrmath", in_dwi_b0, "mean", in_dwi_b0_mean, "-axis", "3"]
-        # result, stderrl, sdtoutl = execute_command(cmd)
-        # if result != 0:
-        #     msg = f"Can not lunch mrmath (exit code {result})"
-        #     return 0, msg, info
+        # Possible to do average b0 not pepolar (AP) but not required with our images
         
         # Concatenate both b0 mean
         b0_pair = os.path.join(dir_name, "b0_pair.mif")
