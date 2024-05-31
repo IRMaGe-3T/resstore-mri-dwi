@@ -100,14 +100,19 @@ if __name__ == '__main__':
                 all_sequences_t1 = layout.get(
                     subject=sub, session=ses,
                     extension='nii.gz', suffix='T1w', return_type='filename')
+                
+                in_t1w = None
                 # TODO: add verification if only one T1w or several T1w
-                in_t1w_nifti = all_sequences_t1[0]
-                result, msg, in_t1w = convert_nifti_to_mif(
-                    in_t1w_nifti, preproc_directory, diff=False
-                )
-                if result == 0:
-                    print(msg)
-                    sys.exit(1)
+                if all_sequences_t1:
+                    in_t1w_nifti = all_sequences_t1[0]
+                    result, msg, in_t1w = convert_nifti_to_mif(
+                        in_t1w_nifti, preproc_directory, diff=False
+                    )
+                    if result == 0:
+                        print(msg)
+                        sys.exit(1)
+                else:
+                    print(f'No t1w files found for subject {sub}, session {ses}')
 
                 # Get DWI and pepolar, convert to MIF, merge DWI and get info
                 if "abcd" in acq:
