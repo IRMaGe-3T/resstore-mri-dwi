@@ -141,14 +141,12 @@ if __name__ == '__main__':
                 else:
                     SHELL = False
 
+            print(f'Phase encoding dir: {pe_dir}')
             # Launch preprocessing
 
             # TODO: add function to launch preprocessing
-            # if "b0_AP exists in OUTPUT":
-            #     in_pepolar="b0_AP.mif"
-            # else:
-            #     in_pepolar=None
-            run_preproc_dwi(in_dwi, pe_dir, readout_time, rpe=None, shell=True, in_pepolar=None)
+            run_preproc_dwi(in_dwi, pe_dir, readout_time, rpe=None, shell=SHELL, in_pepolar_PA=in_pepolar_PA, in_pepolar_AP=in_pepolar_AP)
+            # see what to put in rpe
             
             
             # Take inspiration from https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/preprocessing.py#L59

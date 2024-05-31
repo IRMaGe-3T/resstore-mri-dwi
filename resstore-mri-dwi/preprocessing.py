@@ -56,7 +56,7 @@ def get_dwifslpreproc_command(
 
 
 def run_preproc_dwi(
-    in_dwi, pe_dir, readout_time, rpe=None, shell=True, in_pepolar=None
+    in_dwi, pe_dir, readout_time, rpe=None, shell=True, in_pepolar_PA=None, in_pepolar_AP=None
 ):
     """
     Run preproc for whole brain diffusion using MRtrix command
@@ -89,29 +89,42 @@ def run_preproc_dwi(
         print(f"Skipping unringing step, {dwi_degibbs} already exists.")
 
     # Create b0 pair for motion distortion correction
-    if in_pepolar:
-        # Possible to do average b0 pepolar (AP) but not required with our images 
-        
+    if pe_dir=="j" and in_pepolar_AP:
         # Check for fmap files encoding direction (PA)
-        # If it exists we use, else we extract
-
-        # Extract b0 (PA) from dwi and average data
-        in_dwi_b0 = in_dwi.replace(".mif", "_bzero.mif")
-        cmd = ["dwiextract", in_dwi, in_dwi_b0, "-bzero"]
-        result, stderrl, sdtoutl = execute_command(cmd)
-        if result != 0:
-            msg = f"Can not launch dwiextract (exit code {result})"
-            return 0, msg, info
-        
-        # Possible to do average b0 not pepolar (AP) but not required with our images
-        
+        if in_pepolar_PA==None:
+            # Extract b0 (PA) from dwi 
+            in_pepolar_PA = in_dwi.replace(".mif", "_bzero.mif")
+            cmd = ["dwiextract", in_dwi, in_pepolar_PA, "-bzero"]
+            result, stderrl, sdtoutl = execute_command(cmd)
+            if result != 0:
+                msg = f"Can not launch dwiextract (exit code {result})"
+                return 0, msg, info
         # Concatenate both b0 mean
         b0_pair = os.path.join(dir_name, "b0_pair.mif")
-        cmd = ["mrcat", in_dwi_b0, in_pepolar, b0_pair]
+        cmd = ["mrcat", in_pepolar_PA, in_pepolar_AP, b0_pair]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
             msg = f"Can not launch mrcat to create b0_pair (exit code {result})"
             return 0, msg, info
+    if pe_dir=="j-" and in_pepolar_PA:
+        # Check for fmap files encoding direction (AP)
+        if in_pepolar_AP==None:
+        # Extract b0 (AP) from dwi 
+            in_pepolar_AP = in_dwi.replace(".mif", "_bzero.mif")
+            cmd = ["dwiextract", in_dwi, in_pepolar_AP, "-bzero"]
+            result, stderrl, sdtoutl = execute_command(cmd)
+            if result != 0:
+                msg = f"Can not launch dwiextract (exit code {result})"
+                return 0, msg, info
+        # Concatenate both b0 mean
+        b0_pair = os.path.join(dir_name, "b0_pair.mif")
+        cmd = ["mrcat", in_pepolar_AP, in_pepolar_PA, b0_pair]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"Can not launch mrcat to create b0_pair (exit code {result})"
+            return 0, msg, info
+        
+    
 
     # Motion distortion correction
     # if rpe == "all":
