@@ -15,6 +15,7 @@ from bids import BIDSLayout
 
 from prepare_acquisitions import prepare_abcd_acquistions, prepare_hermes_acquistions
 from useful import convert_nifti_to_mif, execute_command, get_shell
+from preprocessing import run_preproc_dwi
 
 
 if __name__ == '__main__':
@@ -100,19 +101,18 @@ if __name__ == '__main__':
                 all_sequences_t1 = layout.get(
                     subject=sub, session=ses,
                     extension='nii.gz', suffix='T1w', return_type='filename')
-                
-                in_t1w = None
                 # TODO: add verification if only one T1w or several T1w
                 if all_sequences_t1:
                     in_t1w_nifti = all_sequences_t1[0]
                     result, msg, in_t1w = convert_nifti_to_mif(
                         in_t1w_nifti, preproc_directory, diff=False
                     )
-                    if result == 0:
+                    if result == 0: #I add this
                         print(msg)
                         sys.exit(1)
                 else:
-                    print(f'No t1w files found for subject {sub}, session {ses}')
+                    print(f"No T1w data found for subject {sub} in session {ses}. Proceeding without T1w data.")
+                    in_t1w = None  #Until here
 
                 # Get DWI and pepolar, convert to MIF, merge DWI and get info
                 if "abcd" in acq:
@@ -144,6 +144,7 @@ if __name__ == '__main__':
             # Launch preprocessing
 
             # TODO: add function to launch preprocessing
+            run_preproc_dwi(in_dwi, pe_dir, readout_time, rpe=None, shell=True, in_pepolar=None)
             # Take inspiration from https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/preprocessing.py#L59
             # adapt function to abdc acquistions (2 pepolar sequences)
             # Compare with Fabrice Hanneau code
