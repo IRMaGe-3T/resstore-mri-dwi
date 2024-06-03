@@ -130,31 +130,25 @@ def run_preproc_dwi(
             print(f"Skipping b0_pair creation step, {b0_pair} already exists.")
             
         # Motion distortion correction
-        if rpe == "all":
-            # In this case issue with dwifslpreproc
-            # use directly corrected image for in_dwi
-            dwi_out = in_dwi
+        # fslpreproc (topup and Eddy)
+        if b0_pair:
+            cmd = get_dwifslpreproc_command(
+                dwi_degibbs, dwi_preproc, pe_dir, readout_time, b0_pair, rpe, shell
+            )
         else:
-            # fslpreproc (topup and Eddy)
-            dwi_out = dwi_degibbs.replace(".mif", "_fslpreproc.mif")
-            if b0_pair:
-                cmd = get_dwifslpreproc_command(
-                    dwi_degibbs, dwi_out, pe_dir, readout_time, b0_pair, rpe, shell
-                )
-            else:
-                cmd = get_dwifslpreproc_command(
-                    dwi_degibbs,
-                    dwi_out,
-                    pe_dir,
-                    readout_time,
-                    b0_pair=None,
-                    rpe=rpe,
-                    shell=shell,
-                )
-            result, stderrl, sdtoutl = execute_command(cmd)
-            if result != 0:
-                msg = f"Can not lunch dwifslpreproc (exit code {result})"
-                return 0, msg, info
+            cmd = get_dwifslpreproc_command(
+                dwi_degibbs,
+                dwi_preproc,
+                pe_dir,
+                readout_time,
+                b0_pair=None,
+                rpe=rpe,
+                shell=shell,
+            )
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"Can not lunch dwifslpreproc (exit code {result})"
+            return 0, msg, info
             
     else:
         print(f"Skipping motion correction step, {dwi_preproc} already exists.")
