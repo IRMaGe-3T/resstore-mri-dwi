@@ -9,6 +9,7 @@ Functions for preprocessing DWI data:
 import logging
 import os
 
+from FOD import FOD
 from useful import check_file_ext, convert_mif_to_nifti, execute_command
 
 # Set up logging, to check
@@ -193,7 +194,15 @@ def run_preproc_dwi(
     else:
        print(f"Skipping brain mask step, {dwi_mask} already exists.")
 
+    user_input = input(f"Do you want to perform FOD estimation? (yes/no): ").strip().lower()
+    if user_input in ['yes', 'y']:
+        FOD(dwi_preproc, dwi_mask)
+    else:
+        print("No FOD done")
+        
     info = {"dwi_preproc": dwi_unbias, "brain_mask": dwi_mask}
     msg = "Preprocessing DWI done"
     print(msg)
     return 1, msg, info
+
+    
