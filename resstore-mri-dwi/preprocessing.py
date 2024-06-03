@@ -66,6 +66,9 @@ def run_preproc_dwi(
     """
     Run preproc for whole brain diffusion using MRtrix command
     """
+
+    user_input = input(f"Do you want to perform FOD estimation? (yes/no): ").strip().lower()
+
     info = {}
     # Get files name
     dir_name = os.path.dirname(in_dwi)
@@ -205,7 +208,6 @@ def run_preproc_dwi(
     else:
        print(f"Skipping brain mask step, {dwi_mask} already exists.")
 
-    user_input = input(f"Do you want to perform FOD estimation? (yes/no): ").strip().lower()
     if user_input in ['yes', 'y']:
         FOD(dwi_preproc, dwi_mask)
     else:

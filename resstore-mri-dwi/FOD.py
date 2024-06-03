@@ -42,10 +42,10 @@ def FOD(in_dwi, mask):
 
     # FOD estimation 
     vf = os.path.join(dir_name, "vf.mif")
+    wmfod = os.path.join(dir_name, "wmfod.mif")
+    gmfod = os.path.join(dir_name, "gmfod.mif")
+    csffod = os.path.join(dir_name, "csffod.mif")
     if not os.path.exists(vf) :
-        wmfod = os.path.join(dir_name, "wmfod.mif")
-        gmfod = os.path.join(dir_name, "gmfod.mif")
-        csffod = os.path.join(dir_name, "csffod.mif")
         if not (os.path.exists(wmfod) and os.path.exists(gmfod) and os.path.exists(csffod)):
             cmd = ["dwi2fod", "msmt_csd", in_dwi, "-mask", mask, wm, wmfod, gm, gmfod, csf, csffod]
             result, stderrl, sdtoutl = execute_command(cmd)
