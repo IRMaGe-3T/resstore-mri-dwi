@@ -88,47 +88,47 @@ def run_preproc_dwi(
     else:
         print(f"Skipping unringing step, {dwi_degibbs} already exists.")
 
-
+    # Motion and distortion correction
     dwi_preproc = dwi_degibbs.replace("_degibbs.mif", "_degibbs_preproc.mif")
     if not os.path.exists(dwi_preproc):
-        # Create b0 pair for motion distortion correction
-        if pe_dir=="j" and in_pepolar_AP:
-            # Check for fmap files encoding direction (PA)
-            if in_pepolar_PA==None:
-                # Extract b0 (PA) from dwi 
-                in_pepolar_PA = in_dwi.replace(".mif", "_bzero.mif")
-                cmd = ["dwiextract", in_dwi, in_pepolar_PA, "-bzero"]
-                result, stderrl, sdtoutl = execute_command(cmd)
-                if result != 0:
-                    msg = f"Can not launch dwiextract (exit code {result})"
-                    return 0, msg, info
-            # Concatenate both b0 mean
-            b0_pair = os.path.join(dir_name, "b0_pair.mif")
-            cmd = ["mrcat", in_pepolar_PA, in_pepolar_AP, b0_pair]
-            result, stderrl, sdtoutl = execute_command(cmd)
-            if result != 0:
-                msg = f"Can not launch mrcat to create b0_pair (exit code {result})"
-                return 0, msg, info
-        if pe_dir=="j-" and in_pepolar_PA:
-            # Check for fmap files encoding direction (AP)
-            if in_pepolar_AP==None:
-            # Extract b0 (AP) from dwi 
-                in_pepolar_AP = in_dwi.replace(".mif", "_bzero.mif")
-                cmd = ["dwiextract", in_dwi, in_pepolar_AP, "-bzero"]
-                result, stderrl, sdtoutl = execute_command(cmd)
-                if result != 0:
-                    msg = f"Can not launch dwiextract (exit code {result})"
-                    return 0, msg, info
-            # Concatenate both b0 mean
-            b0_pair = os.path.join(dir_name, "b0_pair.mif")
-            cmd = ["mrcat", in_pepolar_AP, in_pepolar_PA, b0_pair]
-            result, stderrl, sdtoutl = execute_command(cmd)
-            if result != 0:
-                msg = f"Can not launch mrcat to create b0_pair (exit code {result})"
-                return 0, msg, info
-            
-        
 
+        # Create b0_pair 
+        b0_pair = os.path.join(dir_name, "b0_pair.mif")
+        if not os.path.exists(b0_pair):
+            # Create command for b0_pair creation if pe_dir=PA
+            if pe_dir=="j" and in_pepolar_AP:
+                # Check for fmap files encoding direction (PA)
+                if in_pepolar_PA==None:
+                    # Extract b0 (PA) from dwi 
+                    in_pepolar_PA = in_dwi.replace(".mif", "_bzero.mif")
+                    cmd = ["dwiextract", in_dwi, in_pepolar_PA, "-bzero"]
+                    result, stderrl, sdtoutl = execute_command(cmd)
+                    if result != 0:
+                        msg = f"Can not launch dwiextract (exit code {result})"
+                        return 0, msg, info
+                # Create command for concatenation
+                cmd = ["mrcat", in_pepolar_PA, in_pepolar_AP, b0_pair]
+            # Create command for b0_pair creation if pe_dir=AP
+            if pe_dir=="j-" and in_pepolar_PA:
+                # Check for fmap files encoding direction (AP)
+                if in_pepolar_AP==None:
+                # Extract b0 (AP) from dwi 
+                    in_pepolar_AP = in_dwi.replace(".mif", "_bzero.mif")
+                    cmd = ["dwiextract", in_dwi, in_pepolar_AP, "-bzero"]
+                    result, stderrl, sdtoutl = execute_command(cmd)
+                    if result != 0:
+                        msg = f"Can not launch dwiextract (exit code {result})"
+                        return 0, msg, info
+                # Create command for concatenation
+                cmd = ["mrcat", in_pepolar_AP, in_pepolar_PA, b0_pair]
+            # Concatenate both b0 images to create b0_pair     
+            result, stderrl, sdtoutl = execute_command(cmd)
+            if result != 0:
+                msg = f"Can not launch mrcat to create b0_pair (exit code {result})"
+                return 0, msg, info
+        else:
+            print(f"Skipping b0_pair creation step, {b0_pair} already exists.")
+            
         # Motion distortion correction
         if rpe == "all":
             # In this case issue with dwifslpreproc
@@ -155,6 +155,7 @@ def run_preproc_dwi(
             if result != 0:
                 msg = f"Can not lunch dwifslpreproc (exit code {result})"
                 return 0, msg, info
+            
     else:
         print(f"Skipping motion correction step, {dwi_preproc} already exists.")
 
