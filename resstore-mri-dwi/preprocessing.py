@@ -109,11 +109,16 @@ def run_preproc_dwi(
                 if in_pepolar_PA==None:
                     # Extract b0 (PA) from dwi 
                     in_pepolar_PA = in_dwi.replace(".mif", "_bzero.mif")
-                    cmd = ["dwiextract", in_dwi, in_pepolar_PA, "-bzero"]
-                    result, stderrl, sdtoutl = execute_command(cmd)
-                    if result != 0:
-                        msg = f"Can not launch dwiextract (exit code {result})"
-                        return 0, msg, info
+                    if not os.path.exists(in_pepolar_PA):
+                        cmd = ["dwiextract", in_dwi, in_pepolar_PA, "-bzero"]
+                        result, stderrl, sdtoutl = execute_command(cmd)
+                        if result != 0:
+                            msg = f"Can not launch dwiextract (exit code {result})"
+                            return 0, msg, info
+                        else:
+                            print("b0_PA sucessfully extracted")
+                    else:
+                        print("Skipping b0_PA extraction, file already exists")
                 # Create command for concatenation
                 cmd = ["mrcat", in_pepolar_PA, in_pepolar_AP, b0_pair]
             # Create command for b0_pair creation if pe_dir=AP
@@ -122,11 +127,17 @@ def run_preproc_dwi(
                 if in_pepolar_AP==None:
                 # Extract b0 (AP) from dwi 
                     in_pepolar_AP = in_dwi.replace(".mif", "_bzero.mif")
-                    cmd = ["dwiextract", in_dwi, in_pepolar_AP, "-bzero"]
-                    result, stderrl, sdtoutl = execute_command(cmd)
-                    if result != 0:
-                        msg = f"Can not launch dwiextract (exit code {result})"
-                        return 0, msg, info
+                    if not os.path.exists(in_pepolar_AP):
+                        cmd = ["dwiextract", in_dwi, in_pepolar_AP, "-bzero"]
+                        result, stderrl, sdtoutl = execute_command(cmd)
+                        if result != 0:
+                            msg = f"Can not launch dwiextract (exit code {result})"
+                            return 0, msg, info
+                        else:
+                            print("b0_AP sucessfully extracted")
+                    else:
+                        print("Skipping b0_AP extraction, file already exists")
+                        
                 # Create command for concatenation
                 cmd = ["mrcat", in_pepolar_AP, in_pepolar_PA, b0_pair]
             # Concatenate both b0 images to create b0_pair     
