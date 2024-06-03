@@ -6,6 +6,7 @@ sequences for processing:
 
 '''
 import sys
+import os
 
 from bids import BIDSLayout
 
@@ -158,18 +159,27 @@ def prepare_hermes_acquistions(bids_directory, sub, ses, preproc_directory):
 
     # For HERMES, pepolar sequences contains b100
     # Extract only b0
-    cmd = ["dwiextract", pepolar_ap, pepolar_ap.replace(
-        '.mif', '_bzero.mif'), '-bzero']
-    result, stderrl, sdtoutl = execute_command(cmd)
-    if result != 0:
-        msg = f"Can not lunch dwicat (exit code {result})"
-    pepolar_ap = pepolar_ap.replace('.mif', '_bzero.mif')
-
-    cmd = ["dwiextract", pepolar_pa, pepolar_pa.replace(
-        '.mif', '_bzero.mif'), '-bzero']
-    result, stderrl, sdtoutl = execute_command(cmd)
-    if result != 0:
-        msg = f"Can not lunch dwicat (exit code {result})"
-    pepolar_pa = pepolar_pa.replace('.mif', '_bzero.mif')
-
+    pepolar_ap_bzero=pepolar_ap.replace('.mif', '_bzero.mif')
+    if not os.path.exists(pepolar_ap_bzero):
+        cmd = ["dwiextract", pepolar_ap, pepolar_ap_bzero, '-bzero']
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"Can not lunch dwicat (exit code {result})"
+        else:
+            print("Extraction successfull")
+    else:
+        print(f"File already exists: {pepolar_ap_bzero}")
+    
+    pepolar_pa_bzero=pepolar_pa.replace('.mif', '_bzero.mif')
+    if not os.path.exists(pepolar_pa_bzero):
+        cmd = ["dwiextract", pepolar_pa, pepolar_pa.replace(
+            '.mif', '_bzero.mif'), '-bzero']
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"Can not lunch dwicat (exit code {result})"
+        else:
+            print("Extraction successfull")
+    else:
+        print(f"Skipping exctraction step, file alreeady exists: {pepolar_pa_bzero}")
+        
     return dwi, dwi_json, pepolar_ap, pepolar_pa
