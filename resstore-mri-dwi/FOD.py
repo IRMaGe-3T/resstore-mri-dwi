@@ -15,7 +15,7 @@ Returns:
 """
 
 import os
-from useful import check_file_ext, convert_mif_to_nifti, execute_command
+from useful import check_file_ext, execute_command
 
 def FOD(in_dwi, mask):
 
