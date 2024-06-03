@@ -11,6 +11,10 @@ import os
 
 from useful import check_file_ext, convert_mif_to_nifti, execute_command
 
+# Set up logging, to check
+logging.basicConfig(level=logging.INFO)
+mylog = logging.getLogger(__name__)
+
 EXT = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
 
 
@@ -74,6 +78,8 @@ def run_preproc_dwi(
         if result != 0:
             msg = f"Can not lunch mrdegibbs (exit code {result})"
             return 0, msg, info
+        else:
+            print(f"Denoise completed. Output file: {dwi_denoise}")
     else:
         print(f"Skipping denoise step, {dwi_denoise} already exists.")
 
@@ -85,6 +91,8 @@ def run_preproc_dwi(
         if result != 0:
             msg = f"Can not launch mrdegibbs (exit code {result})"
             return 0, msg, info
+        else:
+            print(f"Unringing completed. Output file: {dwi_degibbs}")
     else:
         print(f"Skipping unringing step, {dwi_degibbs} already exists.")
 
@@ -126,6 +134,8 @@ def run_preproc_dwi(
             if result != 0:
                 msg = f"Can not launch mrcat to create b0_pair (exit code {result})"
                 return 0, msg, info
+            else:
+                print(f"B0_pair succesfully created. Output file: {b0_pair}")
         else:
             print(f"Skipping b0_pair creation step, {b0_pair} already exists.")
             
@@ -149,29 +159,41 @@ def run_preproc_dwi(
         if result != 0:
             msg = f"Can not lunch dwifslpreproc (exit code {result})"
             return 0, msg, info
+        else:
+            print(f"Motion and distortion correction completed. Output file: {dwi_preproc}")
             
     else:
         print(f"Skipping motion correction step, {dwi_preproc} already exists.")
 
-    # # Bias correction
-    # dwi_unbias = os.path.join(dir_name, dwi_out.replace(".mif", "_unbias.mif"))
-    # cmd = ["dwibiascorrect", "ants", dwi_out, dwi_unbias]
-    # result, stderrl, sdtoutl = execute_command(cmd)
-    # if result != 0:
-    #     msg = f"Can not lunch bias correction (exit code {result})"
-    #     return 0, msg
-
-    # # Brain mask
-    # dwi_mask = os.path.join(dir_name, "dwi_brain_mask.mif")
-    # cmd = ["dwi2mask", dwi_unbias, dwi_mask]
-    # result, stderrl, sdtoutl = execute_command(cmd)
-    # if result != 0:
-    #     msg = "Can not lunch mask (exit code {result})"
-    #     return 0, msg
-
-    # info = {"dwi_preproc": dwi_unbias, "brain_mask": dwi_mask}
-    # msg = "Preprocessing DWI done"
-    # mylog.info(msg)
-    # return 1, msg, info
+    # Bias correction
+    dwi_unbias = dwi_preproc.replace("_degibbs_preproc.mif", "_degibbs_preproc_unbiased.mif")
+    bias_output = dwi_preproc.replace("_degibbs_preproc.mif", "_degibbs_preproc_bias.mif")
+    if not os.path.exists(dwi_unbias) and not os.path.exists(bias_output):
+        cmd = ["dwibiascorrect", "ants", dwi_preproc, dwi_unbias,"-bias", bias_output]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"Can not lunch bias correction (exit code {result})"
+            return 0, msg
+        else:
+            print(f"Bias correction completed. Output files: {dwi_unbias}, {bias_output}")#good detail to add
+    else:
+       print(f"Skipping bias correction step, {dwi_unbias} and/or {bias_output} already exists.")
 
 
+    # Brain mask
+    dwi_mask = dwi_unbias.replace("_degibbs_preproc_unbiased.mif", "_dwi_brain_mask.mif")
+    if not os.path.exists(dwi_mask):
+        cmd = ["dwi2mask", dwi_unbias, dwi_mask]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = "Can not lunch mask (exit code {result})"
+            return 0, msg
+        else:
+            print(f"Brain mask completed. Output file: {dwi_mask}")
+    else:
+       print(f"Skipping brain mask step, {dwi_mask} already exists.")
+
+    info = {"dwi_preproc": dwi_unbias, "brain_mask": dwi_mask}
+    msg = "Preprocessing DWI done"
+    print(msg)
+    return 1, msg, info
