@@ -16,19 +16,23 @@ EXT_NIFTI = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
 EXT_MIF = {"MIF": "mif"}
 
 
+
+
+
+
 def check_file_ext(in_file, ext_dic):
     """Check file extension
-
-    :param in_file: file name (a string)
-    :param ext_dic: dictionary of the valid extensions for the file
+    
+    Parameters:
+    - in_file: file name (a string)
+    - ext_dic: dictionary of the valid extensions for the file
                     (dictionary, ex:
                     EXT = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"})
-    :returns:
-        - valid_bool: True if extension is valid (a boolean)
-        - in_ext: file extension (a string)
-        - file_name: file name without extension (a string)
+    Returns:
+    - valid_bool: True if extension is valid (a boolean)
+    - in_ext: file extension (a string)
+    - file_name: file name without extension (a string)
     """
-
     # Get file extension
     valid_bool = False
     ifile = os.path.split(in_file)[-1]
@@ -46,11 +50,17 @@ def check_file_ext(in_file, ext_dic):
     return valid_bool, in_ext, file_name
 
 
+
+
+
 def execute_command(command):
     """Execute command
-    :param command: command to execute (a list)
 
-    ex command = ['cd', 'path']
+    Parameters:
+    - command: command to execute (a list)
+
+    Examples:
+    - command = ['cd', 'path']
     """
     print("\n", command)
     p = subprocess.Popen(
@@ -62,7 +72,6 @@ def execute_command(command):
         stderr=subprocess.PIPE,
         close_fds=True,
     )
-
     print("--------->PID:", p.pid)
 
     (sdtoutl, stderrl) = p.communicate()
@@ -76,10 +85,24 @@ def execute_command(command):
     return result, stderrl, sdtoutl
 
 
+
+
+
 def convert_mif_to_nifti(in_file, out_directory, diff=True):
     """
     Convert NIfTI into MIF format
+
+    Parameters: 
+    - in_file: file in .mif format
+    - out_directory: path to the directory that should store the .mif file 
+    - diff: by default set to True to take the bvec and bval files 
+
+    Returns:
+    - int: 1 problem, 0 success
+    - msg 
+    - in_file_niftii: converted file in .nii format
     """
+
     in_file_nifti = None
     # Check inputs files and get files name
     valid_bool, ext, file_name = check_file_ext(in_file, EXT_MIF)
@@ -102,20 +125,31 @@ def convert_mif_to_nifti(in_file, out_directory, diff=True):
         ]
     else:
         cmd = ["mrconvert", in_file, in_file_nifti]
-
     result, stderrl, sdtoutl = execute_command(cmd)
-
     if result != 0:
         msg = f"Issue during conversion of {in_file} to MIF format"
         return 0, msg, in_file_nifti
-
     msg = f"Conversion of {in_file} to MIF format done"
-
     return 1, msg, in_file_nifti
 
 
+
+
+
+
 def convert_nifti_to_mif(in_file, out_directory, diff=True):
-    """Convert NIfTI into MIF format"""
+    """Convert NIfTI into MIF format
+    
+    Parameters:
+    - in_file: file in .nii format 
+    - out_directory: path to the directory that should store the .mif file 
+    - diff: by default set to True to take the bvec and bval files 
+
+    Returns:
+    - int: 1 problem, 0 success
+    - msg 
+    - in_file_mif: converted file in .mif format
+    """
     in_file_mif = None
     
     # Check inputs files and get files name
@@ -153,8 +187,21 @@ def convert_nifti_to_mif(in_file, out_directory, diff=True):
     return 1, msg, in_file_mif
 
 
+
+
+
+
 def get_shell(in_file):
-    """Convert NIfTI into MIF format"""
+    """Get shell info (b values)
+    
+    Parameters: 
+    - in_file: input file in .mif format 
+    
+    Returns: 
+    - int 1 success, 0 failure
+    - msg
+    - shell: list of strings containing the b-values
+    """
     shell = []
     # Check inputs files and get files name
     valid_bool, ext, file_name = check_file_ext(in_file, EXT_MIF)

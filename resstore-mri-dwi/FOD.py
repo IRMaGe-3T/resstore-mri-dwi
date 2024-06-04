@@ -1,4 +1,4 @@
-"""
+""" FOD processing 
 Function for FOD estimation:
     - Performs RF estimation using the dhollander algorithm
     - Estimates FOD using MSMT CSD
@@ -7,15 +7,21 @@ Function for FOD estimation:
 
 Parameters:
     in_dwi (str): Path to the input DWI file in MIF format.
-    mask (str): Path to the brain mask file.
+    mask (str): Path to the brain mask file in MIF format. 
 
-Returns:
-    tuple: (status, message, info) where status is 0 for failure and 1 for success,
-            message is a string describing the result, and info is a dictionary with file paths.
+Files created:
+    - voxels.mif
+    - wm.txt, gm.txt, csf.txt
+    - wmfod.mif, gmfod.mif, csffod.mif
+    - wmfod_norm.mif, gmfod_norm.mif, csffod_norm.mif
 """
 
 import os
 from useful import check_file_ext, execute_command
+
+
+
+
 
 def FOD(in_dwi, mask):
 
