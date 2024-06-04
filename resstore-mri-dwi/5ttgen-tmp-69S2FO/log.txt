@@ -1,0 +1,7 @@
+mrconvert /media/admin/e9890200-5ce6-441f-b56b-385d71d440f5/data/resstore_1b/GITHub data/OUTPUT_DIR/derivatives/sub-003/ses-02/dwi-abcd/preprocessing/sub-003_ses-02_T1w.mif /media/admin/e9890200-5ce6-441f-b56b-385d71d440f5/data/resstore_1b/resstore-mri-dwi/resstore-mri-dwi/5ttgen-tmp-69S2FO/input.mif
+mrconvert input.mif T1.nii -strides -1,+2,+3
+maskfilter /APPs/fsl/data/standard/MNI152_T1_1mm_brain_mask_dil.nii.gz dilate mni_mask.nii -npass 4
+standard_space_roi T1.nii T1_preBET.nii.gz -maskMASK mni_mask.nii -roiFOV
+bet T1_preBET.nii.gz T1_BET.nii.gz -f 0.15 -R
+fast T1_BET.nii.gz
+run_first_all -m none -s L_Accu,R_Accu,L_Caud,R_Caud,L_Pall,R_Pall,L_Puta,R_Puta,L_Thal,R_Thal -i T1.nii -o first
