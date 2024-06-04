@@ -7,7 +7,6 @@ Functions for preprocessing DWI data:
 
 import os
 
-from FOD import FOD
 from useful import check_file_ext, convert_mif_to_nifti, execute_command
 
 EXT = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
@@ -96,10 +95,7 @@ def run_preproc_dwi(
     - info
     """
 
-    # Ask user for FOD 
-    user_input = input(f"Do you want to perform FOD estimation? (yes/no): ").strip().lower()
-    user_input_2 = input(f"Do you want to create a whole-brain tractogram? (yes/no): ").strip().lower()
-
+ 
     # Get files name
     info = {}
     dir_name = os.path.dirname(in_dwi)
@@ -247,12 +243,9 @@ def run_preproc_dwi(
     else:
        print(f"Skipping brain mask step, {dwi_mask} already exists.")
 
-    if user_input in ['yes', 'y']:
-        FOD(dwi_preproc, dwi_mask)
-    else:
-        print("No FOD done")
-        "user_imput_2": user_input_2
-    info = {"dwi_preproc": dwi_unbias, "brain_mask": dwi_mask, "user_imput_2": user_input_2}
+
+        
+    info = {"dwi_preproc": dwi_unbias, "brain_mask": dwi_mask}
     msg = "Preprocessing DWI done"
     print(msg)
     return 1, msg, info

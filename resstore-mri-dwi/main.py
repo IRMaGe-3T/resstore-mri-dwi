@@ -16,6 +16,8 @@ from bids import BIDSLayout
 from prepare_acquisitions import prepare_abcd_acquistions, prepare_hermes_acquistions
 from useful import convert_nifti_to_mif, execute_command, get_shell
 from preprocessing import run_preproc_dwi
+from FOD import FOD
+from tractogram import tractogram
 
 
 if __name__ == '__main__':
@@ -45,6 +47,11 @@ if __name__ == '__main__':
     sessions = args.sessions
     acquisitions = args.acquisitions
     layout = BIDSLayout(bids_path)
+
+       # Ask user for FOD and tractogram
+    user_input_1 = input(f"Do you want to perform FOD estimation? (yes/no): ").strip().lower()
+    user_input_2 = input(f"Do you want to create a whole-brain tractogram? (yes/no): ").strip().lower()
+
 
     if subjects == ['all']:
         # Get all subjects in BIDS directory
@@ -145,7 +152,7 @@ if __name__ == '__main__':
             # Launch preprocessing
 
             # TODO: add function to launch preprocessing
-            run_preproc_dwi(in_dwi, pe_dir, readout_time, rpe=None, shell=SHELL, in_pepolar_PA=in_pepolar_PA, in_pepolar_AP=in_pepolar_AP)
+            main_return, main_msg, info =run_preproc_dwi(in_dwi, pe_dir, readout_time, rpe=None, shell=SHELL, in_pepolar_PA=in_pepolar_PA, in_pepolar_AP=in_pepolar_AP)
             # see what to put in rpe
             
             
@@ -163,9 +170,13 @@ if __name__ == '__main__':
             # TODO: add function to get FOD
             # Take inspiration from https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/processing_fod.py
             # Compare with Fabrice Hanneau code
+            if user_input_1 in ['yes', 'y']:
+                FOD(info["dwi_preproc"], info["brain_mask"])
+            else:
+                print("No FOD done")
             
             # Launch TractSeg
-            if info["user_imput_2"]  in ['yes', 'y']:
+            if user_input_2 in ['yes', 'y']:
                 tractogram(in_t1w, info["brain_mask"]) #Preguntar si podemos pasarlo al main
             else:
                 print("No creation of a whole-brain tractogram")
