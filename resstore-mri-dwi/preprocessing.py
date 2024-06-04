@@ -98,6 +98,7 @@ def run_preproc_dwi(
 
     # Ask user for FOD 
     user_input = input(f"Do you want to perform FOD estimation? (yes/no): ").strip().lower()
+    user_input_2 = input(f"Do you want to create a whole-brain tractogram? (yes/no): ").strip().lower()
 
     # Get files name
     info = {}
@@ -250,8 +251,8 @@ def run_preproc_dwi(
         FOD(dwi_preproc, dwi_mask)
     else:
         print("No FOD done")
-        
-    info = {"dwi_preproc": dwi_unbias, "brain_mask": dwi_mask}
+        "user_imput_2": user_input_2
+    info = {"dwi_preproc": dwi_unbias, "brain_mask": dwi_mask, "user_imput_2": user_input_2}
     msg = "Preprocessing DWI done"
     print(msg)
     return 1, msg, info

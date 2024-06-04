@@ -163,8 +163,12 @@ if __name__ == '__main__':
             # TODO: add function to get FOD
             # Take inspiration from https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/processing_fod.py
             # Compare with Fabrice Hanneau code
-
+            
             # Launch TractSeg
+            if info["user_imput_2"]  in ['yes', 'y']:
+                tractogram(in_t1w, info["brain_mask"]) #Preguntar si podemos pasarlo al main
+            else:
+                print("No creation of a whole-brain tractogram")
 
             # TODO: add function to get the tract
             # Take inspiration : https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/processing_tractseg.py#L14
