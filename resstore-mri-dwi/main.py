@@ -18,7 +18,7 @@ from useful import convert_nifti_to_mif, execute_command, get_shell
 from preprocessing import run_preproc_dwi
 from FOD import FOD
 from tractogram import tractogram
-
+from FA import FA_map
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -51,6 +51,7 @@ if __name__ == '__main__':
        # Ask user for FOD and tractogram
     user_input_1 = input(f"Do you want to perform FOD estimation? (yes/no): ").strip().lower()
     user_input_2 = input(f"Do you want to create a whole-brain tractogram? (yes/no): ").strip().lower()
+    user_input_3 = input(f"Do you want to create an FA map of the brain? (yes/no): ").strip().lower()
 
 
     if subjects == ['all']:
@@ -149,12 +150,28 @@ if __name__ == '__main__':
                     SHELL = False
 
             print(f'Phase encoding dir: {pe_dir}')
-            # Launch preprocessing
 
-            # TODO: add function to launch preprocessing
+            # Launch preprocessing
             main_return, main_msg, info =run_preproc_dwi(in_dwi, pe_dir, readout_time, rpe=None, shell=SHELL, in_pepolar_PA=in_pepolar_PA, in_pepolar_AP=in_pepolar_AP)
-            # see what to put in rpe
-            
+
+            # Launch FOD estimation if needed 
+            if user_input_1 in ['yes', 'y']:
+                FOD(info["dwi_preproc"], info["brain_mask"])
+            else:
+                print("No FOD done")  
+
+            # Launch tractography if needed
+            if user_input_2 in ['yes', 'y']:
+                tractogram(in_t1w, info["brain_mask"]) 
+            else:
+                print("No creation of a whole-brain tractogram")
+
+            # Launch FA map creation if needed
+            if user_input_3 in ['yes', 'y']:
+                FA_map(info["dwi_preproc"], info["brain_mask"]) 
+            else:
+                print("No creation of FA_map")
+                   
             
             # Take inspiration from https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/preprocessing.py#L59
             # adapt function to abdc acquistions (2 pepolar sequences)
@@ -165,22 +182,7 @@ if __name__ == '__main__':
             # TODO: add function to compute FA , ADC ..
             # Compare with Fabrice Hanneau code
 
-            # Launch DWI response and FOD
-
-            # TODO: add function to get FOD
             # Take inspiration from https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/processing_fod.py
             # Compare with Fabrice Hanneau code
-            if user_input_1 in ['yes', 'y']:
-                FOD(info["dwi_preproc"], info["brain_mask"])
-            else:
-                print("No FOD done")
-            
-            # Launch TractSeg
-            if user_input_2 in ['yes', 'y']:
-                tractogram(in_t1w, info["brain_mask"]) #Preguntar si podemos pasarlo al main
-            else:
-                print("No creation of a whole-brain tractogram")
 
-            # TODO: add function to get the tract
-            # Take inspiration : https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/processing_tractseg.py#L14
-            # Compare with Fabrice Hanneau code
+            
