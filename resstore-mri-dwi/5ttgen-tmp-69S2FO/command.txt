@@ -1,1 +1,0 @@
-/APPs/mrtrix3/bin/5ttgen fsl /media/admin/e9890200-5ce6-441f-b56b-385d71d440f5/data/resstore_1b/GITHub data/OUTPUT_DIR/derivatives/sub-003/ses-02/dwi-abcd/preprocessing/sub-003_ses-02_T1w.mif 5tt_nocoreg.mif

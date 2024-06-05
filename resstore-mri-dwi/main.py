@@ -53,7 +53,7 @@ if __name__ == '__main__':
     user_input_2 = input(f"Do you want to create a whole-brain tractogram? (yes/no): ").strip().lower()
     user_input_3 = input(f"Do you want to create an FA map of the brain? (yes/no): ").strip().lower()
 
-
+    
     if subjects == ['all']:
         # Get all subjects in BIDS directory
         subjects = layout.get_subjects()
@@ -120,7 +120,7 @@ if __name__ == '__main__':
                         sys.exit(1)
                 else:
                     print(f"No T1w data found for subject {sub} in session {ses}. Proceeding without T1w data.")
-                    in_t1w = None  #Until here
+                    in_t1w = None  
 
                 # Get DWI and pepolar, convert to MIF, merge DWI and get info
                 if "abcd" in acq:
