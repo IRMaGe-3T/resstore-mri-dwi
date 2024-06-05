@@ -12,7 +12,7 @@ Replace `<folder_bids_path>` with the path to your BIDS dataset folder, `<subjec
 
 **Example Command**
 ```
-python3 main.py --bids '/media/admin/e9890200-5ce6-441f-b56b-385d71d440f5/data/resstore_1b/GITHUB_DATA/OUTPUT_DIR' --subjects 003 --sessions 02 --acquisitions hermes
+python3 main.py --bids 'OUTPUT_DIR' --subjects 003 --sessions 02 --acquisitions hermes
 ```
 **Important Notes**
 
