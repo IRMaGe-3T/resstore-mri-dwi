@@ -51,7 +51,7 @@ if __name__ == '__main__':
        # Ask user for FOD and tractogram
     user_input_1 = input(f"Do you want to perform FOD estimation? (yes/no): ").strip().lower()
     user_input_2 = input(f"Do you want to create a whole-brain tractogram? (yes/no): ").strip().lower()
-    user_input_3 = input(f"Do you want to create an FA map of the brain? (yes/no): ").strip().lower()
+    user_input_3 = input(f"Do you want to create an FA, ADC, AD and RD maps of the brain? (yes/no): ").strip().lower()
 
     
     if subjects == ['all']:
