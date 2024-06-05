@@ -2,7 +2,7 @@
 Main code to launch to process RESSTORE diffusion data
 
 python main.py --bids folder_bids_path 
---subjects 01001 01002 --sessions V2 V5 --asquisitions abcd hermes
+--subjects 01001 01002 --sessions V2 V5 --acquisitions abcd hermes
 '''
 
 import argparse
