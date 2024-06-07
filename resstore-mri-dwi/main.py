@@ -18,7 +18,7 @@ from useful import convert_nifti_to_mif, execute_command, get_shell
 from preprocessing import run_preproc_dwi
 from FOD import FOD
 from tractogram import tractogram
-from FA import FA_map
+from FA_ADC_AD_RD import FA_ADC_AD_RD_maps
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -51,7 +51,7 @@ if __name__ == '__main__':
        # Ask user for FOD and tractogram
     user_input_1 = input(f"Do you want to perform FOD estimation? (yes/no): ").strip().lower()
     user_input_2 = input(f"Do you want to create a whole-brain tractogram? (yes/no): ").strip().lower()
-    user_input_3 = input(f"Do you want to create an FA map of the brain? (yes/no): ").strip().lower()
+    user_input_3 = input(f"Do you want to create an FA, ADC, AD and RD maps of the brain? (yes/no): ").strip().lower()
 
     
     if subjects == ['all']:
@@ -168,7 +168,7 @@ if __name__ == '__main__':
 
             # Launch FA map creation if needed
             if user_input_3 in ['yes', 'y']:
-                FA_map(info["dwi_preproc"], info["brain_mask"]) 
+                FA_ADC_AD_RD_maps(info["dwi_preproc"], info["brain_mask"]) 
             else:
                 print("No creation of FA_map")
                    
