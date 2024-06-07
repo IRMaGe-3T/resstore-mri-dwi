@@ -43,6 +43,8 @@ def tractogram(in_dwi, mask, t1_raw, b0_pair):
         if result != 0:
             print(f"Error in mrconvert (B0): {stderr}")
             return
+        else:
+            print(f"Mean B0 image converted to NIfTI format. Output file: {b0_nifti}")
     else:
         print(f"Skipping B0 conversion to NIfTI, {b0_nifti} already exists.")
 
@@ -55,6 +57,8 @@ def tractogram(in_dwi, mask, t1_raw, b0_pair):
         if result != 0:
             print(f"Error in mrconvert (T1): {stderr}")
             return
+        else:
+            print(f"T1 image converted to NIfTI format. Output file: {t1_nii}")
     else:
         print(f"Skipping T1 conversion to NIfTI, {t1_nii} already exists.")
 
@@ -67,6 +71,8 @@ def tractogram(in_dwi, mask, t1_raw, b0_pair):
         if result != 0:
             print(f"Error in flirt: {stderr}")
             return
+        else:
+            print(f"Mean B0 image registered to T1 image using FLIRT. Output file: {diff2struct_fsl_mat}")
     else:
         print(f"Skipping FLIRT registration, {diff2struct_fsl_mat} already exists.")
 
@@ -74,11 +80,13 @@ def tractogram(in_dwi, mask, t1_raw, b0_pair):
     diff2struct_mrtrix_txt = os.path.join(dir_name, "diff2struct_mrtrix.txt")
     # Check if the file already exists or not
     if not os.path.exists(diff2struct_mrtrix_txt):
-        cmd = ["transformconvert", "diff2struct_fsl.mat", b0_nifti, t1_raw, "flirt_import", diff2struct_mrtrix_txt]
+        cmd = ["transformconvert", diff2struct_fsl_mat, b0_nifti, t1_raw, "flirt_import", diff2struct_mrtrix_txt]
         result, stdout, stderr = execute_command(cmd)
         if result != 0:
-            print(f"Error in transformconvert b0: {stderr}")
+            print(f"Error in transformconvert: {stderr}")
             return
+        else:
+            print(f"FLIRT transformation matrix converted to MRtrix format. Output file: {diff2struct_mrtrix_txt}")
     else:
         print(f"Skipping transformconvert, {diff2struct_mrtrix_txt} already exists.")
 
@@ -90,6 +98,8 @@ def tractogram(in_dwi, mask, t1_raw, b0_pair):
         if result != 0:
             print(f"Error in mrtransform (T1): {stderr}")
             return
+        else:
+            print(f"Inverse transformation applied to T1 image. Output file: {t1_coreg_mif}")
     else:
         print(f"Skipping T1 inverse transformation, {t1_coreg_mif} already exists.")
 
@@ -101,8 +111,23 @@ def tractogram(in_dwi, mask, t1_raw, b0_pair):
         if result != 0:
             print(f"Error in mrtransform (5TT): {stderr}")
             return
+        else:
+            print(f"Inverse transformation applied to 5TT image. Output file: {five_tissue_coreg}")
     else:
         print(f"Skipping 5TT inverse transformation, {five_tissue_coreg} already exists.")
+
+    #Preparing a mask of streamline seeding
+    gmwm_seed_coreg = os.path.join(dir_name, "gmwmSeed_coreg.mif")
+    if not os.path.exists(gmwm_seed_coreg):
+        cmd = ["5tt2gmwmi", five_tissue_coreg, gmwm_seed_coreg]
+        result, stdout, stderr = execute_command(cmd)
+        if result != 0:
+            print(f"Error in 5tt2gmwmi: {stderr}")
+            return
+        else:
+            print(f"Mask of streamline seeding successfully created. Output file: {gmwm_seed_coreg}")
+    else:
+        print(f"Skipping creation of a mask of streamline seeding, {gmwm_seed_coreg} already exists.")
 
     print("All processing steps completed successfully.")
 
