@@ -49,8 +49,12 @@ def check_file_ext(in_file, ext_dic):
 
     return valid_bool, in_ext, file_name
 
-
-
+def verify_file(file_path):
+    if os.path.exists(file_path):
+        print(f"File {file_path} already exists. Verifying contents...")
+        return True
+    else:
+        return False
 
 
 def execute_command(command):
