@@ -16,7 +16,6 @@ from prepare_acquisitions import prepare_abcd_acquistions, prepare_hermes_acquis
 from useful import convert_nifti_to_mif, execute_command, get_shell, verify_file
 from preprocessing import run_preproc_dwi
 from FOD import FOD
-from tractogram import tractogram
 from FA_ADC_AD_RD import FA_ADC_AD_RD_maps
 from T1_preproc import run_preproc_t1  
 
@@ -160,12 +159,6 @@ if __name__ == '__main__':
             else:
                 print("No FOD done")  
 
-            # # Launch tractography if needed (Guillermo)
-            # if user_input_2 in ['yes', 'y']:
-            #     tractogram(in_t1w, info["brain_mask"]) 
-            # else:
-            #     print("No creation of a whole-brain tractogram")
-
             # For tractography
             # Launch T1_preproc
             if user_input_2 in ['yes', 'y']:
@@ -184,14 +177,7 @@ if __name__ == '__main__':
             
             # Take inspiration from https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/preprocessing.py#L59
             # adapt function to abdc acquistions (2 pepolar sequences)
+ 
             # Compare with Fabrice Hanneau code
 
-            # Launch compute FA / ADC ..
-
-            # TODO: add function to compute FA , ADC ..
-            # Compare with Fabrice Hanneau code
-
-            # Take inspiration from https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/processing_fod.py
-            # Compare with Fabrice Hanneau code
-
-            
+            # Take inspiration from https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/processing_fod.py            
