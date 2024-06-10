@@ -2,7 +2,7 @@
 """
 Functions for preprocessing DWI data:
     - get_dwifslpreproc_command
-    - run_preproc_dwi: perform preprocessing and optionnal FOD 
+    - run_preproc_dwi: perform preprocessing and optional FOD 
 """
 
 import os
@@ -11,13 +11,8 @@ from useful import check_file_ext, convert_mif_to_nifti, execute_command
 
 EXT = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
 
-
-
-
-
-
 def get_dwifslpreproc_command(
-    in_dwi, dwi_out, pe_dir, readout_time, b0_pair=None, rpe=None, shell=False
+    in_dwi, dwi_out, pe_dir, readout_time, qc_directory, b0_pair=None, rpe=None, shell=False
 ):
     """
     Get dwifslpreproc command
@@ -31,54 +26,43 @@ def get_dwifslpreproc_command(
     - rpe: (optionnal) ratio of partial echo = fraction of the k-space that are encoded
     - shell: (default:False) no info was given on the b-values
 
-    Retun:
+    Return:
     - command: to run the dwifslpreproc 
     """
     command = ["dwifslpreproc", in_dwi, dwi_out]
     if not rpe:
         command += [
             "-rpe_none",
-            "-pe_dir",
-            pe_dir,
-            "-readout_time",
-            readout_time,
+            "-pe_dir", pe_dir,
+            "-readout_time", readout_time,
+            "-eddyqc_text", qc_directory
         ]
     elif rpe == "pair":
         command += [
             "-rpe_pair",
-            "-se_epi",
-            b0_pair,
-            "-pe_dir",
-            pe_dir,
-            "-readout_time",
-            readout_time,
+            "-se_epi", b0_pair,
+            "-pe_dir", pe_dir,
+            "-readout_time", readout_time,
+            "-eddyqc_text", qc_directory
         ]
     elif rpe == "all":
         command += [
             "-rpe_all",
-            "-pe_dir",
-            pe_dir,
-            "-readout_time",
-            readout_time,
+            "-pe_dir", pe_dir,
+            "-readout_time", readout_time,
+            "-eddyqc_text", qc_directory
         ]
-    if shell is True:
+    if shell:
         command += ["-eddy_options", "--slm=linear --data_is_shelled"]
     else:
-        command += ["-eddy_options", "--slm=linear "]
+        command += ["-eddy_options", "--slm=linear"]
     return command
-
-
-
-
-
-
-
 
 def run_preproc_dwi(
     in_dwi, pe_dir, readout_time, rpe=None, shell=True, in_pepolar_PA=None, in_pepolar_AP=None
 ):
     """
-    Run preproc for whole brain diffusion using MRtrix command and an optionnal FOD estimation 
+    Run preproc for whole brain diffusion using MRtrix command and an optional FOD estimation 
 
     Parameters:
     - in_dwi: input file .mif format to be preprocessed
@@ -95,7 +79,6 @@ def run_preproc_dwi(
     - info
     """
 
- 
     # Get files name
     info = {}
     dir_name = os.path.dirname(in_dwi)
@@ -108,7 +91,7 @@ def run_preproc_dwi(
         cmd = ["dwidenoise", in_dwi, dwi_denoise]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not lunch dwidenoise (exit code {result})"
+            msg = f"Cannot launch dwidenoise (exit code {result})"
             return 0, msg, info
         else:
             print(f"Denoise completed. Output file: {dwi_denoise}")
@@ -122,7 +105,7 @@ def run_preproc_dwi(
         cmd = ["mrdegibbs", dwi_denoise, dwi_degibbs]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not launch mrdegibbs (exit code {result})"
+            msg = f"Cannot launch mrdegibbs (exit code {result})"
             return 0, msg, info
         else:
             print(f"Unringing completed. Output file: {dwi_degibbs}")
@@ -139,9 +122,9 @@ def run_preproc_dwi(
         # Check if the file already exists or not
         if not os.path.exists(b0_pair):
             # Create command for b0_pair creation if pe_dir=PA
-            if pe_dir=="j" and in_pepolar_AP:
+            if pe_dir == "j" and in_pepolar_AP:
                 # Check for fmap files encoding direction (PA)
-                if in_pepolar_PA==None:
+                if in_pepolar_PA is None:
                     # Extract b0 (PA) from dwi 
                     in_pepolar_PA = in_dwi.replace(".mif", "_bzero.mif")
                     # Check if the file already exists or not
@@ -149,18 +132,18 @@ def run_preproc_dwi(
                         cmd = ["dwiextract", in_dwi, in_pepolar_PA, "-bzero"]
                         result, stderrl, sdtoutl = execute_command(cmd)
                         if result != 0:
-                            msg = f"Can not launch dwiextract (exit code {result})"
+                            msg = f"Cannot launch dwiextract (exit code {result})"
                             return 0, msg, info
                         else:
-                            print("b0_PA sucessfully extracted")
+                            print("b0_PA successfully extracted")
                     else:
                         print("Skipping b0_PA extraction, file already exists")
                 # Create command for concatenation
                 cmd = ["mrcat", in_pepolar_PA, in_pepolar_AP, b0_pair]
             # Create command for b0_pair creation if pe_dir=AP
-            if pe_dir=="j-" and in_pepolar_PA:
+            if pe_dir == "j-" and in_pepolar_PA:
                 # Check for fmap files encoding direction (AP)
-                if in_pepolar_AP==None:
+                if in_pepolar_AP is None:
                 # Extract b0 (AP) from dwi 
                     in_pepolar_AP = in_dwi.replace(".mif", "_bzero.mif")
                     # Check if the file already exists or not
@@ -168,10 +151,10 @@ def run_preproc_dwi(
                         cmd = ["dwiextract", in_dwi, in_pepolar_AP, "-bzero"]
                         result, stderrl, sdtoutl = execute_command(cmd)
                         if result != 0:
-                            msg = f"Can not launch dwiextract (exit code {result})"
+                            msg = f"Cannot launch dwiextract (exit code {result})"
                             return 0, msg, info
                         else:
-                            print("b0_AP sucessfully extracted")
+                            print("b0_AP successfully extracted")
                     else:
                         print("Skipping b0_AP extraction, file already exists")
                         
@@ -180,17 +163,20 @@ def run_preproc_dwi(
             # Concatenate both b0 images to create b0_pair     
             result, stderrl, sdtoutl = execute_command(cmd)
             if result != 0:
-                msg = f"Can not launch mrcat to create b0_pair (exit code {result})"
+                msg = f"Cannot launch mrcat to create b0_pair (exit code {result})"
                 return 0, msg, info
             else:
-                print(f"B0_pair succesfully created. Output file: {b0_pair}")
+                print(f"B0_pair successfully created. Output file: {b0_pair}")
         else:
             print(f"Skipping b0_pair creation step, {b0_pair} already exists.")
             
         # fslpreproc (topup and Eddy)
+        qc_directory = os.path.join(dir_name, "qc_text")
+        if not os.path.exists(qc_directory):
+            os.makedirs(qc_directory)
         if b0_pair:
             cmd = get_dwifslpreproc_command(
-                dwi_degibbs, dwi_preproc, pe_dir, readout_time, b0_pair, rpe, shell
+                dwi_degibbs, dwi_preproc, pe_dir, readout_time, qc_directory, b0_pair, rpe, shell,
             )
         else:
             cmd = get_dwifslpreproc_command(
@@ -198,13 +184,14 @@ def run_preproc_dwi(
                 dwi_preproc,
                 pe_dir,
                 readout_time,
+                qc_directory,
                 b0_pair=None,
                 rpe=rpe,
                 shell=shell,
             )
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not lunch dwifslpreproc (exit code {result})"
+            msg = f"Cannot launch dwifslpreproc (exit code {result})"
             return 0, msg, info
         else:
             print(f"Motion and distortion correction completed. Output file: {dwi_preproc}")
@@ -218,13 +205,13 @@ def run_preproc_dwi(
     bias_output = dwi_preproc.replace("_degibbs_preproc.mif", "_degibbs_preproc_bias.mif")
     # Check if the file already exists or not
     if not os.path.exists(dwi_unbias) and not os.path.exists(bias_output):
-        cmd = ["dwibiascorrect", "ants", dwi_preproc, dwi_unbias,"-bias", bias_output]
+        cmd = ["dwibiascorrect", "ants", dwi_preproc, dwi_unbias, "-bias", bias_output]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not lunch bias correction (exit code {result})"
+            msg = f"Cannot launch bias correction (exit code {result})"
             return 0, msg
         else:
-            print(f"Bias correction completed. Output files: {dwi_unbias}, {bias_output}")#good detail to add
+            print(f"Bias correction completed. Output files: {dwi_unbias}, {bias_output}")
     else:
        print(f"Skipping bias correction step, {dwi_unbias} and/or {bias_output} already exists.")
 
@@ -236,7 +223,7 @@ def run_preproc_dwi(
         cmd = ["dwi2mask", dwi_unbias, dwi_mask]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = "Can not lunch mask (exit code {result})"
+            msg = f"Cannot launch mask (exit code {result})"
             return 0, msg
         else:
             print(f"Brain mask completed. Output file: {dwi_mask}")
