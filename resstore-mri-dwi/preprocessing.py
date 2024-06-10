@@ -114,11 +114,11 @@ def run_preproc_dwi(
 
     # Motion and distortion correction
     dwi_preproc = dwi_degibbs.replace("_degibbs.mif", "_degibbs_preproc.mif")
+    b0_pair = os.path.join(dir_name, "b0_pair.mif")
     # Check if the file already exists or not
     if not os.path.exists(dwi_preproc):
 
         # Create b0_pair 
-        b0_pair = os.path.join(dir_name, "b0_pair.mif")
         # Check if the file already exists or not
         if not os.path.exists(b0_pair):
             # Create command for b0_pair creation if pe_dir=PA
@@ -232,7 +232,7 @@ def run_preproc_dwi(
 
 
         
-    info = {"dwi_preproc": dwi_unbias, "brain_mask": dwi_mask}
+    info = {"dwi_preproc": dwi_unbias, "brain_mask": dwi_mask,"b0_pair": b0_pair}
     msg = "Preprocessing DWI done"
     print(msg)
     return 1, msg, info

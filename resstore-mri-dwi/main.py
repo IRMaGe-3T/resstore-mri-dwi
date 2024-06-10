@@ -11,6 +11,7 @@ import os
 import glob
 import sys
 
+
 from bids import BIDSLayout
 
 from prepare_acquisitions import prepare_abcd_acquistions, prepare_hermes_acquistions
@@ -162,7 +163,7 @@ if __name__ == '__main__':
 
             # Launch tractography if needed
             if user_input_2 in ['yes', 'y']:
-                tractogram(in_t1w, info["brain_mask"]) 
+                tractogram(info["dwi_preproc"], info["brain_mask"],in_t1w, info["b0_pair"]) 
             else:
                 print("No creation of a whole-brain tractogram")
 

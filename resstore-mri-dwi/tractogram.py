@@ -10,7 +10,8 @@ Returns:
 """
 
 import os
-from useful import check_file_ext, execute_command
+import subprocess
+from useful import check_file_ext, execute_command, verify_file
 
 def tractogram(in_dwi, mask, t1_raw, b0_pair):
 
@@ -24,7 +25,7 @@ def tractogram(in_dwi, mask, t1_raw, b0_pair):
     # Create the nocoreg file
     five_tissue = os.path.join(dir_name, '5tt_nocoreg.mif')
     if not os.path.exists(five_tissue):
-        cmd = ["5ttgen", "fsl", in_dwi, five_tissue]
+        cmd = ["5ttgen", "fsl", t1_raw, five_tissue]
         result, stderrl, stdoutl = execute_command(cmd)
         if result != 0:
             msg = f"Can not launch 5ttgen (exit code {result})"
@@ -33,6 +34,7 @@ def tractogram(in_dwi, mask, t1_raw, b0_pair):
             print(f"5-tissue tissue model succesfully generated. Output file: {five_tissue}")
     else:
         print(f"Skipping 5-tissue generation step, {five_tissue} already exists.")
+
 
     # Convert mean B0 image to NIfTI format
     b0_nifti= b0_pair.replace('.mif', '.nii.gz')
