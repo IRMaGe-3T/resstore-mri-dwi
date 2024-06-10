@@ -25,14 +25,12 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
             in_dwi_b0, out_directory, diff=False
         )
 
-    print(f" \n in_t1_nifti: {in_t1_nifti}")
-    print(f" in_dwi: {in_dwi} \n")
 
-    
-
-    
+    print(f"\n \n in dwi: {in_dwi} \n \n")
+    print(f"\n \n in t1: {in_t1_nifti} \n \n")
+    print(f"output dir: {out_directory}")
     # Creating tissue boundaries
-    tissue_type = in_dwi.replace("_acq-abcd_dir-PA_dwi_denoise_degibbs_preproc_unbiased.mif", "_5tt.nii.gz")
+    tissue_type = os.path.join(out_directory, "5tt.nii.gz")
     if not verify_file(tissue_type):
         cmd = ["5ttgen", "fsl", in_t1_nifti, tissue_type]
         result, stderrl, sdtoutl = execute_command(cmd)
@@ -42,6 +40,7 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
 
     # Extract gm info 
     grey_matter = tissue_type.replace(".nii.gz", "_gm.nii.gz")
+    print(f"\n file to create : {grey_matter} \n")
     if not verify_file(grey_matter):
         cmd = ["fslroi", tissue_type, grey_matter, "0", "1"]
         result, stderrl, sdtoutl = execute_command(cmd)
