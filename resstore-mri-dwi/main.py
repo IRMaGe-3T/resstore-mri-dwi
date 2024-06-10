@@ -18,6 +18,7 @@ from preprocessing import run_preproc_dwi
 from FOD import FOD
 from FA_ADC_AD_RD import FA_ADC_AD_RD_maps
 from T1_preproc import run_preproc_t1  
+from processing_TractSeg import run_tractseg
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -155,7 +156,7 @@ if __name__ == '__main__':
 
             # Launch FOD estimation if needed 
             if user_input_1 in ['yes', 'y']:
-                FOD(info["dwi_preproc"], info["brain_mask"])
+                _,peaks = FOD(info["dwi_preproc"], info["brain_mask"])
             else:
                 print("No FOD done")  
 
@@ -164,8 +165,10 @@ if __name__ == '__main__':
             if user_input_2 in ['yes', 'y']:
                 run_preproc_t1(in_t1w_nifti,info["dwi_preproc"])
                 print("run_preproc_t1w done")
+                run_tractseg(peaks)
+                print("TractSeg successfully used")
             else:
-                print("No T1w preproc done")
+                print("No tractography done")
                 
 
             # Launch FA map creation if needed
