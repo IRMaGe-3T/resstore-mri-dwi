@@ -8,18 +8,17 @@ python main.py --bids folder_bids_path
 import argparse
 import json
 import os
-import glob
 import sys
-
 
 from bids import BIDSLayout
 
 from prepare_acquisitions import prepare_abcd_acquistions, prepare_hermes_acquistions
-from useful import convert_nifti_to_mif, execute_command, get_shell
+from useful import convert_nifti_to_mif, execute_command, get_shell, verify_file
 from preprocessing import run_preproc_dwi
 from FOD import FOD
 from tractogram import tractogram
 from FA_ADC_AD_RD import FA_ADC_AD_RD_maps
+from T1_preproc import run_preproc_t1  
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -161,11 +160,20 @@ if __name__ == '__main__':
             else:
                 print("No FOD done")  
 
-            # Launch tractography if needed
+            # # Launch tractography if needed (Guillermo)
+            # if user_input_2 in ['yes', 'y']:
+            #     tractogram(in_t1w, info["brain_mask"]) 
+            # else:
+            #     print("No creation of a whole-brain tractogram")
+
+            # For tractography
+            # Launch T1_preproc
             if user_input_2 in ['yes', 'y']:
-                tractogram(info["dwi_preproc"], info["brain_mask"],in_t1w, info["b0_pair"]) 
+                run_preproc_t1(in_t1w_nifti,info["dwi_preproc"])
+                print("run_preproc_t1w done")
             else:
-                print("No creation of a whole-brain tractogram")
+                print("No T1w preproc done")
+                
 
             # Launch FA map creation if needed
             if user_input_3 in ['yes', 'y']:
