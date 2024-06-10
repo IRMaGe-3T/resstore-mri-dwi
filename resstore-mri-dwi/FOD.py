@@ -17,7 +17,7 @@ Files created:
 """
 
 import os
-from useful import check_file_ext, execute_command
+from useful import check_file_ext, execute_command, verify_file
 
 
 
@@ -100,4 +100,15 @@ def FOD(in_dwi, mask):
     else:
         print("Intensity normalization already done")
 
-    return 
+    # Extract peaks
+    peaks = os.path.join(dir_name, "peaks.mif")
+    if not verify_file(peaks):
+        cmd = ["sh2peaks", wmfod_norm, peaks]
+        result, stderrl, stdoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"Cannot launch sh2peaks (exit code {result})"
+            return 0, msg, info
+        else:
+            print(f"Peaks Succesfully extracted. Output file: {peaks}")
+
+    return 1, peaks
