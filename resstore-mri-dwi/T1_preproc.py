@@ -1,11 +1,26 @@
-
 import os
 from useful import execute_command, convert_mif_to_nifti, verify_file
 
 def run_preproc_t1(in_t1_nifti, in_dwi):
     """
     Coregister T1w to DWI
+
+    Parameters:
+    -----------
+    in_t1_nifti : str
+        Path to the T1-weighted image in NIfTI format.
+    in_dwi : str
+        Path to the diffusion-weighted image (DWI) in MIF format.
+
+    Returns:
+    --------
+    tuple
+        A tuple containing the execution status (0 if an error occurred, 1 otherwise),
+        a message describing the execution result, and an information dictionary (info).
+        If the status is 1, info will contain the path to the coregistered T1 image.
     """
+
+    # Get name directory and create info 
     info = {}
     out_directory = os.path.dirname(in_dwi)
     
@@ -25,10 +40,6 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
             in_dwi_b0, out_directory, diff=False
         )
 
-
-    print(f"\n \n in dwi: {in_dwi} \n \n")
-    print(f"\n \n in t1: {in_t1_nifti} \n \n")
-    print(f"output dir: {out_directory}")
     # Creating tissue boundaries
     tissue_type = os.path.join(out_directory, "5tt.nii.gz")
     if not verify_file(tissue_type):
@@ -40,7 +51,6 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
 
     # Extract gm info 
     grey_matter = tissue_type.replace(".nii.gz", "_gm.nii.gz")
-    print(f"\n file to create : {grey_matter} \n")
     if not verify_file(grey_matter):
         cmd = ["fslroi", tissue_type, grey_matter, "0", "1"]
         result, stderrl, sdtoutl = execute_command(cmd)
@@ -104,7 +114,6 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
         if result != 0:
             msg = "Can not lunch mrtransform (exit code {result})"
             return 0, msg, info
-    print(f" T1 coreg: {in_t1_coreg}")
 
     # Apply inverse transfo to tissue type (gm --> dwi)
     # Then tissue_type_correg is aligned on dwi
