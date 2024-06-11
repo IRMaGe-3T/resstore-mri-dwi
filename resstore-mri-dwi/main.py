@@ -163,7 +163,7 @@ if __name__ == '__main__':
             # For tractography
             # Launch T1_preproc
             if user_input_2 in ['yes', 'y']:
-                print("FOD files required for tractography. \nLAunching FOD estimations...")
+                print("\n \nFOD files required for tractography. \nLaunching FOD estimations...")
                 _,peaks = FOD(info["dwi_preproc"], info["brain_mask"])
                 run_preproc_t1(in_t1w_nifti,info["dwi_preproc"])
                 print("run_preproc_t1w done")

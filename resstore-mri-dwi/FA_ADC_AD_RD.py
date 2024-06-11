@@ -33,7 +33,7 @@ def FA_ADC_AD_RD_maps(in_dwi, mask):
     RD_map= os.path.join(dir_name, file_name + "_RD_map.mif")
     AD_map= os.path.join(dir_name, file_name + "_AD_map.mif")
     # Check if the file already exist or not 
-    if not (os.path.exists(FA_map) and os.path.exists(ADC_map) and os.path.exists(RD_map)):
+    if not (os.path.exists(FA_map) or os.path.exists(ADC_map) or os.path.exists(RD_map) or os.path.exists(AD_map)):
         cmd = ["tensor2metric", "-fa", FA_map, "-adc", ADC_map, "-rd", RD_map, "-ad", AD_map, tensor]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
@@ -44,4 +44,4 @@ def FA_ADC_AD_RD_maps(in_dwi, mask):
     else:
         print(f"Skipping FA, ADC, AD and RD map creation step, at least one of them already exists.")
 
-    return FA_map
+    return 

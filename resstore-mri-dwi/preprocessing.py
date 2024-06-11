@@ -216,177 +216,170 @@ def run_preproc_dwi(
     else:
        print(f"Skipping bias correction step, {dwi_unbias} and/or {bias_output} already exists.")
 
-    # # Brain mask, change after the MNI
-    # dwi_mask = dwi_unbias.replace("_degibbs_preproc_unbiased.mif", "_dwi_brain_mask.mif")
-    # # Check if the file already exists or not
-    # if not os.path.exists(dwi_mask):
-    #     cmd = ["dwi2mask", dwi_unbias, dwi_mask]
-    #     result, stderrl, sdtoutl = execute_command(cmd)
-    #     if result != 0:
-    #         msg = f"Cannot launch mask (exit code {result})"
-    #         return 0, msg
-    #     else:
-    #         print(f"Brain mask completed. Output file: {dwi_mask}")
-    # else:
-    #    print(f"Skipping brain mask step, {dwi_mask} already exists.")
+    # Brain mask, change after the MNI
+    dwi_mask = dwi_unbias.replace("_degibbs_preproc_unbiased.mif", "_dwi_brain_mask.mif")
+    # Check if the file already exists or not
+    if not os.path.exists(dwi_mask):
+        cmd = ["dwi2mask", dwi_unbias, dwi_mask]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"Cannot launch mask (exit code {result})"
+            return 0, msg
+        else:
+            print(f"Brain mask completed. Output file: {dwi_mask}")
+    else:
+       print(f"Skipping brain mask step, {dwi_mask} already exists.")
 
 
         
-    info_preproc = {"dwi_preproc": dwi_unbias,"b0_pair": b0_pair}
+    info_preproc = {"dwi_preproc": dwi_unbias,"b0_pair": b0_pair, "brain_mask": dwi_mask}
     msg = "Preprocessing DWI done"
     print(msg)
     return 1, msg, info_preproc
 
-# Function to download the template file if it doesn't exist
-def download_template(in_dir):
-    github_repo_url = "https://github.com/your_username/your_repository/raw/main/resources/MNI_FA_template.nii.gz"
-    template_filename = "MNI_FA_template.nii.gz"
-    template_path = os.path.join(in_dir, template_filename)
+# # Function to download the template file if it doesn't exist
+# def download_template(in_dir):
+#     github_repo_url = "https://github.com/your_username/your_repository/raw/main/resources/MNI_FA_template.nii.gz"
+#     template_filename = "MNI_FA_template.nii.gz"
+#     template_path = os.path.join(in_dir, template_filename)
     
-    # Check if the template file already exists
-    if not os.path.exists(template_path):
-        try:
-            print("Downloading MNI_FA_template.nii.gz...")
-            urllib.request.urlretrieve(github_repo_url, template_path)
-            print("Template file downloaded successfully.")
-        except Exception as e:
-            print(f"Failed to download the template file: {e}")
-            return None
+#     # Check if the template file already exists
+#     if not os.path.exists(template_path):
+#         try:
+#             print("Downloading MNI_FA_template.nii.gz...")
+#             urllib.request.urlretrieve(github_repo_url, template_path)
+#             print("Template file downloaded successfully.")
+#         except Exception as e:
+#             print(f"Failed to download the template file: {e}")
+#             return None
     
-    return template_path
+#     return template_path
 
-def run_register_MNI(in_dwi, in_fa):
-    """
-    Run preproc for whole brain diffusion using MRtrix command and an optional FOD estimation 
+# def run_register_MNI(in_dwi, in_fa):
+#     """
+#     Run preproc for whole brain diffusion using MRtrix command and an optional FOD estimation 
 
-    Parameters:
-    - in_dwi: input file .mif format to be preprocessed, mif format.
-    - in_fa: input Fractional Anisotropy Map to be preprocessed, mif format.
+#     Parameters:
+#     - in_dwi: input file .mif format to be preprocessed, mif format.
+#     - in_fa: input Fractional Anisotropy Map to be preprocessed, mif format.
 
-    Returns: 
-    - int 1 success, 0 failure 
-    - msg 
-    - info_mni
-    """
+#     Returns: 
+#     - int 1 success, 0 failure 
+#     - msg 
+#     - info_mni
+#     """
 
-    # Get files name
-    info_mni = {}
-    dir_name = os.path.dirname(in_dwi)
-    valid_bool, in_ext, file_name = check_file_ext(in_dwi, {"MIF": "mif"})
-    in_dwi_nii = in_dwi
-    in_fa_nii = in_fa
+#     # Get files name
+#     info_mni = {}
+#     dir_name = os.path.dirname(in_dwi)
+#     valid_bool, in_ext, file_name = check_file_ext(in_dwi, {"MIF": "mif"})
+#     in_dwi_nii = in_dwi
+#     in_fa_nii = in_fa
 
-    # Download the template file
-    template_path = download_template(in_dwi)
+#     # Download the template file
+#     template_path = download_template(in_dwi)
 
-    voxels = os.path.join(dir_name + "_voxels.mif")
+#     voxels = os.path.join(dir_name + "_voxels.mif")
 
-    # Linear registration of FA
-    fa_mni = os.path.join(dir_name, "FA_MNI.nii.gz")
-    if not verify_file(fa_mni):
-        cmd = [
-            "flirt",
-            "-ref", template_path, 
-            "-in", in_fa_nii,
-            "-out", fa_mni,
-            "-omat", "FA_2_MNI.mat",
-            "-dof", "6",
-            "-cost", "mutualinfo",
-            "-searchcost", "mutualinfo"
-        ]
-        result, stderrl, stdoutl = execute_command(cmd)
-        if result != 0:
-            msg = f"Can not launch flirt for FA (exit code {result})"
-            return 0, msg, info_mni
-        else:
-            print(f"Successfully created FA_MNI.nii.gz. Output file: {fa_mni}")
+#     # Linear registration of FA
+#     fa_mni = os.path.join(dir_name, "FA_MNI.nii.gz")
+#     if not verify_file(fa_mni):
+#         cmd = [
+#             "flirt",
+#             "-ref", template_path, 
+#             "-in", in_fa_nii,
+#             "-out", fa_mni,
+#             "-omat", "FA_2_MNI.mat",
+#             "-dof", "6",
+#             "-cost", "mutualinfo",
+#             "-searchcost", "mutualinfo"
+#         ]
+#         result, stderrl, stdoutl = execute_command(cmd)
+#         if result != 0:
+#             msg = f"Can not launch flirt for FA (exit code {result})"
+#             return 0, msg, info_mni
+#         else:
+#             print(f"Successfully created FA_MNI.nii.gz. Output file: {fa_mni}")
 
-    # Linear registration of DWI
-    diffusion_mni = os.path.join(dir_name, "Diffusion_MNI.nii.gz")
-    if not verify_file(diffusion_mni):
-        cmd = [
-            "flirt",
-            "-ref", template_path,
-            "-in", in_dwi_nii,
-            "-out", diffusion_mni,
-            "-applyxfm",
-            "-init", "FA_2_MNI.mat",
-            "-dof", "6"
-        ]
-        result, stderrl, stdoutl = execute_command(cmd)
-        if result != 0:
-            msg = f"Cannot launch flirt for DWI (exit code {result})"
-            return 0, msg, info_mni
-        else:
-            print(f"Linear registration of DWI completed. Output file: {diffusion_mni}")
+#     # Linear registration of DWI
+#     diffusion_mni = os.path.join(dir_name, "Diffusion_MNI.nii.gz")
+#     if not verify_file(diffusion_mni):
+#         cmd = [
+#             "flirt",
+#             "-ref", template_path,
+#             "-in", in_dwi_nii,
+#             "-out", diffusion_mni,
+#             "-applyxfm",
+#             "-init", "FA_2_MNI.mat",
+#             "-dof", "6"
+#         ]
+#         result, stderrl, stdoutl = execute_command(cmd)
+#         if result != 0:
+#             msg = f"Cannot launch flirt for DWI (exit code {result})"
+#             return 0, msg, info_mni
+#         else:
+#             print(f"Linear registration of DWI completed. Output file: {diffusion_mni}")
     
-    # Rotating BVECs
-    bvecs_mni = os.path.join(dir_name, "Diffusion_MNI.bvecs")
-    if not verify_file(bvecs_mni):
-        cmd = [
-            "rotate_bvecs",
-            "-i", "bvecs",  #Preguntar de donde vienen estos bvecs
-            "-t", "FA_2_MNI.mat",
-            "-o", bvecs_mni
-        ]
-        result, stderrl, stdoutl = execute_command(cmd)
-        if result != 0:
-            msg = f"Cannot launch rotate_bvecs (exit code {result})"
-            return 0, msg, info_mni
-        else:
-            print(f"Rotating BVECs completed. Output file: {bvecs_mni}")
+#     # Rotating BVECs
+#     bvecs_mni = os.path.join(dir_name, "Diffusion_MNI.bvecs")
+#     if not verify_file(bvecs_mni):
+#         cmd = [
+#             "rotate_bvecs",
+#             "-i", "bvecs",  #Preguntar de donde vienen estos bvecs
+#             "-t", "FA_2_MNI.mat",
+#             "-o", bvecs_mni
+#         ]
+#         result, stderrl, stdoutl = execute_command(cmd)
+#         if result != 0:
+#             msg = f"Cannot launch rotate_bvecs (exit code {result})"
+#             return 0, msg, info_mni
+#         else:
+#             print(f"Rotating BVECs completed. Output file: {bvecs_mni}")
 
-    # Copy/Rename BVALs
-    bvals_mni = os.path.join(dir_name, "Diffusion_MNI.bvals")
-    if not verify_file(bvals_mni):
-        cmd = ["cp", "bvals", bvals_mni]
-        result, stderrl, stdoutl = execute_command(cmd)
-        if result != 0:
-            msg = f"Cannot copy bvals (exit code {result})"
-            return 0, msg, info_mni
-        else:
-            print(f"Copy/Rename BVALs completed. Output file: {bvals_mni}")
+#     # Copy/Rename BVALs
+#     bvals_mni = os.path.join(dir_name, "Diffusion_MNI.bvals")
+#     if not verify_file(bvals_mni):
+#         cmd = ["cp", "bvals", bvals_mni]
+#         result, stderrl, stdoutl = execute_command(cmd)
+#         if result != 0:
+#             msg = f"Cannot copy bvals (exit code {result})"
+#             return 0, msg, info_mni
+#         else:
+#             print(f"Copy/Rename BVALs completed. Output file: {bvals_mni}")
 
-    # Convert normalized DWI to MIF
-    diffusion_mni_mif = os.path.join(dir_name, "Diffusion_MNI.mif")
-    if not verify_file(diffusion_mni_mif):
-        cmd = [
-            "mrconvert",
-            diffusion_mni,
-            diffusion_mni_mif,
-            "-fslgrad", bvecs_mni, bvals_mni
-        ]
-        result, stderrl, stdoutl = execute_command(cmd)
-        if result != 0:
-            msg = f"Cannot convert DWI to MIF (exit code {result})"
-            return 0, msg, info_mni
-        else:
-            print(f"Convert normalized DWI to MIF completed. Output file: {diffusion_mni_mif}")
+#     # Convert normalized DWI to MIF
+#     diffusion_mni_mif = os.path.join(dir_name, "Diffusion_MNI.mif")
+#     if not verify_file(diffusion_mni_mif):
+#         cmd = [
+#             "mrconvert",
+#             diffusion_mni,
+#             diffusion_mni_mif,
+#             "-fslgrad", bvecs_mni, bvals_mni
+#         ]
+#         result, stderrl, stdoutl = execute_command(cmd)
+#         if result != 0:
+#             msg = f"Cannot convert DWI to MIF (exit code {result})"
+#             return 0, msg, info_mni
+#         else:
+#             print(f"Convert normalized DWI to MIF completed. Output file: {diffusion_mni_mif}")
 
-    # Brain mask, change after the MNI
-        dwi_mask = dwi_unbias.replace("_degibbs_preproc_unbiased.mif", "_dwi_brain_mask.mif")
-        # Check if the file already exists or not
-        if not os.path.exists(dwi_mask):
-            cmd = ["dwi2mask", dwi_unbias, dwi_mask]
-            result, stderrl, sdtoutl = execute_command(cmd)
-            if result != 0:
-                msg = f"Cannot launch mask (exit code {result})"
-                return 0, msg
-            else:
-                print(f"Brain mask completed. Output file: {dwi_mask}")
-        else:
-        print(f"Skipping brain mask step, {dwi_mask} already exists.")
+#     # Brain mask, change after the MNI
+#         dwi_mask = dwi_unbias.replace("_degibbs_preproc_unbiased.mif", "_dwi_brain_mask.mif")
+#         # Check if the file already exists or not
+#         if not os.path.exists(dwi_mask):
+#             cmd = ["dwi2mask", dwi_unbias, dwi_mask]
+#             result, stderrl, sdtoutl = execute_command(cmd)
+#             if result != 0:
+#                 msg = f"Cannot launch mask (exit code {result})"
+#                 return 0, msg
+#             else:
+#                 print(f"Brain mask completed. Output file: {dwi_mask}")
+#         else:
+#         print(f"Skipping brain mask step, {dwi_mask} already exists.")
 
     
-    # Write average response to file
-    average_response_path = os.path.join(i['path'], "average-response.txt")
-    with open(average_response_path, "w+") as f:
-        f.write('768.08558 -327.24084 72.15579 -11.15219 1.28727')
-    print(f"Successfully wrote average response to {average_response_path}") #test
-
-
-
-
-
-
-
+#     # Write average response to file
+#     average_response_path = os.path.join(i['path'], "average-response.txt")
+#     with open(average_response_path, "w+") as f:
+#         f.write('768.08558 -327.24084 72.15579 -11.15219 1.28727')
+#     print(f"Successfully wrote average response to {average_response_path}") #test
