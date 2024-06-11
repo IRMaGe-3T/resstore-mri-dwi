@@ -154,7 +154,7 @@ if __name__ == '__main__':
             # Launch preprocessing
             main_return, main_msg, info =run_preproc_dwi(in_dwi, pe_dir, readout_time, rpe=None, shell=SHELL, in_pepolar_PA=in_pepolar_PA, in_pepolar_AP=in_pepolar_AP)
 
-            # Launch FOD estimation if needed 
+            # Launch FOD estimation if wanted 
             if user_input_1 in ['yes', 'y']:
                 _,peaks = FOD(info["dwi_preproc"], info["brain_mask"])
             else:
@@ -163,6 +163,8 @@ if __name__ == '__main__':
             # For tractography
             # Launch T1_preproc
             if user_input_2 in ['yes', 'y']:
+                print("FOD files required for tractography. \nLAunching FOD estimations...")
+                _,peaks = FOD(info["dwi_preproc"], info["brain_mask"])
                 run_preproc_t1(in_t1w_nifti,info["dwi_preproc"])
                 print("run_preproc_t1w done")
                 run_tractseg(peaks)
