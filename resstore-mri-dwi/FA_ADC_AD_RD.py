@@ -44,4 +44,4 @@ def FA_ADC_AD_RD_maps(in_dwi, mask):
     else:
         print(f"Skipping FA, ADC, AD and RD map creation step, at least one of them already exists.")
 
-    return 
+    return FA_map
