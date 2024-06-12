@@ -100,8 +100,8 @@ def FOD(in_dwi, mask):
     else:
         print("\nIntensity normalization already done")
 
-    # Extract peaks
-    peaks = os.path.join(dir_name, "peaks.nii")
+    # Extract peaks 
+    peaks = os.path.join(dir_name, file_name + "_peaks.nii")
     if not verify_file(peaks):
         cmd = ["sh2peaks", wmfod_norm, peaks]
         result, stderrl, stdoutl = execute_command(cmd)
