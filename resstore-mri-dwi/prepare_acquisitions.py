@@ -65,11 +65,11 @@ def prepare_abcd_acquistions(bids_directory, sub, ses, preproc_directory):
         cmd = ["dwicat", dwi_1, dwi_2, dwi]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not lunch dwicat (exit code {result})"
+            msg = f"\nCan not lunch dwicat (exit code {result})"
         else:
-                print("Extraction successfull")
+                print("\nExtraction successfull")
     else:
-        print(f"File already exists: {dwi}")
+        print(f"\nFile already exists: {dwi}")
     # Use DTI1 to get info
     dwi_json = dwi_1_nifti.replace("nii.gz", "json")
 
@@ -169,11 +169,11 @@ def prepare_hermes_acquistions(bids_directory, sub, ses, preproc_directory):
         cmd = ["dwiextract", pepolar_ap, pepolar_ap_bzero, '-bzero']
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not lunch dwicat (exit code {result})"
+            msg = f"\nCan not lunch dwicat (exit code {result})"
         else:
-            print("Extraction successfull")
+            print("\nExtraction successfull")
     else:
-        print(f"File already exists: {pepolar_ap_bzero}")
+        print(f"\nFile already exists: {pepolar_ap_bzero}")
     
     pepolar_pa_bzero=pepolar_pa.replace('.mif', '_bzero.mif')
     if not os.path.exists(pepolar_pa_bzero):
@@ -181,10 +181,10 @@ def prepare_hermes_acquistions(bids_directory, sub, ses, preproc_directory):
             '.mif', '_bzero.mif'), '-bzero']
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not lunch dwicat (exit code {result})"
+            msg = f"\nCan not lunch dwicat (exit code {result})"
         else:
-            print("Extraction successfull")
+            print("\nExtraction successfull")
     else:
-        print(f"Skipping exctraction step, file alreeady exists: {pepolar_pa_bzero}")
+        print(f"\nSkipping exctraction step, file alreeady exists: {pepolar_pa_bzero}")
         
     return dwi, dwi_json, pepolar_ap, pepolar_pa

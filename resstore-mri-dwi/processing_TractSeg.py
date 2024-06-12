@@ -37,7 +37,7 @@ def run_tractseg(peaks, FA_map):
         print("\nInput FA_map is not nifti.\n")
         valid_bool, in_ext, file_name = check_file_ext(FA_map, EXT_MIF)
         if not valid_bool:
-            msg = f"Cannot perform tractography, FA_map do not have the right format {result}"
+            msg = f"\nCannot perform tractography, FA_map do not have the right format {result}"
             return 0, msg
         else: 
             print("\n FA is in mif format.\n")
@@ -47,7 +47,7 @@ def run_tractseg(peaks, FA_map):
                 cmd = ["mrconvert", FA_map, FA_nii]
                 result, stderrl, sdtoutl = execute_command(cmd)
                 if result != 0:
-                    msg = f"Can not convert mif to nii for FA_map: {result})"
+                    msg = f"\nCan not convert mif to nii for FA_map: {result})"
                     return 0, msg
             else:
                 print("\n FA  already exist in nii format, we'll use it.\n")
@@ -56,27 +56,27 @@ def run_tractseg(peaks, FA_map):
     cmd = ["TractSeg", "-i", peaks, "--output_type", "tract_segmentation"]
     result, stderrl, sdtoutl = execute_command(cmd)
     if result != 0:
-        msg = f"Can not run TractSeg tract_segmentation (exit code {result})"
+        msg = f"\nCan not run TractSeg tract_segmentation (exit code {result})"
         return 0, msg
     cmd = ["TractSeg", "-i", peaks, "--output_type", "endings_segmentation"]
     result, stderrl, sdtoutl = execute_command(cmd)
     if result != 0:
-        msg = f"Can not run TractSeg endings_segmentation (exit code {result})"
+        msg = f"\nCan not run TractSeg endings_segmentation (exit code {result})"
         return 0, msg
     cmd = ["TractSeg", "-i", peaks, "--output_type", "TOM"]
     result, stderrl, sdtoutl = execute_command(cmd)
     if result != 0:
-        msg = f"Can not run TractSeg TOM (exit code {result})"
+        msg = f"\nCan not run TractSeg TOM (exit code {result})"
         return 0, msg
     cmd = ["Tracking", "-i", peaks, "--tracking_format", "tck"]
     result, stderrl, sdtoutl = execute_command(cmd)
     if result != 0:
-        msg = f"Can not run TractSeg Tracking (exit code {result})"
+        msg = f"\nCan not run TractSeg Tracking (exit code {result})"
         return 0, msg
     cmd = ["TractSeg", "-i", peaks, "--uncertainty"]
     result, stderrl, sdtoutl = execute_command(cmd)
     if result != 0:
-        msg = f"Can not run TractSeg uncertainty (exit code {result})"
+        msg = f"\nCan not run TractSeg uncertainty (exit code {result})"
         return 0, msg
     
     # Run tractometry to create csv file
@@ -90,8 +90,8 @@ def run_tractseg(peaks, FA_map):
             cmd = ["Tractometry", "-i", TOM_trackings, "-o", tracto_csv, "-e", ending_segm, "-s", FA_nii]
             result, stderrl, sdtoutl = execute_command(cmd)
             if result != 0:
-                msg = f"Can not run tractometry: {result})"
+                msg = f"\nCan not run tractometry: {result})"
                 return 0, msg
 
-    msg = "Run TracSeg done"
+    msg = "\nRun TracSeg done"
     return 1, msg

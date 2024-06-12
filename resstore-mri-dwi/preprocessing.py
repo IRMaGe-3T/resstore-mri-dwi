@@ -92,12 +92,12 @@ def run_preproc_dwi(
         cmd = ["dwidenoise", in_dwi, dwi_denoise]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Cannot launch dwidenoise (exit code {result})"
+            msg = f"\nCannot launch dwidenoise (exit code {result})"
             return 0, msg, info_prepoc
         else:
-            print(f"Denoise completed. Output file: {dwi_denoise}")
+            print(f"\nDenoise completed. Output file: {dwi_denoise}")
     else:
-        print(f"Skipping denoise step, {dwi_denoise} already exists.")
+        print(f"\nSkipping denoise step, {dwi_denoise} already exists.")
 
     # DeGibbs / Unringing
     dwi_degibbs = dwi_denoise.replace("_denoise.mif", "_denoise_degibbs.mif")
@@ -106,12 +106,12 @@ def run_preproc_dwi(
         cmd = ["mrdegibbs", dwi_denoise, dwi_degibbs]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Cannot launch mrdegibbs (exit code {result})"
+            msg = f"\nCannot launch mrdegibbs (exit code {result})"
             return 0, msg, info_prepoc
         else:
-            print(f"Unringing completed. Output file: {dwi_degibbs}")
+            print(f"\nUnringing completed. Output file: {dwi_degibbs}")
     else:
-        print(f"Skipping unringing step, {dwi_degibbs} already exists.")
+        print(f"\nSkipping unringing step, {dwi_degibbs} already exists.")
 
     # Motion and distortion correction
     dwi_preproc = dwi_degibbs.replace("_degibbs.mif", "_degibbs_preproc.mif")
@@ -133,12 +133,12 @@ def run_preproc_dwi(
                         cmd = ["dwiextract", in_dwi, in_pepolar_PA, "-bzero"]
                         result, stderrl, sdtoutl = execute_command(cmd)
                         if result != 0:
-                            msg = f"Cannot launch dwiextract (exit code {result})"
+                            msg = f"\nCannot launch dwiextract (exit code {result})"
                             return 0, msg, info_prepoc
                         else:
-                            print("b0_PA successfully extracted")
+                            print("\nb0_PA successfully extracted")
                     else:
-                        print("Skipping b0_PA extraction, file already exists")
+                        print("\nSkipping b0_PA extraction, file already exists")
                 # Create command for concatenation
                 cmd = ["mrcat", in_pepolar_PA, in_pepolar_AP, b0_pair]
             # Create command for b0_pair creation if pe_dir=AP
@@ -152,24 +152,24 @@ def run_preproc_dwi(
                         cmd = ["dwiextract", in_dwi, in_pepolar_AP, "-bzero"]
                         result, stderrl, sdtoutl = execute_command(cmd)
                         if result != 0:
-                            msg = f"Cannot launch dwiextract (exit code {result})"
+                            msg = f"\nCannot launch dwiextract (exit code {result})"
                             return 0, msg, info_prepoc
                         else:
-                            print("b0_AP successfully extracted")
+                            print("\nb0_AP successfully extracted")
                     else:
-                        print("Skipping b0_AP extraction, file already exists")
+                        print("\nSkipping b0_AP extraction, file already exists")
                         
                 # Create command for concatenation
                 cmd = ["mrcat", in_pepolar_AP, in_pepolar_PA, b0_pair]
             # Concatenate both b0 images to create b0_pair     
             result, stderrl, sdtoutl = execute_command(cmd)
             if result != 0:
-                msg = f"Cannot launch mrcat to create b0_pair (exit code {result})"
+                msg = f"\nCannot launch mrcat to create b0_pair (exit code {result})"
                 return 0, msg, info_prepoc
             else:
-                print(f"B0_pair successfully created. Output file: {b0_pair}")
+                print(f"\nB0_pair successfully created. Output file: {b0_pair}")
         else:
-            print(f"Skipping b0_pair creation step, {b0_pair} already exists.")
+            print(f"\nSkipping b0_pair creation step, {b0_pair} already exists.")
             
         # fslpreproc (topup and Eddy)
         qc_directory = os.path.join(dir_name, "qc_text")
@@ -192,13 +192,13 @@ def run_preproc_dwi(
             )
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Cannot launch dwifslpreproc (exit code {result})"
+            msg = f"\nCannot launch dwifslpreproc (exit code {result})"
             return 0, msg, info_prepoc
         else:
-            print(f"Motion and distortion correction completed. Output file: {dwi_preproc}")
+            print(f"\nMotion and distortion correction completed. Output file: {dwi_preproc}")
             
     else:
-        print(f"Skipping motion correction step, {dwi_preproc} already exists.")
+        print(f"\nSkipping motion correction step, {dwi_preproc} already exists.")
 
 
     # Bias correction
@@ -209,12 +209,12 @@ def run_preproc_dwi(
         cmd = ["dwibiascorrect", "ants", dwi_preproc, dwi_unbias, "-bias", bias_output]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Cannot launch bias correction (exit code {result})"
+            msg = f"\nCannot launch bias correction (exit code {result})"
             return 0, msg
         else:
-            print(f"Bias correction completed. Output files: {dwi_unbias}, {bias_output}")
+            print(f"\nBias correction completed. Output files: {dwi_unbias}, {bias_output}")
     else:
-       print(f"Skipping bias correction step, {dwi_unbias} and/or {bias_output} already exists.")
+       print(f"\nSkipping bias correction step, {dwi_unbias} and/or {bias_output} already exists.")
 
     # Brain mask, change after the MNI
     dwi_mask = dwi_unbias.replace("_degibbs_preproc_unbiased.mif", "_dwi_brain_mask.mif")
@@ -223,17 +223,17 @@ def run_preproc_dwi(
         cmd = ["dwi2mask", dwi_unbias, dwi_mask]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Cannot launch mask (exit code {result})"
+            msg = f"\nCannot launch mask (exit code {result})"
             return 0, msg
         else:
-            print(f"Brain mask completed. Output file: {dwi_mask}")
+            print(f"\nBrain mask completed. Output file: {dwi_mask}")
     else:
-       print(f"Skipping brain mask step, {dwi_mask} already exists.")
+       print(f"\nSkipping brain mask step, {dwi_mask} already exists.")
 
 
         
     info_preproc = {"dwi_preproc": dwi_unbias,"b0_pair": b0_pair, "brain_mask": dwi_mask}
-    msg = "Preprocessing DWI done"
+    msg = "\nPreprocessing DWI done"
     print(msg)
     return 1, msg, info_preproc
 

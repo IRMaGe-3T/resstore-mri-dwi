@@ -39,12 +39,12 @@ def FOD(in_dwi, mask):
         cmd = ["dwi2response", "dhollander", in_dwi, wm, gm, csf, "-voxels", voxels]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not launch dwi2response hollander (exit code {result})"
+            msg = f"\nCan not launch dwi2response hollander (exit code {result})"
             return 0, msg, info
         else:
-            print(f"Voxels succesfully created. Output file: {voxels}")
+            print(f"\nVoxels succesfully created. Output file: {voxels}")
     else:
-        print(f"Skipping RF estimation step, {voxels} already exists.")
+        print(f"\nSkipping RF estimation step, {voxels} already exists.")
 
     # FOD estimation 
     vf = os.path.join(dir_name, file_name + "_vf.mif")
@@ -56,34 +56,34 @@ def FOD(in_dwi, mask):
             cmd = ["dwi2fod", "msmt_csd", in_dwi, "-mask", mask, wm, wmfod, gm, gmfod, csf, csffod]
             result, stderrl, sdtoutl = execute_command(cmd)
             if result != 0:
-                msg = f"Can not launch dwi2fod (exit code {result})"
+                msg = f"\nCan not launch dwi2fod (exit code {result})"
                 return 0, msg, info
             else:
-                print(f"FOD files succesfully created. Output file: {wmfod}, {gmfod}, {csffod}")
+                print(f"\nFOD files succesfully created. Output file: {wmfod}, {gmfod}, {csffod}")
         interm_wm = os.path.join(dir_name, "interm_wm.mif")
         cmd = ["mrconvert", "-coord", "3", "0", wmfod, interm_wm]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not launch mrconvert (exit code {result})"
+            msg = f"\nCan not launch mrconvert (exit code {result})"
             return 0, msg, info
         else:
-            print(f"Intermediary files succesfully created. Output file: {interm_wm}")
+            print(f"\nIntermediary files succesfully created. Output file: {interm_wm}")
         cmd = ["mrcat", csffod, gmfod, interm_wm, vf]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not launch mrcat (exit code {result})"
+            msg = f"\nCan not launch mrcat (exit code {result})"
             return 0, msg, info
         else:
-            print(f"Vf files succesfully created. Output file: {vf}")
+            print(f"\nVf files succesfully created. Output file: {vf}")
         cmd = ["rm", interm_wm]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not remove intermediary file (exit code {result})"
+            msg = f"\nCan not remove intermediary file (exit code {result})"
             return 0, msg, info
         else:
-            print(f"Intermediary files succesfully removed. Output file: {interm_wm}")
+            print(f"\nIntermediary files succesfully removed. Output file: {interm_wm}")
     else: 
-        print(f"Skipping FOD estimation step, {vf} already exists.")
+        print(f"\nSkipping FOD estimation step, {vf} already exists.")
 
     # Intensity normalization
     wmfod_norm = os.path.join(dir_name, file_name + "_wmfod_norm.mif")
@@ -93,12 +93,12 @@ def FOD(in_dwi, mask):
         cmd = ["mtnormalise", wmfod, wmfod_norm, gmfod, gmfod_norm, csffod, csffod_norm, "-mask", mask]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not launch mtnormalize (exit code {result})"
+            msg = f"\nCan not launch mtnormalize (exit code {result})"
             return 0, msg, info
         else:
-            print(f"Intensity normalization completed. Output file: {wmfod_norm}, {gmfod_norm}, {csffod_norm}")
+            print(f"\nIntensity normalization completed. Output file: {wmfod_norm}, {gmfod_norm}, {csffod_norm}")
     else:
-        print("Intensity normalization already done")
+        print("\nIntensity normalization already done")
 
     # Extract peaks
     peaks = os.path.join(dir_name, "peaks.nii")
@@ -106,9 +106,9 @@ def FOD(in_dwi, mask):
         cmd = ["sh2peaks", wmfod_norm, peaks]
         result, stderrl, stdoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Cannot launch sh2peaks (exit code {result})"
+            msg = f"\nCannot launch sh2peaks (exit code {result})"
             return 0, msg, info
         else:
-            print(f"Peaks Succesfully extracted. Output file: {peaks}")
+            print(f"\nPeaks Succesfully extracted. Output file: {peaks}")
 
     return 1, peaks

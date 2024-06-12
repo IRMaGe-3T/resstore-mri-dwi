@@ -30,7 +30,7 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
         cmd = ["dwiextract", in_dwi, in_dwi_b0, "-bzero"]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not lunch dwiextract (exit code {result})"
+            msg = f"\nCan not lunch dwiextract (exit code {result})"
             return 0, msg, info
         
     # Convert preprocessed dwi back to nifti
@@ -46,7 +46,7 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
         cmd = ["5ttgen", "fsl", in_t1_nifti, tissue_type]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not lunch 5ttgen (exit code {result})"
+            msg = f"\nCan not lunch 5ttgen (exit code {result})"
             return 0, msg, info
 
     # Extract gm info 
@@ -55,7 +55,7 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
         cmd = ["fslroi", tissue_type, grey_matter, "0", "1"]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not lunch fslroi (exit code {result})"
+            msg = f"\nCan not lunch fslroi (exit code {result})"
             return 0, msg, info
 
 
@@ -78,7 +78,7 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
         ]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not lunch flirt (exit code {result})"
+            msg = f"\nCan not lunch flirt (exit code {result})"
             return 0, msg, info
 
 
@@ -95,7 +95,7 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
         ]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not lunch transformconvert (exit code {result})"
+            msg = f"\nCan not lunch transformconvert (exit code {result})"
             return 0, msg, info
 
     # Apply inverse transfo to t1 (gm --> dwi)
@@ -112,7 +112,7 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
         ]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = "Can not lunch mrtransform (exit code {result})"
+            msg = "\nCan not lunch mrtransform (exit code {result})"
             return 0, msg, info
 
     # Apply inverse transfo to tissue type (gm --> dwi)
@@ -129,7 +129,7 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
         ]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = "Can not lunch mrtransform (exit code {result})"
+            msg = "\nCan not lunch mrtransform (exit code {result})"
             return 0, msg, info
 
     # Create seed
@@ -138,8 +138,8 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
         cmd = ["5tt2gmwmi", tissue_type_coreg, seed_boundary]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not lunch 5tt2gmwmi (exit code {result})"
+            msg = f"\nCan not lunch 5tt2gmwmi (exit code {result})"
             return 0, msg, info
         info = {"in_t1_coreg": in_t1_coreg}
-        msg = "Preprocessing T1 done"
+        msg = "\nPreprocessing T1 done"
         return 1, msg, info

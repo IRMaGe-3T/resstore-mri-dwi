@@ -131,9 +131,9 @@ def convert_mif_to_nifti(in_file, out_directory, diff=True):
         cmd = ["mrconvert", in_file, in_file_nifti]
     result, stderrl, sdtoutl = execute_command(cmd)
     if result != 0:
-        msg = f"Issue during conversion of {in_file} to MIF format"
+        msg = f"\nIssue during conversion of {in_file} to MIF format"
         return 0, msg, in_file_nifti
-    msg = f"Conversion of {in_file} to MIF format done"
+    msg = f"\nConversion of {in_file} to MIF format done"
     return 1, msg, in_file_nifti
 
 
@@ -168,7 +168,7 @@ def convert_nifti_to_mif(in_file, out_directory, diff=True):
     # Check if output MIF file already exists
     in_file_mif = os.path.join(out_directory, file_name + ".mif")
     if os.path.exists(in_file_mif):
-        print(f"Skipping conversion of {in_file} to MIF format as MIF file already exists.")
+        print(f"\nSkipping conversion of {in_file} to MIF format as MIF file already exists.")
         return 1, "", in_file_mif
 
     # Convert diffusions into ".mif" format (mrtrix format)
@@ -183,10 +183,10 @@ def convert_nifti_to_mif(in_file, out_directory, diff=True):
     result, stderrl, sdtoutl = execute_command(cmd)
 
     if result != 0:
-        msg = f"Issue during conversion of {in_file} to MIF format"
+        msg = f"\nIssue during conversion of {in_file} to MIF format"
         return 0, msg, in_file_mif
 
-    msg = f"Conversion of {in_file} to MIF format done"
+    msg = f"\nConversion of {in_file} to MIF format done"
 
     return 1, msg, in_file_mif
 
@@ -217,10 +217,10 @@ def get_shell(in_file):
     result, stderrl, sdtoutl = execute_command(cmd)
 
     if result != 0:
-        msg = f"Can not get info for {in_file}"
+        msg = f"\nCan not get info for {in_file}"
         return 0, msg, shell
     shell = sdtoutl.decode("utf-8").replace("\n", "").split(" ")
-    msg = f"Shell found for {in_file}"
+    msg = f"\nShell found for {in_file}"
 
     return 1, msg, shell
 

@@ -48,10 +48,11 @@ if __name__ == '__main__':
     acquisitions = args.acquisitions
     layout = BIDSLayout(bids_path)
 
-       # Ask user for FOD and tractogram
-    user_input_1 = input(f"Do you want to perform FOD estimation? (yes/no): ").strip().lower()
-    user_input_2 = input(f"Do you want to create a whole-brain tractogram? (yes/no): ").strip().lower()
-    user_input_3 = input(f"Do you want to create an FA, ADC, AD and RD maps of the brain? (yes/no): ").strip().lower()
+       # Ask user for processing
+    user_input_2 = input(f"\nCreating a tractogram includes the FOD estimation and FA map creation.\nDo you want to create a whole-brain tractogram? (yes/no): ").strip().lower()
+    if not user_input_2 in ['yes', 'y']:
+        user_input_1 = input(f"\nDo you want to perform FOD estimation? (yes/no): ").strip().lower()
+        user_input_3 = input(f"\nDo you want to create an FA, ADC, AD and RD maps of the brain? (yes/no): ").strip().lower()
 
     
     if subjects == ['all']:
@@ -62,22 +63,23 @@ if __name__ == '__main__':
         # Get all sessions in BIDS directory
         sessions = layout.get_sessions()
 
-    print(f'Subjects to process: {subjects}')
+    print(f'\nSubjects to process: {subjects}')
     print(f'Sessions to process: {sessions}')
+    print("\n \n===== PREPARATION OF ACQUISITIONS =====\n")
     for sub in subjects:
-        print('\n Subject: ', sub)
+        print('\nSubject: ', sub)
         for ses in sessions:
             print('Session: ', ses)
             # Check if sub / session exist
             check = layout.get(subject=sub, session=ses)
             if check == []:
-                print(f'No data for {sub} for session {ses}')
+                print(f'\nNo data for {sub} for session {ses}')
                 continue
             for acq in acquisitions:
                 # Check if acquistion exist for this subject
                 check = layout.get(subject=sub, session=ses, acquisition=acq)
                 if check == []:
-                    print(f'No data for {sub} for session {ses} for {acq}')
+                    print(f'\nNo data for {sub} for session {ses} for {acq}')
                     continue
 
                 # Create analysis directory
@@ -119,7 +121,7 @@ if __name__ == '__main__':
                         print(msg)
                         sys.exit(1)
                 else:
-                    print(f"No T1w data found for subject {sub} in session {ses}. Proceeding without T1w data.")
+                    print(f"\nNo T1w data found for subject {sub} in session {ses}. Proceeding without T1w data.")
                     in_t1w = None  
 
                 # Get DWI and pepolar, convert to MIF, merge DWI and get info
@@ -149,37 +151,39 @@ if __name__ == '__main__':
                 else:
                     SHELL = False
 
-            print(f'Phase encoding dir: {pe_dir}')
+            print(f'\nPhase encoding dir: {pe_dir}')
+            print("\n \n===== PREPROCESSING =====\n")
 
             # Launch preprocessing
             main_return, main_msg, info =run_preproc_dwi(in_dwi, pe_dir, readout_time, rpe=None, shell=SHELL, in_pepolar_PA=in_pepolar_PA, in_pepolar_AP=in_pepolar_AP)
 
-            # Launch FOD estimation if wanted 
-            if user_input_1 in ['yes', 'y']:
-                _,peaks = FOD(info["dwi_preproc"], info["brain_mask"])
-            else:
-                print("No FOD done")  
+            print("\n \n===== PROCESSING =====\n")
 
-            # For tractography
-            # Launch T1_preproc
+            # Launch processing choosen by user
+            # Launch tracto with T1_preproc is asked
             if user_input_2 in ['yes', 'y']:
-                print("\n \nFOD files required for tractography. \nLaunching FOD estimations...")
+                print("\nFOD files required for tractography. \nLaunching FOD estimations...")
                 _,peaks = FOD(info["dwi_preproc"], info["brain_mask"])
-                print("\n \nFA files required for tractography. \nLaunching FA map creation...")
+                print("\nFA files required for tractography. \nLaunching FA map creation...")
                 FA_map = FA_ADC_AD_RD_maps(info["dwi_preproc"], info["brain_mask"])
                 run_preproc_t1(in_t1w_nifti,info["dwi_preproc"])
-                print("run_preproc_t1w done")
+                print("\nrun_preproc_t1w done")
                 run_tractseg(peaks, FA_map)
-                print("TractSeg successfully used")
+                print("\nTractSeg successfully used")
             else:
-                print("No tractography done")
-                
+                print("\nNo tractography done")
+                # Launch FOD estimation if asked without tractogram
+                if user_input_1 in ['yes', 'y']:
+                    _,peaks = FOD(info["dwi_preproc"], info["brain_mask"])
+                else:
+                    print("\nNo FOD done")  
+                # Launch FA map creation if asked without tractogram
+                if user_input_3 in ['yes', 'y']:
+                    FA_ADC_AD_RD_maps(info["dwi_preproc"], info["brain_mask"]) 
+                else:
+                    print("\nNo creation of FA_map")
 
-            # Launch FA map creation if needed
-            if user_input_3 in ['yes', 'y']:
-                FA_ADC_AD_RD_maps(info["dwi_preproc"], info["brain_mask"]) 
-            else:
-                print("No creation of FA_map")
+            print("\n \n===== THE END =====\n\n")
                    
             
             # Take inspiration from https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/preprocessing.py#L59

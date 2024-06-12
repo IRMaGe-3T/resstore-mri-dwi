@@ -20,12 +20,12 @@ def FA_ADC_AD_RD_maps(in_dwi, mask):
         cmd = ["dwi2tensor", in_dwi, "-mask", mask, tensor]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not launch dwi2tensor (exit code {result})"
+            msg = f"\nCan not launch dwi2tensor (exit code {result})"
             return 0, msg, info
         else:
-            print(f"Diffusion tensor succesfully created. Output file: {tensor}")
+            print(f"\nDiffusion tensor succesfully created. Output file: {tensor}")
     else:
-        print(f"Skipping RF estimation step, {tensor} already exists.")
+        print(f"\nSkipping RF estimation step, {tensor} already exists.")
 
     # Create path to FA map
     FA_map = os.path.join(dir_name, file_name + "_FA_map.mif")
@@ -37,11 +37,11 @@ def FA_ADC_AD_RD_maps(in_dwi, mask):
         cmd = ["tensor2metric", "-fa", FA_map, "-adc", ADC_map, "-rd", RD_map, "-ad", AD_map, tensor]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not launch tensor2metric (exit code {result})"
+            msg = f"\nCan not launch tensor2metric (exit code {result})"
             return 0, msg, info
         else:
-            print(f"FA map succesfully created. Output file: {FA_map}")
+            print(f"\nFA map succesfully created. Output file: {FA_map}")
     else:
-        print(f"Skipping FA, ADC, AD and RD map creation step, at least one of them already exists.")
+        print(f"\nSkipping FA, ADC, AD and RD map creation step, at least one of them already exists.")
 
     return FA_map
