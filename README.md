@@ -28,7 +28,7 @@ This command create a file `results.png` in the `tractseg_output` folder. It rep
 
 	2) Visualize the tracks with mrview
 
-To see the tracks you can use mrview. Launch mrview from the terminal. Open the preprocessed diffusion image which is named `sub-XXX_ses-XX_..._denoise_degibbs_prproc_unbiased.mif`. Then with `Tools` add `tractography`. Then open the track that you want to vizualize from `TOM_trackings` folder. To visualize only the track click on `View` and `Hide main image`.  
+To see the tracks you can use mrview. Launch mrview from the terminal. Open the preprocessed diffusion image which is named `sub-XXX_ses-XX_..._denoise_degibbs_prproc_unbiased.mif`. Then with 'Tools' add 'tractography'. Then open the track that you want to vizualize from `TOM_trackings` folder. To visualize only the track click on 'View' and 'Hide main image'.  
 
 
 **Important Notes**
