@@ -116,24 +116,28 @@ def convert_mif_to_nifti(in_file, out_directory, diff=True):
 
     # Convert diffusions into ".mif" format (mrtrix format)
     in_file_nifti = os.path.join(out_directory, file_name + ".nii.gz")
-    if diff:
-        bvec = in_file.replace(ext, "bvec")
-        bval = in_file.replace(ext, "bval")
-        cmd = [
-            "mrconvert",
-            in_file,
-            in_file_nifti,
-            "-export_grad_fsl",
-            bvec,
-            bval,
-        ]
+    if not verify_file(in_file_nifti):
+        if diff:
+            bvec = in_file.replace(ext, "bvec")
+            bval = in_file.replace(ext, "bval")
+            cmd = [
+                "mrconvert",
+                in_file,
+                in_file_nifti,
+                "-export_grad_fsl",
+                bvec,
+                bval,
+            ]
+        else:
+            cmd = ["mrconvert", in_file, in_file_nifti]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"Issue during conversion of {in_file} to nifti format"
+            return 0, msg, in_file_nifti
+        msg = f"Conversion of {in_file} to nifti format done"
     else:
-        cmd = ["mrconvert", in_file, in_file_nifti]
-    result, stderrl, sdtoutl = execute_command(cmd)
-    if result != 0:
-        msg = f"\nIssue during conversion of {in_file} to MIF format"
-        return 0, msg, in_file_nifti
-    msg = f"\nConversion of {in_file} to MIF format done"
+        msg= None
+    print(msg)
     return 1, msg, in_file_nifti
 
 
