@@ -165,9 +165,11 @@ if __name__ == '__main__':
             if user_input_2 in ['yes', 'y']:
                 print("\n \nFOD files required for tractography. \nLaunching FOD estimations...")
                 _,peaks = FOD(info["dwi_preproc"], info["brain_mask"])
+                print("\n \nFA files required for tractography. \nLaunching FA map creation...")
+                FA_map = FA_ADC_AD_RD_maps(info["dwi_preproc"], info["brain_mask"])
                 run_preproc_t1(in_t1w_nifti,info["dwi_preproc"])
                 print("run_preproc_t1w done")
-                run_tractseg(peaks)
+                run_tractseg(peaks, FA_map)
                 print("TractSeg successfully used")
             else:
                 print("No tractography done")
