@@ -32,46 +32,61 @@ def prepare_abcd_acquistions(bids_directory, sub, ses, preproc_directory):
 
     layout = BIDSLayout(bids_directory)
     acq = 'abcd'
-    # For ABCD, 2 DWI
-    acq1 = acq + "1"
-    all_sequences_dwi1 = layout.get(
+    all_sequences_dwi_concatenated = layout.get(
         subject=sub, session=ses, extension='nii.gz',
-        suffix='dwi', acquisition=acq1, return_type='filename'
+        suffix='dwi', acquisition=acq, return_type='filename'
     )
-    dwi_1_nifti = all_sequences_dwi1[0]
-    acq2 = acq + "2"
-    all_sequences_dwi2 = layout.get(
-        subject=sub, session=ses, extension='nii.gz',
-        suffix='dwi', acquisition=acq2, return_type='filename'
-    )
-    dwi_2_nifti = all_sequences_dwi2[0]
-
-    result, msg, dwi_1 = convert_nifti_to_mif(
-        dwi_1_nifti, preproc_directory, diff=True
-    )
-    if result == 0:
-        print(msg)
-        sys.exit(1)
-
-    result, msg, dwi_2 = convert_nifti_to_mif(
-        dwi_2_nifti, preproc_directory, diff=True
-    )
-    if result == 0:
-        print(msg)
-        sys.exit(1)
-    # Merge DTI1 and DTI2
-    dwi = dwi_1.replace(f"acq-{acq1}", "acq-abcd")
-    if not os.path.exists(dwi):
-        cmd = ["dwicat", dwi_1, dwi_2, dwi]
-        result, stderrl, sdtoutl = execute_command(cmd)
-        if result != 0:
-            msg = f"\nCan not lunch dwicat (exit code {result})"
-        else:
-                print("\nExtraction successfull")
+    if all_sequences_dwi_concatenated:
+        dwi_nifti = all_sequences_dwi_concatenated[0]
+        result, msg, dwi = convert_nifti_to_mif(
+            dwi_nifti, preproc_directory, diff=True
+        )
+        if result == 0:
+            print(msg)
+            sys.exit(1)
+        print("\nDWI processing successful")
+        dwi_json = dwi_nifti.replace("nii.gz", "json")
     else:
-        print(f"\nFile already exists: {dwi}")
-    # Use DTI1 to get info
-    dwi_json = dwi_1_nifti.replace("nii.gz", "json")
+        # For ABCD, 2 DWI
+        acq1 = acq + "1"
+        all_sequences_dwi1 = layout.get(
+            subject=sub, session=ses, extension='nii.gz',
+            suffix='dwi', acquisition=acq1, return_type='filename'
+        )
+        dwi_1_nifti = all_sequences_dwi1[0]
+        acq2 = acq + "2"
+        all_sequences_dwi2 = layout.get(
+            subject=sub, session=ses, extension='nii.gz',
+            suffix='dwi', acquisition=acq2, return_type='filename'
+        )
+        dwi_2_nifti = all_sequences_dwi2[0]
+
+        result, msg, dwi_1 = convert_nifti_to_mif(
+            dwi_1_nifti, preproc_directory, diff=True
+        )
+        if result == 0:
+            print(msg)
+            sys.exit(1)
+
+        result, msg, dwi_2 = convert_nifti_to_mif(
+            dwi_2_nifti, preproc_directory, diff=True
+        )
+        if result == 0:
+            print(msg)
+            sys.exit(1)
+        # Merge DTI1 and DTI2
+        dwi = dwi_1.replace(f"acq-{acq1}", "acq-abcd")
+        if not os.path.exists(dwi):
+            cmd = ["dwicat", dwi_1, dwi_2, dwi]
+            result, stderrl, sdtoutl = execute_command(cmd)
+            if result != 0:
+                msg = f"\nCan not lunch dwicat (exit code {result})"
+            else:
+                    print("\nExtraction successfull")
+        else:
+            print(f"\nFile already exists: {dwi}")
+        # Use DTI1 to get info
+        dwi_json = dwi_1_nifti.replace("nii.gz", "json")
 
     # Get both pepolar sequences
     all_sequences_pepolar_ap = layout.get(
