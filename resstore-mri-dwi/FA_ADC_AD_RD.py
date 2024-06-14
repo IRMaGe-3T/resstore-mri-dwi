@@ -44,7 +44,7 @@ def FA_ADC_AD_RD_maps(in_dwi, mask):
     else:
         print(f"\nSkipping FA, ADC, AD and RD map creation step, at least one of them already exists.")
 
-    info_fa = {"FA_map_raw": FA_map}
+    info_fa = {"FA_map": FA_map}
     msg = "FA_map done"
     print(msg)
     return 1, msg, info_fa

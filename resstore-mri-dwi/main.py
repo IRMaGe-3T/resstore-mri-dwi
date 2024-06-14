@@ -179,7 +179,7 @@ if __name__ == '__main__':
 
             # Aligning image to MNI space
             if user_input_2 in ['yes', 'y']:
-                mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map_raw"]) 
+                mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map"]) 
             else:
                 print("\nNo MNI space alignment")
 
@@ -194,7 +194,7 @@ if __name__ == '__main__':
             if user_input_4 in ['yes', 'y']:
                 run_preproc_t1(in_t1w_nifti,info_mni["dwi_preproc_mni"])
                 print("run_preproc_t1w done")
-                run_tractseg(peaks)
+                run_tractseg(peaks,info_fa["FA_map"])
                 print("\nTractSeg successfully used")
             else:
                 print("\nNo tractography done")
