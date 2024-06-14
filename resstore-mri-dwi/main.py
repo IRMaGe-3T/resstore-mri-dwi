@@ -175,31 +175,29 @@ if __name__ == '__main__':
             if user_input_1 in ['yes', 'y']:
                 fa_return, fa_msg, info_fa = FA_ADC_AD_RD_maps(info_preproc["dwi_preproc"], info_preproc["brain_mask"]) 
             else:
-                print("No creation of FA_map")
+                print("\nNo creation of FA_map")
 
             # Aligning image to MNI space
             if user_input_2 in ['yes', 'y']:
                 mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map_raw"]) 
             else:
-                print("No MNI space alignment")
+                print("\nNo MNI space alignment")
 
             # Launch FOD estimation if wanted 
             if user_input_3 in ['yes', 'y']:
                 _,peaks = FOD(info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"])
             else:
-                print("No FOD done")  
+                print("\nNo FOD done")  
 
             # For tractography
             # Launch T1_preproc
             if user_input_4 in ['yes', 'y']:
-                print("FOD files required for tractography. \nLAunching FOD estimations...")
-                _,peaks = FOD(info_mni["dwi_preproc_mni"], info_mni["brain_mask_mni"])
                 run_preproc_t1(in_t1w_nifti,info_mni["dwi_preproc_mni"])
                 print("run_preproc_t1w done")
                 run_tractseg(peaks)
-                print("TractSeg successfully used")
+                print("\nTractSeg successfully used")
             else:
-                print("No tractography done")
+                print("\nNo tractography done")
 
             print("\n \n===== THE END =====\n\n")
                    

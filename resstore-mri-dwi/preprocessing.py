@@ -300,10 +300,10 @@ def run_register_MNI(in_dwi, in_fa):
         ]
         result, stderrl, stdoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Can not launch flirt for FA (exit code {result})"
+            msg = f"\nCan not launch flirt for FA (exit code {result})"
             return 0, msg, info_mni
         else:
-            print(f"Linear registration of FA completed. Output file: {fa_mni}")
+            print(f"\nLinear registration of FA completed. Output file: {fa_mni}")
 
     # Linear registration of DWI
     diffusion_mni = in_dwi_nii.replace(".nii.gz", "_MNI.nii.gz")
@@ -319,10 +319,10 @@ def run_register_MNI(in_dwi, in_fa):
         ]
         result, stderrl, stdoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Cannot launch flirt for DWI (exit code {result})"
+            msg = f"\nCannot launch flirt for DWI (exit code {result})"
             return 0, msg, info_mni
         else:
-            print(f"Linear registration of DWI completed. Output file: {diffusion_mni}")
+            print(f"\nLinear registration of DWI completed. Output file: {diffusion_mni}")
     
     # Rotating BVECs
     in_bvecs = in_dwi_nii.replace(".nii.gz", ".bvec")
@@ -336,10 +336,10 @@ def run_register_MNI(in_dwi, in_fa):
         ]
         result, stderrl, stdoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Cannot launch rotate_bvecs (exit code {result})"
+            msg = f"\nCannot launch rotate_bvecs (exit code {result})"
             return 0, msg, info_mni
         else:
-            print(f"Rotating BVECs completed. Output file: {bvecs_mni}")
+            print(f"\nRotating BVECs completed. Output file: {bvecs_mni}")
 
     # Copy/Rename BVALs
     in_bval = in_dwi_nii.replace(".nii.gz", ".bval")
@@ -348,10 +348,10 @@ def run_register_MNI(in_dwi, in_fa):
         cmd = ["cp", in_bval, bvals_mni]  
         result, stderrl, stdoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Cannot copy bvals (exit code {result})"
+            msg = f"\nCannot copy bvals (exit code {result})"
             return 0, msg, info_mni
         else:
-            print(f"Copy/Rename BVALs completed. Output file: {bvals_mni}")
+            print(f"\nCopy/Rename BVALs completed. Output file: {bvals_mni}")
 
     # Convert normalized DWI to MIF
     mni_mif_return, mni_mif_msg,diffusion_mni_mif = convert_nifti_to_mif(diffusion_mni, dir_name)
@@ -363,10 +363,10 @@ def run_register_MNI(in_dwi, in_fa):
         cmd = ["dwi2mask", diffusion_mni_mif, dwi_mask] #To try i put this one bad
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"Cannot launch mask (exit code {result})"
+            msg = f"\nCannot launch mask (exit code {result})"
             return 0, msg
         else:
-            print(f"Brain mask completed. Output file: {dwi_mask}")
+            print(f"\nBrain mask completed. Output file: {dwi_mask}")
     
     # # Write average response to file, what is this?
     # average_response_path = os.path.join(i['path'], "average-response.txt")
@@ -375,6 +375,6 @@ def run_register_MNI(in_dwi, in_fa):
     # print(f"Successfully wrote average response to {average_response_path}") #test
 
     info_mni = {"dwi_preproc_mni": diffusion_mni_mif,"dwi_mask_mni": dwi_mask}
-    msg = "Image aligned to MNI space"
+    msg = "\nMNI space step done"
     print(msg)
     return 1, msg, info_mni
