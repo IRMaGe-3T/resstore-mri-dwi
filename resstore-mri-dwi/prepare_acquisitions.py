@@ -32,6 +32,7 @@ def prepare_abcd_acquistions(bids_directory, sub, ses, preproc_directory):
 
     layout = BIDSLayout(bids_directory)
     acq = 'abcd'
+    # For ABCD, 1 DWI
     all_sequences_dwi_concatenated = layout.get(
         subject=sub, session=ses, extension='nii.gz',
         suffix='dwi', acquisition=acq, return_type='filename'
