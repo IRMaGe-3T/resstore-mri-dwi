@@ -185,7 +185,7 @@ if __name__ == '__main__':
 
             # Launch FOD estimation if wanted 
             if user_input_3 in ['yes', 'y']:
-                _,peaks = FOD(info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"])
+                _,msg,peaks = FOD(info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"],acq)
             else:
                 print("\nNo FOD done")  
 
