@@ -178,29 +178,58 @@ def prepare_hermes_acquistions(bids_directory, sub, ses, preproc_directory):
         print(msg)
         sys.exit(1)
 
-    # For HERMES, pepolar sequences contains b100
-    # Extract only b0
+    # For HERMES, pepolar sequences may contain b1000 and b0
+    # Check if pepolar contain only b0 or not 
+    _, msg, shell_ap = get_shell(pepolar_ap)
+    _, msg, shell_pa = get_shell(pepolar_pa)
+    print(f'\nShell pepolar AP: {shell_ap}')
+    print(f'\nShell pepolar PA: {shell_pa}')
+    shell_ap = [bval for bval in shell_ap if bval != "0" and bval != ""]
+    shell_pa = [bval for bval in shell_pa if bval != "0" and bval != ""]
+    print(f'\nShell pepolar AP: {shell_ap}')
+    print(f'\nShell pepolar PA: {shell_pa}')
     pepolar_ap_bzero=pepolar_ap.replace('.mif', '_bzero.mif')
-    if not os.path.exists(pepolar_ap_bzero):
-        cmd = ["dwiextract", pepolar_ap, pepolar_ap_bzero, '-bzero']
-        result, stderrl, sdtoutl = execute_command(cmd)
-        if result != 0:
-            msg = f"\nCan not lunch dwicat (exit code {result})"
-        else:
-            print("\nExtraction successfull")
-    else:
-        print(f"\nFile already exists: {pepolar_ap_bzero}")
-    
     pepolar_pa_bzero=pepolar_pa.replace('.mif', '_bzero.mif')
-    if not os.path.exists(pepolar_pa_bzero):
-        cmd = ["dwiextract", pepolar_pa, pepolar_pa.replace(
-            '.mif', '_bzero.mif'), '-bzero']
+
+    # If pepolar contain b0 and b1000, extract b0
+    if (len(shell_pa) > 0 and len(shell_ap) > 0):
+        print('\n Hermes fmaps contain b1000 and b0. b0 must be extracted')
+
+        # Extraction b0 AP
+        if not os.path.exists(pepolar_ap_bzero):
+            cmd = ["dwiextract", pepolar_ap, pepolar_ap_bzero, '-bzero']
+            result, stderrl, sdtoutl = execute_command(cmd)
+            if result != 0:
+                msg = f"\nCan not launch dwicat (exit code {result})"
+            else:
+                print("\nExtraction successfull")
+        else:
+            print(f"\nFile already exists: {pepolar_ap_bzero}")
+        
+        # Extraction b0 PA
+        if not os.path.exists(pepolar_pa_bzero):
+            cmd = ["dwiextract", pepolar_pa, pepolar_pa.replace(
+                '.mif', '_bzero.mif'), '-bzero']
+            result, stderrl, sdtoutl = execute_command(cmd)
+            if result != 0:
+                msg = f"\nCan not lunch dwicat (exit code {result})"
+            else:
+                print("\nExtraction successfull")
+        else:
+            print(f"\nSkipping exctraction step, file alreeady exists: {pepolar_pa_bzero}")
+
+    # If pepolar contain only b0, rename the file
+    else:
+        print('\n Hermes fmaps contain only b0.')
+        cmd = ["mv", pepolar_pa, pepolar_pa_bzero]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"\nCan not lunch dwicat (exit code {result})"
-        else:
-            print("\nExtraction successfull")
-    else:
-        print(f"\nSkipping exctraction step, file alreeady exists: {pepolar_pa_bzero}")
-        
-    return dwi, dwi_json, pepolar_ap, pepolar_pa
+            msg = f"\nCan not rename pepolar_pa images (exit code {result})"
+
+        cmd = ["mv", pepolar_ap, pepolar_ap_bzero]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"\nCan not rename pepolar_ap images (exit code {result})"
+            
+
+    return dwi, dwi_json, pepolar_ap_bzero, pepolar_pa_bzero
