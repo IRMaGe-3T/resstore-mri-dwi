@@ -257,7 +257,7 @@ def download_template(dir_name):
     
     return template_path
 
-def run_register_MNI(in_dwi, in_fa):
+def run_register_MNI(in_dwi, in_fa, MNI_dir):
     """
     Aligning image to MNI space
 
@@ -273,20 +273,21 @@ def run_register_MNI(in_dwi, in_fa):
 
     # Get files name
     info_mni = {}
-    dir_name = os.path.dirname(in_dwi)
+    preproc_dir = os.path.dirname(in_dwi)
+    FA_dir = os.path.dirname(in_fa)
     valid_bool, in_ext, file_name = check_file_ext(in_dwi, {"MIF": "mif"})
 
     # Download the template file
-    template_path = download_template(dir_name)
+    template_path = download_template(MNI_dir)
 
     # Convert MIF to NIfTI
     #Diffusion
-    dwi_nii_return, dwii_nii_msg,in_dwi_nii=convert_mif_to_nifti(in_dwi,dir_name)
+    dwi_nii_return, dwii_nii_msg,in_dwi_nii=convert_mif_to_nifti(in_dwi,preproc_dir)
     #FA
-    fa_nii_return, fa_nii_msg,in_fa_nii=convert_mif_to_nifti(in_fa,dir_name, False)
+    fa_nii_return, fa_nii_msg,in_fa_nii=convert_mif_to_nifti(in_fa,FA_dir, False)
 
     # Linear registration of FA
-    fa_mni = in_fa_nii.replace(".nii.gz", "_MNI.nii.gz")
+    fa_mni = os.path.join(MNI_dir, "FA_MNI.nii.gz")
     if not verify_file(fa_mni):
         cmd = [
             "flirt",
@@ -306,7 +307,7 @@ def run_register_MNI(in_dwi, in_fa):
             print(f"\nLinear registration of FA completed. Output file: {fa_mni}")
 
     # Linear registration of DWI
-    diffusion_mni = in_dwi_nii.replace(".nii.gz", "_MNI.nii.gz")
+    diffusion_mni = os.path.join(MNI_dir, "dwi_MNI.nii.gz")
     if not verify_file(diffusion_mni):
         cmd = [
             "flirt",
@@ -325,12 +326,12 @@ def run_register_MNI(in_dwi, in_fa):
             print(f"\nLinear registration of DWI completed. Output file: {diffusion_mni}")
     
     # Rotating BVECs
-    in_bvecs = in_dwi_nii.replace(".nii.gz", ".bvec")
-    bvecs_mni = in_dwi_nii.replace(".nii.gz", "_MNI.bvec")
+    bvecs = in_dwi_nii.replace(".nii.gz", ".bvec")
+    bvecs_mni = diffusion_mni.replace(".nii.gz", ".bvec")
     if not verify_file(bvecs_mni):
         cmd = [
             "rotate_bvecs",
-            "-i", in_bvecs,  
+            "-i", bvecs,  
             "-t", "FA_2_MNI.mat",
             "-o", bvecs_mni
         ]
@@ -342,10 +343,10 @@ def run_register_MNI(in_dwi, in_fa):
             print(f"\nRotating BVECs completed. Output file: {bvecs_mni}")
 
     # Copy/Rename BVALs
-    in_bval = in_dwi_nii.replace(".nii.gz", ".bval")
-    bvals_mni = in_dwi_nii.replace(".nii.gz", "_MNI.bval")
+    bval = in_dwi_nii.replace(".nii.gz", ".bval")
+    bvals_mni = diffusion_mni.replace(".nii.gz", ".bval")
     if not verify_file(bvals_mni):
-        cmd = ["cp", in_bval, bvals_mni]  
+        cmd = ["cp", bval, bvals_mni]  
         result, stderrl, stdoutl = execute_command(cmd)
         if result != 0:
             msg = f"\nCannot copy bvals (exit code {result})"
@@ -354,7 +355,7 @@ def run_register_MNI(in_dwi, in_fa):
             print(f"\nCopy/Rename BVALs completed. Output file: {bvals_mni}")
 
     # Convert normalized DWI to MIF
-    mni_mif_return, mni_mif_msg,diffusion_mni_mif = convert_nifti_to_mif(diffusion_mni, dir_name)
+    mni_mif_return, mni_mif_msg, diffusion_mni_mif = convert_nifti_to_mif(diffusion_mni, MNI_dir)
 
     # Brain mask, change after the MNI
     dwi_mask = diffusion_mni_mif.replace(".mif", "_mask_MNI.mif")

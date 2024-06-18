@@ -21,7 +21,7 @@ from useful import check_file_ext, execute_command, verify_file
 
 
 
-def FOD(in_dwi, mask, acq):
+def FOD(in_dwi, mask, acq,FOD_dir):
 
     info = {}
     # Get files name
@@ -30,10 +30,10 @@ def FOD(in_dwi, mask, acq):
     
     if acq=='abcd':
         # RF estimation 
-        voxels = os.path.join(dir_name, file_name + "_voxels.mif")
-        wm = os.path.join(dir_name, file_name + "_wm.txt")
-        gm = os.path.join(dir_name, file_name + "_gm.txt")
-        csf = os.path.join(dir_name, file_name + "_csf.txt")
+        voxels = os.path.join(FOD_dir, "voxels.mif")
+        wm = os.path.join(FOD_dir, "wm.txt")
+        gm = os.path.join(FOD_dir, "gm.txt")
+        csf = os.path.join(FOD_dir, "csf.txt")
         if not os.path.exists(voxels):
             cmd = ["dwi2response", "dhollander", in_dwi, wm, gm, csf, "-voxels", voxels]
             result, stderrl, sdtoutl = execute_command(cmd)
@@ -46,10 +46,10 @@ def FOD(in_dwi, mask, acq):
             print(f"\nSkipping RF estimation step, {voxels} already exists.")
 
         # FOD estimation 
-        vf = os.path.join(dir_name, file_name + "_vf.mif")
-        wmfod = os.path.join(dir_name, file_name + "_wmfod.mif")
-        gmfod = os.path.join(dir_name, file_name + "_gmfod.mif")
-        csffod = os.path.join(dir_name, file_name + "_csffod.mif")
+        vf = os.path.join(FOD_dir, "vf.mif")
+        wmfod = os.path.join(FOD_dir, "wmfod.mif")
+        gmfod = os.path.join(FOD_dir, "gmfod.mif")
+        csffod = os.path.join(FOD_dir, "csffod.mif")
         if not os.path.exists(vf) :
             if not (os.path.exists(wmfod) and os.path.exists(gmfod) and os.path.exists(csffod)):
                 cmd = ["dwi2fod", "msmt_csd", in_dwi, "-mask", mask, wm, wmfod, gm, gmfod, csf, csffod]
@@ -59,7 +59,7 @@ def FOD(in_dwi, mask, acq):
                     return 0, msg, info
                 else:
                     print(f"\nFOD files succesfully created. Output file: {wmfod}, {gmfod}, {csffod}")
-            interm_wm = os.path.join(dir_name, "interm_wm.mif")
+            interm_wm = os.path.join(FOD_dir, "interm_wm.mif")
             cmd = ["mrconvert", "-coord", "3", "0", wmfod, interm_wm]
             result, stderrl, sdtoutl = execute_command(cmd)
             if result != 0:
@@ -85,9 +85,9 @@ def FOD(in_dwi, mask, acq):
             print(f"\nSkipping FOD estimation step, {vf} already exists.")
 
         # Intensity normalization
-        wmfod_norm = os.path.join(dir_name, file_name + "_wmfod_norm.mif")
-        gmfod_norm = os.path.join(dir_name, file_name + "_gmfod_norm.mif")
-        csffod_norm = os.path.join(dir_name, file_name + "_csffod_norm.mif")
+        wmfod_norm = os.path.join(FOD_dir, "wmfod_norm.mif")
+        gmfod_norm = os.path.join(FOD_dir, "gmfod_norm.mif")
+        csffod_norm = os.path.join(FOD_dir, "csffod_norm.mif")
         if not (os.path.exists(wmfod_norm) and os.path.exists(gmfod_norm) and os.path.exists(csffod_norm)):
             cmd = ["mtnormalise", wmfod, wmfod_norm, gmfod, gmfod_norm, csffod, csffod_norm, "-mask", mask]
             result, stderrl, sdtoutl = execute_command(cmd)
@@ -100,7 +100,7 @@ def FOD(in_dwi, mask, acq):
             print("\nIntensity normalization already done")
 
         # Extract peaks 
-        peaks = os.path.join(dir_name, file_name + "_peaks.nii")
+        peaks = os.path.join(FOD_dir, "peaks.nii")
         if not verify_file(peaks):
             cmd = ["sh2peaks", wmfod_norm, peaks]
             result, stderrl, stdoutl = execute_command(cmd)
@@ -114,11 +114,11 @@ def FOD(in_dwi, mask, acq):
         return 1, msg, peaks
     
     elif acq=='hermes':
-        peaks_h = os.path.join(dir_name, file_name + "_peaks.nii")
+        peaks_h = os.path.join(FOD_dir, "peaks.nii")
         if not verify_file(peaks_h):
 
             # dwi2response
-            rf = os.path.join(dir_name, file_name + "_rf.response")
+            rf = os.path.join(FOD_dir,"rf.response")
             if not verify_file(rf):
                 cmd = ["dwi2response", "tournier", in_dwi, rf, "-mask", mask]
                 result, stderrl, stdoutl = execute_command(cmd)
@@ -129,7 +129,7 @@ def FOD(in_dwi, mask, acq):
                     print(f"\nResponse estimation for FOD done. Output file: {rf}")
             
             # dwi2fod
-            fod = os.path.join(dir_name, file_name + "_FOD.mif")
+            fod = os.path.join(FOD_dir, "FOD.mif")
             if not verify_file(fod):
                 cmd = ["dwi2fod", "csd", in_dwi, rf, fod, "-mask", mask]
                 result, stderrl, stdoutl = execute_command(cmd)

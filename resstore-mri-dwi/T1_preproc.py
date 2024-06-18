@@ -22,7 +22,7 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
 
     # Get name directory and create info 
     info = {}
-    out_directory = os.path.dirname(in_dwi)
+    MNI_dir = os.path.dirname(in_dwi)
     
     # Extract b0 from dwi
     in_dwi_b0 = in_dwi.replace(".mif", "_bzero.mif")
@@ -37,11 +37,11 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
     in_dwi_b0_nii = in_dwi_b0.replace(".mif", ".nii.gz")
     if not verify_file(in_dwi_b0_nii):
         result, msg, in_dwi_b0_nii = convert_mif_to_nifti(
-            in_dwi_b0, out_directory, diff=False
+            in_dwi_b0, MNI_dir, diff=False
         )
 
     # Creating tissue boundaries
-    tissue_type = os.path.join(out_directory, "5tt.nii.gz")
+    tissue_type = os.path.join(MNI_dir, "5tt.nii.gz")
     if not verify_file(tissue_type):
         cmd = ["5ttgen", "fsl", in_t1_nifti, tissue_type]
         result, stderrl, sdtoutl = execute_command(cmd)
@@ -61,7 +61,7 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
 
     # Coregistration of T1 with DWI
     # Get transfo matrix to go from dwi to gm 
-    transfo_mat = os.path.join(out_directory, "diff2struct_fsl.mat")
+    transfo_mat = os.path.join(MNI_dir, "diff2struct_fsl.mat")
     if not verify_file(transfo_mat):
         cmd = [
             "flirt",
@@ -83,7 +83,7 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
 
 
     # Convert the matrix (dwi --> gm) to the right format (diff2struct.txt) for the next step
-    diff2struct = os.path.join(out_directory, "diff2struct_mrtrix.txt")
+    diff2struct = os.path.join(MNI_dir, "diff2struct_mrtrix.txt")
     if not verify_file(diff2struct):
         cmd = [
             "transformconvert",
@@ -133,7 +133,7 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
             return 0, msg, info
 
     # Create seed
-    seed_boundary = os.path.join(out_directory, "gmwmSeed_coreg_dwi.mif")
+    seed_boundary = os.path.join(MNI_dir, "gmwmSeed_coreg_dwi.mif")
     if not verify_file(seed_boundary):
         cmd = ["5tt2gmwmi", tissue_type_coreg, seed_boundary]
         result, stderrl, sdtoutl = execute_command(cmd)

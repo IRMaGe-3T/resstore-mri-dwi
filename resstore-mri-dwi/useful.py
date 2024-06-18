@@ -10,7 +10,7 @@ Useful functions :
 
 import os
 import subprocess
-
+import shutil
 
 EXT_NIFTI = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
 EXT_MIF = {"MIF": "mif"}
@@ -228,3 +228,44 @@ def get_shell(in_file):
 
     return 1, msg, shell
 
+
+
+def delete_directory(dir):
+    """
+    Remove a directory and all its contents recursively.
+
+    Args:
+    - dir (str): Path to the directory to be deleted.
+
+    Returns:
+    - None
+
+    Raises:
+    - OSError: If the directory or any of its contents cannot be removed.
+
+    This function attempts to delete the specified directory and all its contents.
+    It first checks if the directory exists, and if so, proceeds to delete all files
+    and subdirectories within it recursively. Finally, it removes the directory itself.
+    Any errors encountered during the deletion process are caught and printed as an error message.
+    """
+    try:
+        # Check if the directory exists
+        if os.path.exists(dir):
+            # Delete all files inside the directory
+            for fichier in os.listdir(dir):
+                file_path = os.path.join(dir, fichier)
+                try:
+                    if os.path.isfile(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    print(f"Error deleting file {file_path}: {e}")
+            
+            # Delete the directory itself
+            shutil.rmtree(dir)
+            print(f"Directory '{dir}' and its contents have been successfully deleted.")
+        else:
+            print(f"Directory '{dir}' does not exist.")
+    except Exception as e:
+        print(f"Error deleting directory '{dir}': {e}")
