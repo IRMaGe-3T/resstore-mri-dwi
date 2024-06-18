@@ -29,8 +29,8 @@ def FA_ADC_AD_RD_maps(in_dwi, mask, FA_dir):
     # Create path to FA map
     FA_map = os.path.join(FA_dir, "FA_map.mif")
     ADC_map= os.path.join(FA_dir, "ADC_map.mif")
-    RD_map= os.path.join(FA_dir,  "_RD_map.mif")
-    AD_map= os.path.join(FA_dir,  "_AD_map.mif")
+    RD_map= os.path.join(FA_dir,  "RD_map.mif")
+    AD_map= os.path.join(FA_dir,  "AD_map.mif")
     # Check if the file already exist or not 
     if not (os.path.exists(FA_map) or os.path.exists(ADC_map) or os.path.exists(RD_map) or os.path.exists(AD_map)):
         cmd = ["tensor2metric", "-fa", FA_map, "-adc", ADC_map, "-rd", RD_map, "-ad", AD_map, tensor]
