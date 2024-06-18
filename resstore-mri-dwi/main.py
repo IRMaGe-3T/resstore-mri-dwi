@@ -39,6 +39,10 @@ if __name__ == '__main__':
         '--acquisitions', required=True,  nargs='+',
         help='diffusion acquisition to process (abcd, hermes)'
     )
+    parser.add_argument(
+        '--volumes', required=None, 
+        help='list of volumes to remove (.txt)'
+    )
 
     # Set path
     args = parser.parse_args()
@@ -46,6 +50,7 @@ if __name__ == '__main__':
     subjects = args.subjects
     sessions = args.sessions
     acquisitions = args.acquisitions
+    volumes = args.volumes
     layout = BIDSLayout(bids_path)
 
     # Ask user for processing
@@ -94,14 +99,24 @@ if __name__ == '__main__':
                     print(f'\nNo data for {sub} for session {ses} for {acq}')
                     continue
 
-                # Create analysis directory
-                analysis_directory = os.path.join(
-                    bids_path,
-                    "derivatives",
-                    "sub-" + sub,
-                    "ses-" + ses,
-                    "dwi-" + acq
-                )
+                if volumes==None:
+                    # Create analysis directory
+                    analysis_directory = os.path.join(
+                        bids_path,
+                        "derivatives",
+                        "sub-" + sub,
+                        "ses-" + ses,
+                        "dwi-" + acq
+                    )
+                else:
+                    # Create analysis directory
+                    analysis_directory = os.path.join(
+                        bids_path,
+                        "derivatives",
+                        "sub-" + sub,
+                        "ses-" + ses,
+                        "dwi-" + acq + "_removed_volumes",
+                    )
 
 
 
