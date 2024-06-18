@@ -64,6 +64,7 @@ def run_tractseg(peaks, FA_map, Tract_dir):
     tractseg_out_dir=os.path.join(Tract_dir, "tractseg_output")
     bundle = os.path.join(tractseg_out_dir, "bundle_segmentations")
     ending_segm= os.path.join(tractseg_out_dir, "endings_segmentations")
+    uncertainty = os.path.join(tractseg_out_dir, "bundle_uncertainties")
     TOM = os.path.join(tractseg_out_dir, "TOM")
     TOM_trackings = os.path.join(tractseg_out_dir, "TOM_trackings")
 
@@ -96,15 +97,16 @@ def run_tractseg(peaks, FA_map, Tract_dir):
             msg = f"\nCan not run TractSeg Tracking (exit code {result})"
             return 0, msg
         
-    cmd = ["TractSeg", "-i", peaks_tracto, "--uncertainty"]
-    result, stderrl, sdtoutl = execute_command(cmd)
-    if result != 0:
-        msg = f"\nCan not run TractSeg uncertainty (exit code {result})"
-        return 0, msg
+    if not verify_file(uncertainty):
+        cmd = ["TractSeg", "-i", peaks_tracto, "--uncertainty"]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"\nCan not run TractSeg uncertainty (exit code {result})"
+            return 0, msg
     
     # Run tractometry to create csv file
     if (os.path.exists(TOM_trackings) and os.path.exists(ending_segm)):
-        tracto_csv = os.path.join(tractseg_out_dir, "tactometry.csv")
+        tracto_csv = os.path.join(tractseg_out_dir, "tractometry.csv")
         if not verify_file(tracto_csv):
             cmd = ["Tractometry", "-i", TOM_trackings, "-o", tracto_csv, "-e", ending_segm, "-s", FA_nii]
             result, stderrl, sdtoutl = execute_command(cmd)
