@@ -35,9 +35,9 @@ To see the tracks you can use mrview. Launch mrview from the terminal. Open the 
 
 ## Removing volumes
 
-If you want to remove some volumes of your images to increase the quality of the processing, here's how you can do:
-	- Create a text file in which you write the indices of the volumes that you want to remove. Each index must be separated from the other with a space. You can find an example in `ressources`. 
-	- Run the same command as in the 'Getting started' section but add an option `--volumes` followed by the path to the text file that you just created. The program will create a new folder: `dwi-acq_removed_volumes` where you can find the results of the pre and post processing on the image with removed volumes.
+If you want to remove some volumes of your images to increase the quality of the processing, here's how you can do:  
+	- Create a text file in which you write the indices of the volumes that you want to remove. Each index must be separated from the other with a space. You can find an example in `ressources`.   
+	- Run the same command as in the 'Getting started' section but add an option `--volumes` followed by the path to the text file that you just created. The program will create a new folder: `dwi-acq_removed_volumes` where you can find the results of the pre and post processing on the image with removed volumes.  
 	
 **Example command**	
 ```
