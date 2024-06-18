@@ -1,28 +1,23 @@
 import os
 from useful import delete_directory
 
-def remove_volumes(input_file, output_file, volumes_to_remove):
-    """
-    Remove specific volumes from a MRtrix image file (.mif).
-
-    Args:
-        input_file (str): Path to the input MRtrix image file (.mif).
-        output_file (str): Path to save the output MRtrix image file (.mif).
-        volumes_to_remove (list): Text file (.txt) containing the list of volumes to remove.
-
-    Returns:
-        None
-    """
-    # Create a temporary directory
+def remove_volumes(input_file, output_file, volumes_to_remove_file):
+    # Créer un répertoire temporaire
     dir = os.path.dirname(input_file)
     temp_dir = os.path.join(dir, "_temp")
     os.mkdir(temp_dir)
     
-    # List to store paths of remaining volumes
+    with open(volumes_to_remove_file, 'r') as file:
+        data=file.read()
+        volumes_to_remove = data.split()
+
+    print(f'\n   Vol to rm: {volumes_to_remove}')
+
+    # Liste pour stocker les chemins des volumes restants
     remaining_volumes = []
     volume_idx = 0
 
-    # Loop to extract volumes
+    # Boucle pour extraire les volumes
     while True:
         temp_volume_file = os.path.join(temp_dir, f'volume_{volume_idx}.mif')
         result = os.system(f'mrconvert {input_file} -coord 3 {volume_idx} {temp_volume_file}')
@@ -33,11 +28,12 @@ def remove_volumes(input_file, output_file, volumes_to_remove):
             remaining_volumes.append(temp_volume_file)
         volume_idx += 1
     
-    # Concatenate remaining volumes into a single output .mif file
+    # Concaténer les volumes restants en un seul fichier .mif de sortie
     remaining_volumes = ' '.join(remaining_volumes)
     os.system(f'mrcat {remaining_volumes} -axis 3 {output_file}')
     
-    # Clean up temporary files
+    # Nettoyer les fichiers temporaires
+    
     delete_directory(temp_dir)
     
-    print(f"Volumes removed and image saved to '{output_file}'")
+    print(f"Volumes retirés et image sauvegardée sous '{output_file}'")

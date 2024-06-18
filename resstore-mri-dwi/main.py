@@ -19,6 +19,7 @@ from FOD import FOD
 from FA_ADC_AD_RD import FA_ADC_AD_RD_maps
 from T1_preproc import run_preproc_t1  
 from processing_TractSeg import run_tractseg
+from remove_volume import remove_volumes
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -181,6 +182,18 @@ if __name__ == '__main__':
 
             print(f'\nPhase encoding dir: {pe_dir}')
             print("\n \n===== PREPROCESSING =====\n")
+
+            if not volumes==None:
+                in_dwi_rm_vol = in_dwi.replace(".mif", "_removed_vol.mif")
+                remove_volumes(in_dwi, in_dwi_rm_vol, volumes)
+                cmd = ["mv",in_dwi_rm_vol, in_dwi]
+                result, stderrl, sdtoutl = execute_command(cmd)
+                if result != 0:
+                    msg = f"\nCan not move dwi_rm_vol file (exit code {result})"
+                cmd = ["rm",in_dwi_rm_vol]
+                result, stderrl, sdtoutl = execute_command(cmd)
+                if result != 0:
+                    msg = f"\nCan not delete dwi_rm_vol file (exit code {result})"
 
             # Launch preprocessing
             main_return, main_msg, info_preproc =run_preproc_dwi(in_dwi, pe_dir, readout_time, rpe=None, shell=SHELL, in_pepolar_PA=in_pepolar_PA, in_pepolar_AP=in_pepolar_AP)
