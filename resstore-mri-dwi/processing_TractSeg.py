@@ -11,7 +11,7 @@ EXT_NIFTI = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
 EXT_MIF = {"MIF": "mif"}
 
 
-def run_tractseg(peaks, FA_map):
+def run_tractseg(peaks, FA_map, Tract_dir):
     """
     Run all the commands from TractSeg software.
     
@@ -41,8 +41,7 @@ def run_tractseg(peaks, FA_map):
             return 0, msg
         else: 
             print("\n FA is in mif format.\n")
-            dir_name_FA = os.path.dirname(FA_map)
-            FA_nii = dir_name_FA.replace(".mif", ".nii.gz")
+            FA_nii = FA_map.replace(".mif", ".nii.gz")
             if not verify_file(FA_nii):
                 cmd = ["mrconvert", FA_map, FA_nii]
                 result, stderrl, sdtoutl = execute_command(cmd)
@@ -52,38 +51,58 @@ def run_tractseg(peaks, FA_map):
             else:
                 print("\n FA  already exist in nii format, we'll use it.\n")
 
+    # Copy peaks into the tracto directory
+    peaks_tracto = os.path.join(Tract_dir, "peaks.nii")
+    if not verify_file(peaks_tracto):
+        cmd = ["cp", peaks, peaks_tracto]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"\nCan not copy peaks in the tracto directory: {result})"
+            return 0, msg
+
     # Run all usefull TractSeg commands
-    cmd = ["TractSeg", "-i", peaks, "--output_type", "tract_segmentation"]
-    result, stderrl, sdtoutl = execute_command(cmd)
-    if result != 0:
-        msg = f"\nCan not run TractSeg tract_segmentation (exit code {result})"
-        return 0, msg
-    cmd = ["TractSeg", "-i", peaks, "--output_type", "endings_segmentation"]
-    result, stderrl, sdtoutl = execute_command(cmd)
-    if result != 0:
-        msg = f"\nCan not run TractSeg endings_segmentation (exit code {result})"
-        return 0, msg
-    cmd = ["TractSeg", "-i", peaks, "--output_type", "TOM"]
-    result, stderrl, sdtoutl = execute_command(cmd)
-    if result != 0:
-        msg = f"\nCan not run TractSeg TOM (exit code {result})"
-        return 0, msg
-    cmd = ["Tracking", "-i", peaks, "--tracking_format", "tck"]
-    result, stderrl, sdtoutl = execute_command(cmd)
-    if result != 0:
-        msg = f"\nCan not run TractSeg Tracking (exit code {result})"
-        return 0, msg
-    cmd = ["TractSeg", "-i", peaks, "--uncertainty"]
+    tractseg_out_dir=os.path.join(Tract_dir, "tractseg_output")
+    bundle = os.path.join(tractseg_out_dir, "bundle_segmentations")
+    ending_segm= os.path.join(tractseg_out_dir, "endings_segmentations")
+    TOM = os.path.join(tractseg_out_dir, "TOM")
+    TOM_trackings = os.path.join(tractseg_out_dir, "TOM_trackings")
+
+    if not verify_file(bundle):
+        cmd = ["TractSeg", "-i", peaks_tracto, "--output_type", "tract_segmentation"]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"\nCan not run TractSeg tract_segmentation (exit code {result})"
+            return 0, msg
+    
+    print(f'\n    end: {ending_segm}')
+    if not verify_file(ending_segm):
+        cmd = ["TractSeg", "-i", peaks_tracto, "--output_type", "endings_segmentation"]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"\nCan not run TractSeg endings_segmentation (exit code {result})"
+            return 0, msg
+        
+    if not verify_file(TOM):
+        cmd = ["TractSeg", "-i", peaks_tracto, "--output_type", "TOM"]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"\nCan not run TractSeg TOM (exit code {result})"
+            return 0, msg
+        
+    if not verify_file(TOM_trackings):
+        cmd = ["Tracking", "-i", peaks_tracto, "--tracking_format", "tck"]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"\nCan not run TractSeg Tracking (exit code {result})"
+            return 0, msg
+        
+    cmd = ["TractSeg", "-i", peaks_tracto, "--uncertainty"]
     result, stderrl, sdtoutl = execute_command(cmd)
     if result != 0:
         msg = f"\nCan not run TractSeg uncertainty (exit code {result})"
         return 0, msg
     
     # Run tractometry to create csv file
-    dir_name = os.path.dirname(peaks)
-    tractseg_out_dir=os.path.join(dir_name, "tractseg_output")
-    TOM_trackings = os.path.join(tractseg_out_dir, "TOM_trackings")
-    ending_segm= os.path.join(tractseg_out_dir, "endings_segmentation")
     if (os.path.exists(TOM_trackings) and os.path.exists(ending_segm)):
         tracto_csv = os.path.join(tractseg_out_dir, "tactometry.csv")
         if not verify_file(tracto_csv):
