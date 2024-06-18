@@ -12,7 +12,7 @@ Replace `<folder_bids_path>` with the path to your BIDS dataset folder, `<subjec
 
 **Example Command**
 ```
-python3 main.py --bids 'OUTPUT_DIR' --subjects 003 --sessions 02 --acquisitions hermes
+python3 main.py --bids 'path/to/OUTPUT_DIR' --subjects 003 --sessions 02 --acquisitions hermes
 ```
 **Visualization of tractography results**
 
@@ -30,7 +30,20 @@ This command create a file `results.png` in the `tractseg_output` folder. It rep
 
 To see the tracks you can use mrview. Launch mrview from the terminal. Open the preprocessed diffusion image which is named `sub-XXX_ses-XX_..._denoise_degibbs_prproc_unbiased.mif`. Then with 'Tools' add 'tractography'. Then open the track that you want to vizualize from `TOM_trackings` folder. To visualize only the track click on 'View' and 'Hide main image'.  
 
+**Removing volumes**
 
+If you want to remove some volumes of your images to increase the quality of the processing, here's how you can do:
+	- Create a text file in which you write the indices of the volumes that you want to remove. Each index must be separated from the other with a space. You can find an example in `ressources`. 
+	- Run the same command as in the 'Getting started' section but add an option `--volumes` followed by the path to the text file that you just created. The program will create a new folder: `dwi-acq_removed_volumes` where you can find the results of the pre and post processing on the image with removed volumes.
+	
+**Example command**	
+```
+python3 main.py --bids 'path/to/OUTPUT_DIR' --subjects 003 --sessions 02 --acquisitions hermes --volumes 'path/to/volumes_to_remove.txt'
+```
+**How to choose which volumes to remove**
+
+Open the pdf file located in: `preprocessing/qc_text/quad/qc.pdf`. On the 6th page you'll see a chart indicating the number of outlier in each volume. A good idea is to supress the volumes having too many outliers (high peaks on top of the chart).
+You can also visualize by hand the volumes by typing in the terminal `mrview path/to/img.mif` and decide which volume to remove. The ones where the head is tilted and the ones featuring dark bands are good to remove.  
 **Important Notes**
 
 * Make sure you have the BIDS files in the `OUTPUT_DIR` folder.
