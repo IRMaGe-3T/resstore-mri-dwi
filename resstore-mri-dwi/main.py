@@ -198,7 +198,7 @@ if __name__ == '__main__':
 
             # Aligning image to MNI space
             if user_input_2 in ['yes', 'y']:
-                MNI_dir = os.path.join(analysis_directory, "preprocessing in MNI")
+                MNI_dir = os.path.join(analysis_directory, "preprocessing_MNI")
                 if not os.path.exists(MNI_dir):
                     os.mkdir(MNI_dir)
                 mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map"],MNI_dir) 
