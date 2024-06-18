@@ -369,11 +369,6 @@ def run_register_MNI(in_dwi, in_fa, MNI_dir):
         else:
             print(f"\nBrain mask completed. Output file: {dwi_mask}")
     
-    # # Write average response to file, what is this?
-    # average_response_path = os.path.join(i['path'], "average-response.txt")
-    # with open(average_response_path, "w+") as f:
-    #     f.write('768.08558 -327.24084 72.15579 -11.15219 1.28727')
-    # print(f"Successfully wrote average response to {average_response_path}") #test
 
     info_mni = {"dwi_preproc_mni": diffusion_mni_mif,"dwi_mask_mni": dwi_mask}
     msg = "\nMNI space step done"

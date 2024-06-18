@@ -113,6 +113,13 @@ def run_tractseg(peaks, FA_map, Tract_dir):
             if result != 0:
                 msg = f"\nCan not run tractometry: {result})"
                 return 0, msg
+            
+    if verify_file(peaks_tracto):
+        cmd = ["rm", peaks_tracto]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"\nCan not delete peaks copy in the tracto directory: {result})"
+            return 0, msg
 
     msg = "\nRun TracSeg done"
     return 1, msg
