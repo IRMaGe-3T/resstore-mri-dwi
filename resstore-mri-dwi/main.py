@@ -161,6 +161,20 @@ if __name__ == '__main__':
                 elif "hermes" in acq:
                     in_dwi, in_dwi_json, in_pepolar_AP, in_pepolar_PA = prepare_hermes_acquistions(
                         bids_path, sub, ses, preproc_directory)
+                    
+                # Remove volume from dwi if needed
+                if not volumes==None:
+                    in_dwi_rm_vol = in_dwi.replace(".mif", "_removed_vol.mif")
+                    remove_volumes(in_dwi, in_dwi_rm_vol, volumes)
+                    cmd = ["mv",in_dwi_rm_vol, in_dwi]
+                    result, stderrl, sdtoutl = execute_command(cmd)
+                    if result != 0:
+                        msg = f"\nCan not move dwi_rm_vol file (exit code {result})"
+                    cmd = ["rm",in_dwi_rm_vol]
+                    result, stderrl, sdtoutl = execute_command(cmd)
+                    if result != 0:
+                        msg = f"\nCan not delete dwi_rm_vol file (exit code {result})"
+
 
                 # Get info fot future processing
                 # Get readout time
@@ -182,18 +196,6 @@ if __name__ == '__main__':
 
             print(f'\nPhase encoding dir: {pe_dir}')
             print("\n \n===== PREPROCESSING =====\n")
-
-            if not volumes==None:
-                in_dwi_rm_vol = in_dwi.replace(".mif", "_removed_vol.mif")
-                remove_volumes(in_dwi, in_dwi_rm_vol, volumes)
-                cmd = ["mv",in_dwi_rm_vol, in_dwi]
-                result, stderrl, sdtoutl = execute_command(cmd)
-                if result != 0:
-                    msg = f"\nCan not move dwi_rm_vol file (exit code {result})"
-                cmd = ["rm",in_dwi_rm_vol]
-                result, stderrl, sdtoutl = execute_command(cmd)
-                if result != 0:
-                    msg = f"\nCan not delete dwi_rm_vol file (exit code {result})"
 
             # Launch preprocessing
             main_return, main_msg, info_preproc =run_preproc_dwi(in_dwi, pe_dir, readout_time, rpe=None, shell=SHELL, in_pepolar_PA=in_pepolar_PA, in_pepolar_AP=in_pepolar_AP)
