@@ -1,7 +1,7 @@
 import os
 from useful import delete_directory
 
-def remove_volumes_dwi(input_file, output_file, volumes_to_remove_file):
+def remove_volumes(input_file, output_file, volumes_to_remove_file):
     # Créer un répertoire temporaire
     dir = os.path.dirname(input_file)
     temp_dir = os.path.join(dir, "_temp")
