@@ -95,26 +95,35 @@ def prepare_abcd_acquistions(bids_directory, sub, ses, preproc_directory):
         suffix='epi', acquisition=acq, direction='AP',
         return_type='filename'
     )
-    pepolar_ap_nifti = all_sequences_pepolar_ap[0]
-    result, msg, pepolar_ap = convert_nifti_to_mif(
-        pepolar_ap_nifti, preproc_directory, diff=False
-    )
-    if result == 0:
-        print(msg)
-        sys.exit(1)
+    if len(all_sequences_pepolar_ap)!=0:
+        pepolar_ap_nifti = all_sequences_pepolar_ap[0]
+        result, msg, pepolar_ap = convert_nifti_to_mif(
+            pepolar_ap_nifti, preproc_directory, diff=False
+        )
+        if result == 0:
+            print(msg)
+            sys.exit(1)
+    else:
+        pepolar_ap_nifti=None
+        pepolar_ap=None
 
     all_sequences_pepolar_pa = layout.get(
         subject=sub, session=ses, extension='nii.gz',
         suffix='epi', acquisition=acq, direction='PA',
         return_type='filename'
     )
-    pepolar_pa_nifti = all_sequences_pepolar_pa[0]
-    result, msg, pepolar_pa = convert_nifti_to_mif(
-        pepolar_pa_nifti, preproc_directory, diff=False
-    )
-    if result == 0:
-        print(msg)
-        sys.exit(1)
+
+    if len(all_sequences_pepolar_pa)!=0:
+        pepolar_pa_nifti = all_sequences_pepolar_pa[0]
+        result, msg, pepolar_pa = convert_nifti_to_mif(
+            pepolar_pa_nifti, preproc_directory, diff=False
+        )
+        if result == 0:
+            print(msg)
+            sys.exit(1)
+    else:
+        pepolar_pa_nifti=None
+        pepolar_pa=None
 
     return dwi, dwi_json, pepolar_ap, pepolar_pa
 
