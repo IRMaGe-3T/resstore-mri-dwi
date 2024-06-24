@@ -248,7 +248,7 @@ def download_template(dir_name):
     # Check if the template file already exists
     if not verify_file(template_path):
         try:
-            print("Downloading MNI_FA_template.nii.gz...")
+            print("\nDownloading MNI_FA_template.nii.gz...")
             urllib.request.urlretrieve(github_repo_url, template_path)
             print("\nTemplate file downloaded successfully.")
         except Exception as e:

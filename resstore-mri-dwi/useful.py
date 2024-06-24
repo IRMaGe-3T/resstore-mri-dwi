@@ -239,7 +239,7 @@ def download_subjects_txt(dir_name):
     # Check if the template file already exists
     if not verify_file(template_path):
         try:
-            print("Downloading subjects.txt...")
+            print("\nDownloading subjects.txt...")
             urllib.request.urlretrieve(github_repo_url, template_path)
             print("\subjects.txt file downloaded successfully.")
         except Exception as e:
