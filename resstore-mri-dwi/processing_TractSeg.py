@@ -4,7 +4,7 @@ Functions to used TracSeg software:
 
 """
 
-from useful import check_file_ext, execute_command, verify_file
+from useful import check_file_ext, execute_command, verify_file, download_subjects_txt
 import os
 
 EXT_NIFTI = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
@@ -120,6 +120,9 @@ def run_tractseg(peaks, FA_map, Tract_dir):
         if result != 0:
             msg = f"\nCan not delete peaks copy in the tracto directory: {result})"
             return 0, msg
+        
+    #Download subjects.txt template
+    subjects_txt = download_subjects_txt(tractseg_out_dir)
 
     msg = "\nRun TracSeg done"
     return 1, msg

@@ -6,11 +6,13 @@ Useful functions :
     - convert_mif_to_nifti
     - convert_nifti_to_mif
     - get_shell
+    -download_subjects_txt
 """
 
 import os
 import subprocess
 import shutil
+import urllib.request
 
 EXT_NIFTI = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
 EXT_MIF = {"MIF": "mif"}
@@ -228,7 +230,23 @@ def get_shell(in_file):
 
     return 1, msg, shell
 
-
+# Function to download the subjects.txt file if it doesn't exist
+def download_subjects_txt(dir_name):
+    github_repo_url = "https://github.com/IRMaGe-3T/resstore-mri-dwi/raw/525fa8803e8c6fd1cfa2886e90e52163e9e5e12c/resstore-mri-dwi/resources/subjects.txt"
+    template_filename = "subjects.txt"
+    template_path = os.path.join(dir_name, template_filename)
+    
+    # Check if the template file already exists
+    if not verify_file(template_path):
+        try:
+            print("Downloading subjects.txt...")
+            urllib.request.urlretrieve(github_repo_url, template_path)
+            print("\subjects.txt file downloaded successfully.")
+        except Exception as e:
+            print(f"\nFailed to download the subjects.txt file: {e}")
+            return None
+    
+    return template_path
 
 def delete_directory(dir):
     """
