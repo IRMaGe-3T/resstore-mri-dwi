@@ -152,6 +152,7 @@ if __name__ == '__main__':
                 else:
                     print(f"\nNo T1w data found for subject {sub} in session {ses}. Proceeding without T1w data.")
                     in_t1w = None  
+                    in_t1w_nifti = None
 
                 # Get DWI and pepolar, convert to MIF, merge DWI and get info
                 if "abcd" in acq:
@@ -235,8 +236,9 @@ if __name__ == '__main__':
                 Tract_dir = os.path.join(analysis_directory, "Tracto")
                 if not os.path.exists(Tract_dir):
                     os.mkdir(Tract_dir)
-                run_preproc_t1(in_t1w_nifti,info_mni["dwi_preproc_mni"])
-                print("run_preproc_t1w done")
+                if in_t1w_nifti is not None:
+                    run_preproc_t1(in_t1w_nifti,info_mni["dwi_preproc_mni"])
+                    print("run_preproc_t1w done")
                 run_tractseg(peaks,info_fa["FA_map"],Tract_dir)
                 print("\nTractSeg successfully used")
             else:
