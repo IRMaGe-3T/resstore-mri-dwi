@@ -20,6 +20,7 @@ from FA_ADC_AD_RD import FA_ADC_AD_RD_maps
 from T1_preproc import run_preproc_t1  
 from processing_TractSeg import run_tractseg
 from remove_volume import remove_volumes
+from ROI import getFAstats
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -243,6 +244,14 @@ if __name__ == '__main__':
                 print("\nTractSeg successfully used")
             else:
                 print("\nNo tractography done")
+
+            Tract_dir = os.path.join(analysis_directory, "Tracto")
+            tractseg_out_dir = os.path.join(Tract_dir, "tractseg_output")
+            bundle = os.path.join(tractseg_out_dir, "bundle_segmentations")
+            ROI = os.path.join(bundle, "CST_left.nii.gz")
+            d=getFAstats(info_fa["FA_map"], ROI)
+            print("\n\n\n")
+            print(d)
 
             print("\n \n===== THE END =====\n\n")
                    
