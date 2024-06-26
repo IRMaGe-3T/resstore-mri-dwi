@@ -58,12 +58,12 @@ def create_or_update_tsv(subject_name, roi_stats, tsv_file):
         existing_data = []
         existing_headers = []
 
-    # Si el archivo no tiene encabezado, escribir el encabezado
+    # If the file does not have headers, write them
     if not existing_headers:
         existing_data.append(expected_headers)
         existing_headers = expected_headers
-        
-    # Asegurarse de que los datos coincidan con el orden de los encabezados
+
+    # Match data with header
     if existing_headers != expected_headers:
         header_mapping = {header: index for index, header in enumerate(existing_headers)}
         existing_data[1:] = [
@@ -71,21 +71,21 @@ def create_or_update_tsv(subject_name, roi_stats, tsv_file):
             for row in existing_data[1:]
         ]
 
-    # Verificar si el sujeto ya está en la tabla
+    # Verify if subject is already on the list
     subjects_in_table = {row[0] for row in existing_data[1:]}
     if subject_name in subjects_in_table:
-        return  # Si el sujeto ya está presente, no agregar datos adicionales
+        return  # If there is the subject we skip
 
     # Create each file
     subject_data = [subject_name] + [stat['mean_FA'] for stat in roi_stats]
 
-    # Añadir los datos del sujeto actual a los datos existentes, excluyendo encabezado
+    # add subject data excluding headers
     existing_data.append(subject_data)
     
-    # Ordenar los datos por el nombre del sujeto (excluyendo el encabezado para la ordenación)
+    # Name order of subject
     existing_data[1:] = sorted(existing_data[1:], key=lambda x: x[0])
 
-    # Escribir de nuevo todos los datos en el archivo TSV, ordenados y alineados
+    # Rewrite all data on the TSV file, by name order and with the proper headers
     with open(tsv_file, mode='w', newline='') as file:
         writer = csv.writer(file, delimiter='\t')
         writer.writerows([expected_headers] + existing_data[1:])

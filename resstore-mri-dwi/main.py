@@ -258,11 +258,7 @@ if __name__ == '__main__':
             for roi_file in roi_files:
                 ROI = os.path.join(bundle, roi_file)
                 d = getFAstats(info_fa["FA_map"], ROI, bundle)
-                #for csv
                 roi_stats.append(d)
-                #print(f"Resultados para {roi_file}:")
-                #print(d)
-                #print("\n\n\n")
 
             tsv_file = os.path.join(bids_path, "derivatives", "FA_stats.tsv")
             subject_name = analysis_directory.split('/')[-3] + '-' + analysis_directory.split('/')[-2] + '-' + analysis_directory.split('/')[-1]
