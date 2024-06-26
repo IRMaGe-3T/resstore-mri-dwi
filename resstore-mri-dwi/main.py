@@ -20,7 +20,7 @@ from FA_ADC_AD_RD import FA_ADC_AD_RD_maps
 from T1_preproc import run_preproc_t1  
 from processing_TractSeg import run_tractseg
 from remove_volume import remove_volumes
-from ROI import getFAstats
+from ROI import getFAstats, create_or_update_tsv
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -245,13 +245,28 @@ if __name__ == '__main__':
             else:
                 print("\nNo tractography done")
 
+            #Directory definition
             Tract_dir = os.path.join(analysis_directory, "Tracto")
             tractseg_out_dir = os.path.join(Tract_dir, "tractseg_output")
             bundle = os.path.join(tractseg_out_dir, "bundle_segmentations")
-            ROI = os.path.join(bundle, "CST_left.nii.gz")
-            d=getFAstats(info_fa["FA_map"], ROI)
-            print("\n\n\n")
-            print(d)
+
+            #All ROIs
+            roi_files = [f for f in os.listdir(bundle) if f.endswith('.nii.gz')]
+
+            roi_stats = []
+
+            for roi_file in roi_files:
+                ROI = os.path.join(bundle, roi_file)
+                d = getFAstats(info_fa["FA_map"], ROI, bundle)
+                #for csv
+                roi_stats.append(d)
+                #print(f"Resultados para {roi_file}:")
+                #print(d)
+                #print("\n\n\n")
+
+            tsv_file = os.path.join(bids_path, "derivatives", "FA_stats.tsv")
+            subject_name = analysis_directory.split('/')[-3] + '-' + analysis_directory.split('/')[-2] + '-' + analysis_directory.split('/')[-1]
+            create_or_update_tsv(subject_name, roi_stats, tsv_file)
 
             print("\n \n===== THE END =====\n\n")
                    
