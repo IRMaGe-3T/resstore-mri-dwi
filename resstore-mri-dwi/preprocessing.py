@@ -163,13 +163,13 @@ def run_preproc_dwi(
                         
                 # Create command for concatenation
                 cmd = ["mrcat", in_pepolar_AP, in_pepolar_PA, b0_pair]
-            # Concatenate both b0 images to create b0_pair     
-            result, stderrl, sdtoutl = execute_command(cmd)
-            if result != 0:
-                msg = f"\nCannot launch mrcat to create b0_pair (exit code {result})"
-                return 0, msg, info_prepoc
-            else:
-                print(f"\nB0_pair successfully created. Output file: {b0_pair}")
+                # Concatenate both b0 images to create b0_pair     
+                result, stderrl, sdtoutl = execute_command(cmd)
+                if result != 0:
+                    msg = f"\nCannot launch mrcat to create b0_pair (exit code {result})"
+                    return 0, msg, info_prepoc
+                else:
+                    print(f"\nB0_pair successfully created. Output file: {b0_pair}")
         else:
             print(f"\nSkipping b0_pair creation step, {b0_pair} already exists.")
             
