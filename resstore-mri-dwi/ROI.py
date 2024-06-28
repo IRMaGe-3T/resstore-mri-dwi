@@ -43,6 +43,7 @@ def create_or_update_tsv(subject_name, roi_stats, tsv_file):
 
     # Create headers
     roi_headers = [stat['ROI_mask'] for stat in roi_stats]
+    roi_headers.sort()  # Sort the ROI headers alphabetically
     expected_headers = ["Subject"] + roi_headers
 
     # Check if content exist
