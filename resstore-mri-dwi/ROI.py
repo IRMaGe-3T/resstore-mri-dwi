@@ -12,14 +12,13 @@ def getFAstats (FA, ROI_mask, bundle):
     # Create a dictionnary
     d = {} 
     
-    ROI_mask_grid = os.path.join(grid_dir, os.path.basename(ROI_mask).replace(".nii.gz", "_grid.nii.gz"))
+    # ROI_mask_grid = os.path.join(grid_dir, os.path.basename(ROI_mask).replace(".nii.gz", "_grid.nii.gz"))
 
-    if not verify_file(ROI_mask_grid):
-        cmd = ["mrgrid", ROI_mask, "regrid", "-template", FA, ROI_mask_grid, "-interp", "nearest"]
-        result, stderrl, sdtoutl = execute_command(cmd)
+    # if not verify_file(ROI_mask_grid):
+    #     cmd = ["mrgrid", ROI_mask, "regrid", "-template", FA, ROI_mask_grid, "-interp", "nearest"]
+    #     result, stderrl, sdtoutl = execute_command(cmd)
 
-    
-    cmd = ["mrstats", "-mask", ROI_mask_grid, FA]
+    cmd = ["mrstats", "-mask", ROI_mask, FA]
     result, stderrl, sdtoutl = execute_command(cmd)
     
     res = sdtoutl.split()    

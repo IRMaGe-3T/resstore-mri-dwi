@@ -33,6 +33,7 @@ def run_tractseg(peaks, FA_map, Tract_dir):
     # Check if FA map has the right format (nifti)
     # If format is mif, convert it to (nifti)
     valid_bool, in_ext, file_name = check_file_ext(FA_map, EXT_NIFTI)
+    FA_nii = FA_map.replace(".mif", ".nii.gz")
     if not valid_bool:
         print("\nInput FA_map is not nifti.\n")
         valid_bool, in_ext, file_name = check_file_ext(FA_map, EXT_MIF)
@@ -41,7 +42,6 @@ def run_tractseg(peaks, FA_map, Tract_dir):
             return 0, msg
         else: 
             print("\n FA is in mif format.\n")
-            FA_nii = FA_map.replace(".mif", ".nii.gz")
             if not verify_file(FA_nii):
                 cmd = ["mrconvert", FA_map, FA_nii]
                 result, stderrl, sdtoutl = execute_command(cmd)

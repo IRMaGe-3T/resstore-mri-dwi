@@ -370,7 +370,7 @@ def run_register_MNI(in_dwi, in_fa, MNI_dir):
             print(f"\nBrain mask completed. Output file: {dwi_mask}")
     
 
-    info_mni = {"dwi_preproc_mni": diffusion_mni_mif,"dwi_mask_mni": dwi_mask}
+    info_mni = {"dwi_preproc_mni": diffusion_mni_mif,"dwi_mask_mni": dwi_mask, "FA_MNI": fa_mni}
     msg = "\nMNI space step done"
     print(msg)
     return 1, msg, info_mni

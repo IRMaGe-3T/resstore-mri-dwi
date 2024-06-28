@@ -227,7 +227,7 @@ if __name__ == '__main__':
                 FOD_dir = os.path.join(analysis_directory, "FOD")
                 if not os.path.exists(FOD_dir):
                     os.mkdir(FOD_dir)
-                _,msg,peaks = FOD(info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"],acq, FOD_dir)
+                _,msg, peaks = FOD(info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"], acq, FOD_dir)
             else:
                 print("\nNo FOD done")  
 
@@ -240,24 +240,24 @@ if __name__ == '__main__':
                 if in_t1w_nifti is not None:
                     run_preproc_t1(in_t1w_nifti,info_mni["dwi_preproc_mni"])
                     print("run_preproc_t1w done")
-                run_tractseg(peaks,info_fa["FA_map"],Tract_dir)
+                run_tractseg(peaks, info_mni["FA_MNI"], Tract_dir)
                 print("\nTractSeg successfully used")
             else:
                 print("\nNo tractography done")
 
-            #Directory definition
+            # Directory definition
             Tract_dir = os.path.join(analysis_directory, "Tracto")
             tractseg_out_dir = os.path.join(Tract_dir, "tractseg_output")
             bundle = os.path.join(tractseg_out_dir, "bundle_segmentations")
 
-            #All ROIs
+            # All ROIs
             roi_files = [f for f in os.listdir(bundle) if f.endswith('.nii.gz')]
 
             roi_stats = []
 
             for roi_file in roi_files:
                 ROI = os.path.join(bundle, roi_file)
-                d = getFAstats(info_fa["FA_map"], ROI, bundle)
+                d = getFAstats(info_mni["FA_MNI"], ROI, bundle)
                 roi_stats.append(d)
 
             tsv_file = os.path.join(bids_path, "derivatives", "FA_stats.tsv")
