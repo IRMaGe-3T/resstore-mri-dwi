@@ -292,10 +292,7 @@ def delete_directory(dir):
 
 
 
-import pyautogui
-from PIL import ImageGrab  # Installer via pip install pillow
-
-def capture_and_save_graph(file_path):
+def plot_cst_data(file_path):
     # Lire le fichier CSV dans un DataFrame pandas avec le bon séparateur
     data = pd.read_csv(file_path, sep=';')
     
@@ -317,16 +314,8 @@ def capture_and_save_graph(file_path):
     # Afficher le graphique à l'écran
     plt.show()
     
-    # Attendre un court instant pour que le graphique soit complètement affiché
-    pyautogui.PAUSE = 1
-    
-    # Capture d'écran de la zone du graphique à l'écran
-    x, y, width, height = pyautogui.locateOnScreen('chemin/vers/marqueur_graphique.png')  # Utiliser pyautogui pour trouver le marqueur du graphique
-    screenshot = pyautogui.screenshot(region=(x, y, width, height))
-    
-    # Enregistrer la capture d'écran dans le même répertoire que le fichier CSV
+    # Enregistrer le graphique dans le même répertoire que le fichier CSV
     dir = os.path.dirname(file_path)
     graph = os.path.join(dir, "CST_graph.png")
-    screenshot.save(graph)
-    
-    print(f"Capture d'écran du graphique enregistrée dans : {graph}")
+    plt.savefig(graph)
+    print(f"Graphique enregistré dans : {graph}")
