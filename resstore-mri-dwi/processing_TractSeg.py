@@ -4,7 +4,7 @@ Functions to used TracSeg software:
 
 """
 
-from useful import check_file_ext, execute_command, verify_file, download_subjects_txt
+from useful import check_file_ext, execute_command, verify_file, download_subjects_txt, plot_cst_data
 import os
 
 EXT_NIFTI = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
@@ -123,6 +123,8 @@ def run_tractseg(peaks, FA_map, Tract_dir):
         
     #Download subjects.txt template
     subjects_txt = download_subjects_txt(tractseg_out_dir)
+
+    plot_cst_data(tracto_csv)
 
     msg = "\nRun TracSeg done"
     return 1, msg
