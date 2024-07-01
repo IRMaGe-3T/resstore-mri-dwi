@@ -55,23 +55,23 @@ if __name__ == '__main__':
     volumes = args.volumes
     layout = BIDSLayout(bids_path)
 
-    # Ask user for processing
-    user_input_1 = input(f"\nDo you want to create an FA, ADC, AD and RD maps of the brain? (yes/no): ").strip().lower()
-    if user_input_1 in ['yes', 'y']:
-        user_input_2 = input(f"Do you want to align image to the MNI space? (yes/no): ").strip().lower()
-        if user_input_2 in ['yes', 'y']:
-            user_input_3 = input(f"Do you want to perform FOD estimation? (yes/no): ").strip().lower()
-            if user_input_3 in ['yes', 'y']:
-                user_input_4 = input(f"Do you want to create a whole-brain tractogram? (yes/no): ").strip().lower()
-            else:
-                user_input_4 = 'no'
-        else:
-            user_input_3 = 'no'
-            user_input_4 = 'no'
-    else:
-        user_input_2 = 'no'
-        user_input_3 = 'no'
-        user_input_4 = 'no'
+    # # Use this section if you want to ask user for processing
+    # user_input_1 = input(f"\nDo you want to create an FA, ADC, AD and RD maps of the brain? (yes/no): ").strip().lower()
+    # if user_input_1 in ['yes', 'y']:
+    #     user_input_2 = input(f"Do you want to align image to the MNI space? (yes/no): ").strip().lower()
+    #     if user_input_2 in ['yes', 'y']:
+    #         user_input_3 = input(f"Do you want to perform FOD estimation? (yes/no): ").strip().lower()
+    #         if user_input_3 in ['yes', 'y']:
+    #             user_input_4 = input(f"Do you want to create a whole-brain tractogram? (yes/no): ").strip().lower()
+    #         else:
+    #             user_input_4 = 'no'
+    #     else:
+    #         user_input_3 = 'no'
+    #         user_input_4 = 'no'
+    # else:
+    #     user_input_2 = 'no'
+    #     user_input_3 = 'no'
+    #     user_input_4 = 'no'
 
     
     if subjects == ['all']:
@@ -204,46 +204,76 @@ if __name__ == '__main__':
 
             print("\n \n===== PROCESSING =====\n")
 
-            # Launch FA map creation if needed
-            if user_input_1 in ['yes', 'y']:
-                FA_dir = os.path.join(analysis_directory, "FA")
-                if not os.path.exists(FA_dir):
-                    os.mkdir(FA_dir)
-                fa_return, fa_msg, info_fa = FA_ADC_AD_RD_maps(info_preproc["dwi_preproc"], info_preproc["brain_mask"],FA_dir) 
-            else:
-                print("\nNo creation of FA_map")
+            # # Use this section if you ask the user which processing is required 
 
-            # Aligning image to MNI space
-            if user_input_2 in ['yes', 'y']:
-                MNI_dir = os.path.join(analysis_directory, "preprocessing_MNI")
-                if not os.path.exists(MNI_dir):
-                    os.mkdir(MNI_dir)
-                mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map"],MNI_dir) 
-            else:
-                print("\nNo MNI space alignment")
+            # # Launch FA map creation if needed
+            # if user_input_1 in ['yes', 'y']:
+            #     FA_dir = os.path.join(analysis_directory, "FA")
+            #     if not os.path.exists(FA_dir):
+            #         os.mkdir(FA_dir)
+            #     fa_return, fa_msg, info_fa = FA_ADC_AD_RD_maps(info_preproc["dwi_preproc"], info_preproc["brain_mask"],FA_dir) 
+            # else:
+            #     print("\nNo creation of FA_map")
 
-            # Launch FOD estimation if wanted 
-            if user_input_3 in ['yes', 'y']:
-                FOD_dir = os.path.join(analysis_directory, "FOD")
-                if not os.path.exists(FOD_dir):
-                    os.mkdir(FOD_dir)
-                _,msg, peaks = FOD(info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"], acq, FOD_dir)
-            else:
-                print("\nNo FOD done")  
+            # # Aligning image to MNI space
+            # if user_input_2 in ['yes', 'y']:
+            #     MNI_dir = os.path.join(analysis_directory, "preprocessing_MNI")
+            #     if not os.path.exists(MNI_dir):
+            #         os.mkdir(MNI_dir)
+            #     mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map"],MNI_dir) 
+            # else:
+            #     print("\nNo MNI space alignment")
 
-            # For tractography
-            # Launch T1_preproc
-            if user_input_4 in ['yes', 'y']:
-                Tract_dir = os.path.join(analysis_directory, "Tracto")
-                if not os.path.exists(Tract_dir):
-                    os.mkdir(Tract_dir)
-                if in_t1w_nifti is not None:
-                    run_preproc_t1(in_t1w_nifti,info_mni["dwi_preproc_mni"])
-                    print("run_preproc_t1w done")
-                run_tractseg(peaks, info_mni["FA_MNI"], Tract_dir)
-                print("\nTractSeg successfully used")
-            else:
-                print("\nNo tractography done")
+            # # Launch FOD estimation if wanted 
+            # if user_input_3 in ['yes', 'y']:
+            #     FOD_dir = os.path.join(analysis_directory, "FOD")
+            #     if not os.path.exists(FOD_dir):
+            #         os.mkdir(FOD_dir)
+            #     _,msg, peaks = FOD(info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"], acq, FOD_dir)
+            # else:
+            #     print("\nNo FOD done")  
+
+            # # For tractography
+            # # Launch T1_preproc
+            # if user_input_4 in ['yes', 'y']:
+            #     Tract_dir = os.path.join(analysis_directory, "Tracto")
+            #     if not os.path.exists(Tract_dir):
+            #         os.mkdir(Tract_dir)
+            #     if in_t1w_nifti is not None:
+            #         run_preproc_t1(in_t1w_nifti,info_mni["dwi_preproc_mni"])
+            #         print("run_preproc_t1w done")
+            #     run_tractseg(peaks, info_mni["FA_MNI"], Tract_dir)
+            #     print("\nTractSeg successfully used")
+            # else:
+            #     print("\nNo tractography done")
+
+
+
+            # # Short version of the code doing all the processing
+            # FA map
+            FA_dir = os.path.join(analysis_directory, "FA")
+            if not os.path.exists(FA_dir):
+                os.mkdir(FA_dir)
+            fa_return, fa_msg, info_fa = FA_ADC_AD_RD_maps(info_preproc["dwi_preproc"], info_preproc["brain_mask"],FA_dir)
+            # Aligning in the MNI space
+            MNI_dir = os.path.join(analysis_directory, "preprocessing_MNI")
+            if not os.path.exists(MNI_dir):
+                os.mkdir(MNI_dir)
+            mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map"],MNI_dir) 
+            # Doing FOD estimations
+            FOD_dir = os.path.join(analysis_directory, "FOD")
+            if not os.path.exists(FOD_dir):
+                os.mkdir(FOD_dir)
+            _,msg, peaks = FOD(info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"], acq, FOD_dir)
+            # Tractography
+            Tract_dir = os.path.join(analysis_directory, "Tracto")
+            if not os.path.exists(Tract_dir):
+                os.mkdir(Tract_dir)
+            if in_t1w_nifti is not None:
+                run_preproc_t1(in_t1w_nifti,info_mni["dwi_preproc_mni"])
+                print("run_preproc_t1w done")
+            run_tractseg(peaks, info_mni["FA_MNI"], Tract_dir)
+            print("\nTractSeg successfully used")
 
             # Directory definition
             Tract_dir = os.path.join(analysis_directory, "Tracto")
@@ -268,7 +298,6 @@ if __name__ == '__main__':
                    
             
             # Take inspiration from https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/preprocessing.py#L59
-            # adapt function to abdc acquistions (2 pepolar sequences)
  
             # Compare with Fabrice Hanneau code
 
