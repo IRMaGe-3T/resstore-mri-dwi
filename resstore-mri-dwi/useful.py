@@ -293,29 +293,28 @@ def delete_directory(dir):
 
 
 def plot_cst_data(file_path):
-    # Lire le fichier CSV dans un DataFrame pandas avec le bon séparateur
+    # Read CSV file ith the good separator
     data = pd.read_csv(file_path, sep=';')
     
-    # Vérifier que les colonnes nécessaires existent
+    # Verify that the CST data exists
     if 'CST_left' not in data.columns or 'CST_right' not in data.columns:
         raise ValueError("Le fichier doit contenir les colonnes 'CST_left' et 'CST_right'")
     
-    # Tracer les données
+    # Plot the results
     plt.figure(figsize=(10, 6))
     plt.plot(data['CST_left'], label='CST_left', marker='o')
     plt.plot(data['CST_right'], label='CST_right', marker='x')
     
     # Ajouter des titres et des légendes
-    plt.title('Évolution des données chiffrées')
-    plt.xlabel('Index')
-    plt.ylabel('Valeurs')
+    plt.title('FA along the tract')
+    plt.ylabel('FA')
     plt.legend()
     
     # Afficher le graphique à l'écran
     plt.show()
     
-    # Enregistrer le graphique dans le même répertoire que le fichier CSV
-    dir = os.path.dirname(file_path)
-    graph = os.path.join(dir, "CST_graph.png")
-    plt.savefig(graph)
-    print(f"Graphique enregistré dans : {graph}")
+    # # Enregistrer le graphique dans le même répertoire que le fichier CSV
+    # dir = os.path.dirname(file_path)
+    # graph = os.path.join(dir, "CST_graph.png")
+    # plt.savefig(graph)
+    # print(f"Graphique enregistré dans : {graph}")
