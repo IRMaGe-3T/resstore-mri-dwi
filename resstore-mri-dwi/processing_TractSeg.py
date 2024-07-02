@@ -124,6 +124,19 @@ def run_tractseg(peaks, FA_map, Tract_dir):
     #Download subjects.txt template
     subjects_txt = download_subjects_txt(tractseg_out_dir)
 
+    if verify_file(tracto_csv):
+        # Read the content of the .txt file
+        with open(subjects_txt, 'r') as file:
+            lines = file.readlines()
+        # Modify the first line
+        lines[0] = f"# tractometry_path={tracto_csv}\n"
+        # Write the modified content back to the .txt file
+        with open(subjects_txt, 'w') as file:
+            file.writelines(lines)
+        print(f"\nUpdated the first line of {subjects_txt} with the path to the CSV file.")
+
+
+
     plot_cst_data(tracto_csv)
 
     msg = "\nRun TracSeg done"
