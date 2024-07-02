@@ -293,7 +293,7 @@ def delete_directory(dir):
 
 
 def plot_cst_data(file_path):
-    # Read CSV file ith the good separator
+    # Read CSV file with the correct separator
     data = pd.read_csv(file_path, sep=';')
     
     # Verify that the CST data exists
@@ -305,16 +305,18 @@ def plot_cst_data(file_path):
     plt.plot(data['CST_left'], label='CST_left', marker='o')
     plt.plot(data['CST_right'], label='CST_right', marker='x')
     
-    # Ajouter des titres et des légendes
+    # Add titles and legends
     plt.title('FA along the tract')
     plt.ylabel('FA')
     plt.legend()
     
-    # Afficher le graphique à l'écran
-    plt.show()
+    # Save the figure
+    plt.tight_layout()
+    dir = os.path.dirname(file_path)
+    save_path = os.path.join(dir, "FA_CST.png")
+    plt.savefig(save_path)
     
-    # # Enregistrer le graphique dans le même répertoire que le fichier CSV
-    # dir = os.path.dirname(file_path)
-    # graph = os.path.join(dir, "CST_graph.png")
-    # plt.savefig(graph)
-    # print(f"Graphique enregistré dans : {graph}")
+    # Close the plot
+    plt.close('all')
+    
+    print(f"Graph saved to {save_path}")
