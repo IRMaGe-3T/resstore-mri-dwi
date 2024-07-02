@@ -259,7 +259,7 @@ def download_template(dir_name):
     
     return template_path
 
-def run_register_MNI(in_dwi, in_fa, MNI_dir):
+def run_register_MNI(in_dwi, in_fa, NODDI_dir, MNI_dir):
     """
     Aligning image to MNI space
 
@@ -307,6 +307,30 @@ def run_register_MNI(in_dwi, in_fa, MNI_dir):
             return 0, msg, info_mni
         else:
             print(f"\nLinear registration of FA completed. Output file: {fa_mni}")
+
+    # Linear registration of NODDI maps
+    if NODDI_dir is not None:
+        for file_name in os.listdir(NODDI_dir):
+            if file_name.endswith(".nii.gz"):
+                map_path = os.path.join(NODDI_dir, file_name)
+                map_mni = os.path.join(MNI_dir, file_name.replace(".nii.gz", "_MNI.nii.gz"))
+                if not verify_file(map_mni):
+                    cmd = [
+                        "flirt",
+                        "-ref", template_path, 
+                        "-in", map_path,
+                        "-out", map_mni,
+                        "-omat", "FA_2_MNI.mat",
+                        "-dof", "6",
+                        "-cost", "mutualinfo",
+                        "-searchcost", "mutualinfo"
+                    ]
+                    result, stderr, stdout = execute_command(cmd)
+                    if result != 0:
+                        msg = f"\nCan not launch flirt for NODDI map {file_name} (exit code {result}): {stderr}"
+                        return 0, msg, info_mni
+                    else:
+                        print(f"\nLinear registration of NODDI map {file_name} completed. Output file: {map_mni}")
 
     # Linear registration of DWI
     diffusion_mni = os.path.join(MNI_dir, "dwi_MNI.nii.gz")

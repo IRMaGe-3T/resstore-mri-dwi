@@ -58,4 +58,11 @@ def NODDI(dwi_mif,bval_file,bvec_file,mask_nii):
         delete_directory(kernels)
 
 
+    preproc_dir = os.path.dirname(dwi_mif)
+    analysis_dir = os.path.dirname(preproc_dir)
+    AMICO_dir = os.path.join(analysis_dir, "AMICO")
+    NODDI_dir = os.path.join(AMICO_dir, "NODDI")
+
+
     print("AMICO processing completed.")
+    return NODDI_dir

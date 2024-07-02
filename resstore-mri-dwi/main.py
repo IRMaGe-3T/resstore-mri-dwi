@@ -257,11 +257,20 @@ if __name__ == '__main__':
             if not os.path.exists(FA_dir):
                 os.mkdir(FA_dir)
             fa_return, fa_msg, info_fa = FA_ADC_AD_RD_maps(info_preproc["dwi_preproc"], info_preproc["brain_mask"],FA_dir)
+            # NODDI
+            mask_nii = info_preproc["brain_mask_nii"]
+            if acq=="abcd":
+                dwi_preproc = info_preproc["dwi_preproc"]
+                bval = dwi_preproc.replace(".mif", ".bval")
+                bvec = dwi_preproc.replace(".mif", ".bvec")
+                NODDI_dir = NODDI(dwi_preproc, bval, bvec, mask_nii)
+            else:
+                NODDI_dir = None
             # Aligning in the MNI space
             MNI_dir = os.path.join(analysis_directory, "preprocessing_MNI")
             if not os.path.exists(MNI_dir):
                 os.mkdir(MNI_dir)
-            mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map"],MNI_dir) 
+            mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map"], NODDI_dir, MNI_dir) 
             # Doing FOD estimations
             FOD_dir = os.path.join(analysis_directory, "FOD")
             if not os.path.exists(FOD_dir):
@@ -276,14 +285,6 @@ if __name__ == '__main__':
                 print("run_preproc_t1w done")
             run_tractseg(peaks, info_mni["FA_MNI"], Tract_dir)
             print("\nTractSeg successfully used")
-
-            # NODDI
-            mask_nii = info_preproc["brain_mask_nii"]
-            if acq=="abcd":
-                dwi_preproc = info_preproc["dwi_preproc"]
-                bval = dwi_preproc.replace(".mif", ".bval")
-                bvec = dwi_preproc.replace(".mif", ".bvec")
-                NODDI(dwi_preproc, bval, bvec, mask_nii)
 
             # Directory definition
             Tract_dir = os.path.join(analysis_directory, "Tracto")
