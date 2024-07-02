@@ -21,6 +21,7 @@ from T1_preproc import run_preproc_t1
 from processing_TractSeg import run_tractseg
 from remove_volume import remove_volumes
 from ROI import getFAstats, create_or_update_tsv
+from dipy_dti_dki import DIPY_DTI
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -293,6 +294,12 @@ if __name__ == '__main__':
             tsv_file = os.path.join(bids_path, "derivatives", "FA_stats.tsv")
             subject_name = analysis_directory.split('/')[-3] + '-' + analysis_directory.split('/')[-2] + '-' + analysis_directory.split('/')[-1]
             create_or_update_tsv(subject_name, roi_stats, tsv_file)
+            
+            # DIPY DKI
+            DKI_dir = os.path.join(analysis_directory, "DKI")
+            if not os.path.exists(DKI_dir):
+                os.mkdir(DKI_dir)
+            DKI_return, DKI_msg, info_DKI = DIPY_DTI(info_preproc["dwi_preproc"], info_preproc["brain_mask"],DKI_dir)
 
             print("\n \n===== THE END =====\n\n")
                    
