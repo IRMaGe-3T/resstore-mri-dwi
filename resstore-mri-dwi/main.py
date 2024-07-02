@@ -22,6 +22,7 @@ from processing_TractSeg import run_tractseg
 from remove_volume import remove_volumes
 from ROI import getFAstats, create_or_update_tsv
 from dipy_dti_dki import DIPY_DTI
+from NODDI import NODDI
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -276,6 +277,14 @@ if __name__ == '__main__':
             run_tractseg(peaks, info_mni["FA_MNI"], Tract_dir)
             print("\nTractSeg successfully used")
 
+            # NODDI
+            mask_nii = info_preproc["brain_mask_nii"]
+            if acq=="abcd":
+                dwi_preproc = info_preproc["dwi_preproc"]
+                bval = dwi_preproc.replace(".mif", ".bval")
+                bvec = dwi_preproc.replace(".mif", ".bvec")
+                NODDI(dwi_preproc, bval, bvec, mask_nii)
+
             # Directory definition
             Tract_dir = os.path.join(analysis_directory, "Tracto")
             tractseg_out_dir = os.path.join(Tract_dir, "tractseg_output")
@@ -299,7 +308,7 @@ if __name__ == '__main__':
             DKI_dir = os.path.join(analysis_directory, "DKI")
             if not os.path.exists(DKI_dir):
                 os.mkdir(DKI_dir)
-            DKI_return, DKI_msg, info_DKI = DIPY_DTI(info_preproc["dwi_preproc"], info_preproc["brain_mask"],DKI_dir)
+            DKI_return, DKI_msg, info_DKI = DIPY_DTI(info_preproc["dwi_preproc"], info_preproc["brain_mask_nii"],DKI_dir)
 
             print("\n \n===== THE END =====\n\n")
                    

@@ -232,9 +232,11 @@ def run_preproc_dwi(
     else:
        print(f"\nSkipping brain mask step, {dwi_mask} already exists.")
 
-
+    mask_nii = dwi_mask.replace('.mif', '.nii.gz')
+    if not verify_file(mask_nii):
+        convert_mif_to_nifti(dwi_mask, dir_name, diff=None)
         
-    info_preproc = {"dwi_preproc": dwi_unbias,"brain_mask": dwi_mask}
+    info_preproc = {"dwi_preproc": dwi_unbias,"brain_mask": dwi_mask, "brain_mask_nii": mask_nii}
     msg = "\nPreprocessing DWI done"
     print(msg)
     return 1, msg, info_preproc

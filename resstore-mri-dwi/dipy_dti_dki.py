@@ -13,13 +13,7 @@ from useful import convert_mif_to_nifti, verify_file
 import nibabel as nib
 
 
-def DIPY_DTI(dwi_unbias_mif, dwi_mask_mif, DKI_dir):
-
-
-    dwi_mask_dir = os.path.dirname(dwi_mask_mif)
-    dwi_mask_nii = dwi_mask_mif.replace('.mif', '.nii.gz')
-    if not verify_file(dwi_mask_nii):
-        convert_mif_to_nifti(dwi_mask_mif, dwi_mask_dir, diff=None)
+def DIPY_DTI(dwi_unbias_mif, dwi_mask_nii, DKI_dir):
 
     dwi_unbias_nii = dwi_unbias_mif.replace('.mif', '.nii.gz')
     dwi_bval = dwi_unbias_nii.replace('.nii.gz', '.bval')
