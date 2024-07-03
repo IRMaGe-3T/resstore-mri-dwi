@@ -313,7 +313,7 @@ def run_register_MNI(in_dwi, in_fa, NODDI_dir, DKI_dir, MNI_dir):
         for file_name in os.listdir(NODDI_dir):
             if file_name.endswith(".nii.gz"):
                 map_path = os.path.join(NODDI_dir, file_name)
-                MNI_NODDI_dir = os.path.join(MNI_dir)
+                MNI_NODDI_dir = os.path.join(MNI_dir, "NODDI")
                 if not os.path.exists(MNI_NODDI_dir):
                     os.mkdir(MNI_NODDI_dir)
                 map_mni = os.path.join(MNI_NODDI_dir, file_name.replace(".nii.gz", "_MNI.nii.gz"))
@@ -333,12 +333,15 @@ def run_register_MNI(in_dwi, in_fa, NODDI_dir, DKI_dir, MNI_dir):
                         msg = f"\nCan not launch flirt for NODDI map {file_name} (exit code {result}): {stderr}"
                         return 0, msg, info_mni
                     
-    # Linear registration of DKII maps
+    # Linear registration of DKI maps
     if DKI_dir is not None:
         for file_name in os.listdir(DKI_dir):
             if file_name.endswith(".nii.gz"):
                 map_path = os.path.join(DKI_dir, file_name)
-                map_mni = os.path.join(MNI_dir, file_name.replace(".nii.gz", "_MNI.nii.gz"))
+                MNI_DKI_dir = os.path.join(MNI_dir, "DKI")
+                if not os.path.exists(MNI_DKI_dir):
+                    os.mkdir(MNI_DKI_dir)
+                map_mni = os.path.join(MNI_DKI_dir, file_name.replace(".nii.gz", "_MNI.nii.gz"))
                 if not verify_file(map_mni):
                     cmd = [
                         "flirt",
