@@ -6,7 +6,7 @@ def NODDI(dwi_mif,bval_file,bvec_file,mask_nii):
     # dwi and mask are given . mif and should be .nii.gz
     
     # Paths
-    dir = os.path.dirname(dwi_mif)
+    dir = os.path.dirname(dwi_mif) # path to the folder "preprocessing"
     dwi_file = dwi_mif.replace("mif", "nii.gz")
     scheme_file = os.path.join(dir, "scheme")
 
@@ -54,7 +54,8 @@ def NODDI(dwi_mif,bval_file,bvec_file,mask_nii):
         ae.save_results()
         print("Results saved.\n")
 
-        kernels = os.path.join(dir, "kernels")
+        analysis_dir = os.path.dirname(dir)
+        kernels = os.path.join(analysis_dir, "kernels")
         delete_directory(kernels)
 
 
