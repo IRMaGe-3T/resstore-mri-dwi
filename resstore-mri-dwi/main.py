@@ -192,19 +192,17 @@ if __name__ == '__main__':
             fa_return, fa_msg, info_fa = FA_ADC_AD_RD_maps(info_preproc["dwi_preproc"], info_preproc["brain_mask"],FA_dir)
             # NODDI maps
             mask_nii = info_preproc["brain_mask_nii"]
-            if acq=="abcd":
-                AMICO_dir = os.path.join(analysis_directory, "AMICO")
-                if not os.path.exists(AMICO_dir):
-                    dwi_preproc = info_preproc["dwi_preproc"]
-                    bval = dwi_preproc.replace(".mif", ".bval")
-                    bvec = dwi_preproc.replace(".mif", ".bvec")
-                    NODDI_dir = NODDI(dwi_preproc, bval, bvec, mask_nii)
-                else:
-                    base_dir = os.path.dirname(os.path.dirname(mask_nii))
-                    NODDI_dir = os.path.join(base_dir, "AMICO", "NODDI")
+            AMICO_dir = os.path.join(analysis_directory, "AMICO")
+            if not os.path.exists(AMICO_dir):
+                dwi_preproc = info_preproc["dwi_preproc"]
+                bval = dwi_preproc.replace(".mif", ".bval")
+                bvec = dwi_preproc.replace(".mif", ".bvec")
+                NODDI_dir = NODDI(dwi_preproc, bval, bvec, mask_nii)
             else:
-                NODDI_dir = None
-            # DKI maps
+                base_dir = os.path.dirname(os.path.dirname(mask_nii))
+                NODDI_dir = os.path.join(base_dir, "AMICO", "NODDI")
+
+            # DKI maps, only works for abcd since it requires 3 b values
             if acq=="abcd":
                 DKI_dir = os.path.join(analysis_directory, "DKI")
                 if not os.path.exists(DKI_dir):

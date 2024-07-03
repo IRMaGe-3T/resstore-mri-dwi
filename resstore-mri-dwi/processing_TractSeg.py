@@ -53,12 +53,15 @@ def run_tractseg(peaks, FA_map, Tract_dir):
 
     # Copy peaks into the tracto directory
     peaks_tracto = os.path.join(Tract_dir, "peaks.nii")
-    if not verify_file(peaks_tracto):
-        cmd = ["cp", peaks, peaks_tracto]
-        result, stderrl, sdtoutl = execute_command(cmd)
-        if result != 0:
-            msg = f"\nCan not copy peaks in the tracto directory: {result})"
-            return 0, msg
+    tractseg_out_dir=os.path.join(Tract_dir, "tractseg_output")
+    bundle = os.path.join(tractseg_out_dir, "bundle_segmentations")
+    if not verify_file(bundle):
+        if not verify_file(peaks_tracto):
+            cmd = ["cp", peaks, peaks_tracto]
+            result, stderrl, sdtoutl = execute_command(cmd)
+            if result != 0:
+                msg = f"\nCan not copy peaks in the tracto directory: {result})"
+                return 0, msg
 
     # Run all usefull TractSeg commands
     tractseg_out_dir=os.path.join(Tract_dir, "tractseg_output")
