@@ -16,14 +16,14 @@ from bids import BIDSLayout
 from prepare_acquisitions import prepare_abcd_acquistions, prepare_hermes_acquistions
 from useful import convert_nifti_to_mif, execute_command, get_shell, verify_file
 from preprocessing import run_preproc_dwi
-from FOD import FOD
-from FA_ADC_AD_RD import FA_ADC_AD_RD_maps
+from MRtrix_FOD import FOD
+from MRTrix_FA import FA_map
 from T1_preproc import run_preproc_t1  
-from processing_TractSeg import run_tractseg
+from TractSeg_processing import run_tractseg
 from remove_volume import remove_volumes
-from ROI import create_or_update_tsv, extract_roi_stats
-from dipy_dti_dki import DIPY_DTI
-from NODDI import NODDI
+from ROI_stats import create_or_update_tsv, extract_roi_stats
+from DIPY_DKI import DKI
+from AMICO_NODDI import NODDI
 from align_in_MNI import map_in_MNI, run_register_MNI
 
 if __name__ == '__main__':
@@ -190,7 +190,7 @@ if __name__ == '__main__':
             FA_dir = os.path.join(analysis_directory, "FA")
             if not os.path.exists(FA_dir):
                 os.mkdir(FA_dir)
-            fa_return, fa_msg, info_fa = FA_ADC_AD_RD_maps(info_preproc["dwi_preproc"], info_preproc["brain_mask"],FA_dir)
+            fa_return, fa_msg, info_fa = FA_map(info_preproc["dwi_preproc"], info_preproc["brain_mask"],FA_dir)
             # NODDI maps
             mask_nii = info_preproc["brain_mask_nii"]
             AMICO_dir = os.path.join(analysis_directory, "AMICO")
@@ -208,7 +208,7 @@ if __name__ == '__main__':
                 DKI_dir = os.path.join(analysis_directory, "DKI")
                 if not os.path.exists(DKI_dir):
                     os.mkdir(DKI_dir)
-                DKI_return, DKI_msg, info_DKI = DIPY_DTI(info_preproc["dwi_preproc"], info_preproc["brain_mask_nii"],DKI_dir)
+                DKI_return, DKI_msg, info_DKI = DKI(info_preproc["dwi_preproc"], info_preproc["brain_mask_nii"],DKI_dir)
             else:
                 DKI_dir=None
             # Aligning in the MNI space

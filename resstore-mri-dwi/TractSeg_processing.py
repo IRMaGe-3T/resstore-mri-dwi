@@ -107,6 +107,8 @@ def run_tractseg(peaks, FA_map, Tract_dir):
             msg = f"\nCan not run TractSeg uncertainty (exit code {result})"
             return 0, msg
     
+
+    ##Split from here
     # Run tractometry to create csv file
     if (os.path.exists(TOM_trackings) and os.path.exists(ending_segm)):
         tracto_csv = os.path.join(tractseg_out_dir, "tractometry.csv")

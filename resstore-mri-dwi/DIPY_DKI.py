@@ -1,5 +1,5 @@
 """
-DIPY DKI
+Diffusion Kurtosis Imaging (DKI) 
 
 """
 
@@ -13,7 +13,7 @@ from useful import convert_mif_to_nifti, verify_file
 import nibabel as nib
 
 
-def DIPY_DTI(dwi_unbias_mif, dwi_mask_nii, DKI_dir):
+def DKI(dwi_unbias_mif, dwi_mask_nii, DKI_dir):
 
     dwi_unbias_nii = dwi_unbias_mif.replace('.mif', '.nii.gz')
     dwi_bval = dwi_unbias_nii.replace('.nii.gz', '.bval')

@@ -6,7 +6,7 @@ Create FA map
 import os
 from useful import check_file_ext, execute_command
 
-def FA_ADC_AD_RD_maps(in_dwi, mask, FA_dir):
+def FA_map(in_dwi, mask, FA_dir):
 
     info = {}
     # Get files name
