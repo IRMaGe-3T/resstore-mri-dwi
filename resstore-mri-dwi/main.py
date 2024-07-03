@@ -257,20 +257,30 @@ if __name__ == '__main__':
             if not os.path.exists(FA_dir):
                 os.mkdir(FA_dir)
             fa_return, fa_msg, info_fa = FA_ADC_AD_RD_maps(info_preproc["dwi_preproc"], info_preproc["brain_mask"],FA_dir)
-            # NODDI
+            # NODDI maps
             mask_nii = info_preproc["brain_mask_nii"]
             if acq=="abcd":
-                dwi_preproc = info_preproc["dwi_preproc"]
-                bval = dwi_preproc.replace(".mif", ".bval")
-                bvec = dwi_preproc.replace(".mif", ".bvec")
-                NODDI_dir = NODDI(dwi_preproc, bval, bvec, mask_nii)
+                AMICO_dir = os.path.join(analysis_directory, "AMICO_dir")
+                if not os.path.exists(AMICO_dir):
+                    dwi_preproc = info_preproc["dwi_preproc"]
+                    bval = dwi_preproc.replace(".mif", ".bval")
+                    bvec = dwi_preproc.replace(".mif", ".bvec")
+                    NODDI_dir = NODDI(dwi_preproc, bval, bvec, mask_nii)
             else:
                 NODDI_dir = None
+            # DKI maps
+            if acq=="abcd":
+                DKI_dir = os.path.join(analysis_directory, "DKI")
+                if not os.path.exists(DKI_dir):
+                    os.mkdir(DKI_dir)
+                DKI_return, DKI_msg, info_DKI = DIPY_DTI(info_preproc["dwi_preproc"], info_preproc["brain_mask_nii"],DKI_dir)
+            else:
+                DKI_dir=None
             # Aligning in the MNI space
             MNI_dir = os.path.join(analysis_directory, "preprocessing_MNI")
             if not os.path.exists(MNI_dir):
                 os.mkdir(MNI_dir)
-            mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map"], NODDI_dir, MNI_dir) 
+            mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map"], NODDI_dir, DKI_dir, MNI_dir) 
             # Doing FOD estimations
             FOD_dir = os.path.join(analysis_directory, "FOD")
             if not os.path.exists(FOD_dir):
@@ -304,12 +314,6 @@ if __name__ == '__main__':
             tsv_file = os.path.join(bids_path, "derivatives", "FA_stats.tsv")
             subject_name = analysis_directory.split('/')[-3] + '-' + analysis_directory.split('/')[-2] + '-' + analysis_directory.split('/')[-1]
             create_or_update_tsv(subject_name, roi_stats, tsv_file)
-            
-            # DIPY DKI
-            DKI_dir = os.path.join(analysis_directory, "DKI")
-            if not os.path.exists(DKI_dir):
-                os.mkdir(DKI_dir)
-            DKI_return, DKI_msg, info_DKI = DIPY_DTI(info_preproc["dwi_preproc"], info_preproc["brain_mask_nii"],DKI_dir)
 
             print("\n \n===== THE END =====\n\n")
                    
