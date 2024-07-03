@@ -15,15 +15,16 @@ from bids import BIDSLayout
 
 from prepare_acquisitions import prepare_abcd_acquistions, prepare_hermes_acquistions
 from useful import convert_nifti_to_mif, execute_command, get_shell, verify_file
-from preprocessing import run_preproc_dwi, run_register_MNI
+from preprocessing import run_preproc_dwi
 from FOD import FOD
 from FA_ADC_AD_RD import FA_ADC_AD_RD_maps
 from T1_preproc import run_preproc_t1  
 from processing_TractSeg import run_tractseg
 from remove_volume import remove_volumes
-from ROI import getFAstats, create_or_update_tsv, extract_roi_stats
+from ROI import create_or_update_tsv, extract_roi_stats
 from dipy_dti_dki import DIPY_DTI
 from NODDI import NODDI
+from align_in_MNI import map_in_MNI, run_register_MNI
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -215,6 +216,15 @@ if __name__ == '__main__':
             if not os.path.exists(MNI_dir):
                 os.mkdir(MNI_dir)
             mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map"], NODDI_dir, DKI_dir, MNI_dir) 
+            # NODDI and DKI maps in the MNI
+            for file_name in os.listdir(NODDI_dir):
+                if file_name.endswith(".nii.gz"):
+                    map = os.path.join(NODDI_dir, file_name)
+                    map_in_MNI(map, MNI_dir, NODDI_dir, DKI_dir)
+            for file_name in os.listdir(DKI_dir):
+                if file_name.endswith(".nii.gz"):
+                    map = os.path.join(DKI_dir, file_name)
+                    map_in_MNI(map, MNI_dir, NODDI_dir, DKI_dir)
             # Doing FOD estimations
             FOD_dir = os.path.join(analysis_directory, "FOD")
             if not os.path.exists(FOD_dir):
