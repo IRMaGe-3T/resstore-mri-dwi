@@ -19,26 +19,26 @@ def DIPY_DTI(dwi_unbias_mif, dwi_mask_nii, DKI_dir):
     dwi_bval = dwi_unbias_nii.replace('.nii.gz', '.bval')
     dwi_bvec = dwi_unbias_nii.replace('.nii.gz', '.bvec')
 
-    AD = os.path.join(DKI_dir, 'dipy_dti_' + 'AD' + '.nii.gz')
+    AD = os.path.join(DKI_dir, 'dipy_dki_' + 'AD' + '.nii.gz')
 
     if not verify_file(AD):
-        print('\nDTI recontruction with dipy')
-        data, affine = load_nifti(dwi_unbias_nii)
-        bvals, bvecs = read_bvals_bvecs(dwi_bval, dwi_bvec)
-        gtab = gradient_table(bvals, bvecs)
-        dtimodel = dti.TensorModel(gtab)
-        mask, affine_mask = load_nifti(dwi_mask_nii)
-        dtifit = dtimodel.fit(data, mask=mask)
-        dti_metrics = {'FA': dtifit.fa,
-                    'MD': dtifit.md,
-                    'AD': dtifit.ad,
-                    'RD': dtifit.rd
-                    }
+        # print('\nDTI recontruction with dipy')
+        # data, affine = load_nifti(dwi_unbias_nii)
+        # bvals, bvecs = read_bvals_bvecs(dwi_bval, dwi_bvec)
+        # gtab = gradient_table(bvals, bvecs)
+        # dtimodel = dti.TensorModel(gtab)
+        # mask, affine_mask = load_nifti(dwi_mask_nii)
+        # dtifit = dtimodel.fit(data, mask=mask)
+        # dti_metrics = {'FA': dtifit.fa,
+        #             'MD': dtifit.md,
+        #             'AD': dtifit.ad,
+        #             'RD': dtifit.rd
+        #             }
 
-        for metric in list(dti_metrics.keys()):
-            img = nib.Nifti1Image(dti_metrics[metric], affine)
-            path = os.path.join(DKI_dir, 'dipy_dti_' + metric + '.nii.gz')
-            nib.save(img, path)
+        # for metric in list(dti_metrics.keys()):
+        #     img = nib.Nifti1Image(dti_metrics[metric], affine)
+        #     path = os.path.join(DKI_dir, 'dipy_dti_' + metric + '.nii.gz')
+        #     nib.save(img, path)
 
 
         print('\nDKI recontruction with dipy')

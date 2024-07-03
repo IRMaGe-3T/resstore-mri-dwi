@@ -6,11 +6,10 @@ def NODDI(dwi_mif,bval_file,bvec_file,mask_nii):
     # dwi and mask are given . mif and should be .nii.gz
     
     # Paths
-    dir = os.path.dirname(dwi_mif) # path to the folder "preprocessing"
-    dwi_file = dwi_mif.replace("mif", "nii.gz")
-    scheme_file = os.path.join(dir, "scheme")
+    base_dir = os.path.dirname(os.path.dirname(dwi_mif))
+    AMICO_dir = os.path.join(base_dir, "AMICO")
 
-    if not verify_file(scheme_file):
+    if not verify_file(AMICO_dir):
         # Setup AMICO
         print("Setting up AMICO...")
         amico.setup()
@@ -63,6 +62,7 @@ def NODDI(dwi_mif,bval_file,bvec_file,mask_nii):
     analysis_dir = os.path.dirname(preproc_dir)
     AMICO_dir = os.path.join(analysis_dir, "AMICO")
     NODDI_dir = os.path.join(AMICO_dir, "NODDI")
+    os.remove(scheme_file)
 
 
     print("AMICO processing completed.")
