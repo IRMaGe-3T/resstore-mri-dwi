@@ -19,7 +19,7 @@ from preprocessing import run_preproc_dwi
 from MRtrix_FOD import FOD
 from MRTrix_FA import FA_map
 from T1_preproc import run_preproc_t1  
-from TractSeg_processing import run_tractseg
+from TractSeg_processing import run_tractseg, tractometry_postprocess
 from remove_volume import remove_volumes
 from ROI_stats import create_or_update_tsv, extract_roi_stats
 from DIPY_DKI import DKI
@@ -179,6 +179,7 @@ if __name__ == '__main__':
                     SHELL = False
 
             print(f'\nPhase encoding dir: {pe_dir}')
+
             print("\n \n===== PREPROCESSING =====\n")
 
             # Launch preprocessing
@@ -191,6 +192,7 @@ if __name__ == '__main__':
             if not os.path.exists(FA_dir):
                 os.mkdir(FA_dir)
             fa_return, fa_msg, info_fa = FA_map(info_preproc["dwi_preproc"], info_preproc["brain_mask"],FA_dir)
+
             # NODDI maps
             mask_nii = info_preproc["brain_mask_nii"]
             AMICO_dir = os.path.join(analysis_directory, "AMICO")
@@ -211,11 +213,13 @@ if __name__ == '__main__':
                 DKI_return, DKI_msg, info_DKI = DKI(info_preproc["dwi_preproc"], info_preproc["brain_mask_nii"],DKI_dir)
             else:
                 DKI_dir=None
+
             # Aligning in the MNI space
             MNI_dir = os.path.join(analysis_directory, "preprocessing_MNI")
             if not os.path.exists(MNI_dir):
                 os.mkdir(MNI_dir)
             mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map"], NODDI_dir, DKI_dir, MNI_dir) 
+
             # NODDI and DKI maps in the MNI
             for file_name in os.listdir(NODDI_dir):
                 if file_name.endswith(".nii.gz"):
@@ -225,11 +229,13 @@ if __name__ == '__main__':
                 if file_name.endswith(".nii.gz"):
                     map = os.path.join(DKI_dir, file_name)
                     map_in_MNI(map, MNI_dir, NODDI_dir, DKI_dir)
+
             # Doing FOD estimations
             FOD_dir = os.path.join(analysis_directory, "FOD")
             if not os.path.exists(FOD_dir):
                 os.mkdir(FOD_dir)
             _,msg, peaks = FOD(info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"], acq, FOD_dir)
+
             # Tractography
             Tract_dir = os.path.join(analysis_directory, "Tracto")
             if not os.path.exists(Tract_dir):
@@ -237,7 +243,13 @@ if __name__ == '__main__':
             if in_t1w_nifti is not None:
                 run_preproc_t1(in_t1w_nifti,info_mni["dwi_preproc_mni"])
                 print("run_preproc_t1w done")
-            run_tractseg(peaks, info_mni["FA_MNI"], Tract_dir)
+            run_tractseg(peaks, Tract_dir)
+
+            # Tractometry
+            # Change here if you want to perform tractometry with another map than the FA
+            # Be carefull: the map must be in the MNI space
+            map_path = info_mni["FA_MNI"]
+            tractometry_postprocess(map_path, Tract_dir)
             print("\nTractSeg successfully used")
 
             # ROI extraction
