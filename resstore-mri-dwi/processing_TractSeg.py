@@ -135,7 +135,7 @@ def run_tractseg(peaks, FA_map, Tract_dir):
             file.writelines(lines)
         print(f"\nUpdated the first line of {subjects_txt} with the path to the CSV file.\n")
 
-    FA_graphs = os.path.join(tractseg_out_dir, "FA_graphs_TractSeg")
+    FA_graphs = os.path.join(tractseg_out_dir, "FA_graphs_TractSeg.png")
     if not verify_file(FA_graphs):
         cmd = ["plot_tractometry_results", "-i", subjects_txt, "-o", FA_graphs, "--mc"]
         result, stderrl, sdtoutl = execute_command(cmd)

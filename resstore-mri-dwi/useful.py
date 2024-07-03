@@ -6,7 +6,8 @@ Useful functions :
     - convert_mif_to_nifti
     - convert_nifti_to_mif
     - get_shell
-    -download_subjects_txt
+    - download_subjects_txt
+    - plot_cst_data
 """
 
 import os

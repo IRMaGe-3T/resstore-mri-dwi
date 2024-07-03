@@ -9,6 +9,7 @@ import argparse
 import json
 import os
 import sys
+import csv
 
 from bids import BIDSLayout
 
@@ -20,7 +21,7 @@ from FA_ADC_AD_RD import FA_ADC_AD_RD_maps
 from T1_preproc import run_preproc_t1  
 from processing_TractSeg import run_tractseg
 from remove_volume import remove_volumes
-from ROI import getFAstats, create_or_update_tsv
+from ROI import getFAstats, create_or_update_tsv, extract_roi_stats
 from dipy_dti_dki import DIPY_DTI
 from NODDI import NODDI
 
@@ -56,25 +57,6 @@ if __name__ == '__main__':
     acquisitions = args.acquisitions
     volumes = args.volumes
     layout = BIDSLayout(bids_path)
-
-    # # Use this section if you want to ask user for processing
-    # user_input_1 = input(f"\nDo you want to create an FA, ADC, AD and RD maps of the brain? (yes/no): ").strip().lower()
-    # if user_input_1 in ['yes', 'y']:
-    #     user_input_2 = input(f"Do you want to align image to the MNI space? (yes/no): ").strip().lower()
-    #     if user_input_2 in ['yes', 'y']:
-    #         user_input_3 = input(f"Do you want to perform FOD estimation? (yes/no): ").strip().lower()
-    #         if user_input_3 in ['yes', 'y']:
-    #             user_input_4 = input(f"Do you want to create a whole-brain tractogram? (yes/no): ").strip().lower()
-    #         else:
-    #             user_input_4 = 'no'
-    #     else:
-    #         user_input_3 = 'no'
-    #         user_input_4 = 'no'
-    # else:
-    #     user_input_2 = 'no'
-    #     user_input_3 = 'no'
-    #     user_input_4 = 'no'
-
     
     if subjects == ['all']:
         # Get all subjects in BIDS directory
@@ -121,8 +103,6 @@ if __name__ == '__main__':
                         "ses-" + ses,
                         "dwi-" + acq + "_removed_volumes",
                     )
-
-
 
                 preproc_directory = os.path.join(
                     analysis_directory, "preprocessing"
@@ -179,7 +159,6 @@ if __name__ == '__main__':
                     if result != 0:
                         msg = f"\nCan not delete dwi_rm_vol file (exit code {result})"
 
-
                 # Get info fot future processing
                 # Get readout time
                 with open(in_dwi_json, encoding="utf-8") as my_json:
@@ -206,52 +185,6 @@ if __name__ == '__main__':
 
             print("\n \n===== PROCESSING =====\n")
 
-            # # Use this section if you ask the user which processing is required 
-
-            # # Launch FA map creation if needed
-            # if user_input_1 in ['yes', 'y']:
-            #     FA_dir = os.path.join(analysis_directory, "FA")
-            #     if not os.path.exists(FA_dir):
-            #         os.mkdir(FA_dir)
-            #     fa_return, fa_msg, info_fa = FA_ADC_AD_RD_maps(info_preproc["dwi_preproc"], info_preproc["brain_mask"],FA_dir) 
-            # else:
-            #     print("\nNo creation of FA_map")
-
-            # # Aligning image to MNI space
-            # if user_input_2 in ['yes', 'y']:
-            #     MNI_dir = os.path.join(analysis_directory, "preprocessing_MNI")
-            #     if not os.path.exists(MNI_dir):
-            #         os.mkdir(MNI_dir)
-            #     mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map"],MNI_dir) 
-            # else:
-            #     print("\nNo MNI space alignment")
-
-            # # Launch FOD estimation if wanted 
-            # if user_input_3 in ['yes', 'y']:
-            #     FOD_dir = os.path.join(analysis_directory, "FOD")
-            #     if not os.path.exists(FOD_dir):
-            #         os.mkdir(FOD_dir)
-            #     _,msg, peaks = FOD(info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"], acq, FOD_dir)
-            # else:
-            #     print("\nNo FOD done")  
-
-            # # For tractography
-            # # Launch T1_preproc
-            # if user_input_4 in ['yes', 'y']:
-            #     Tract_dir = os.path.join(analysis_directory, "Tracto")
-            #     if not os.path.exists(Tract_dir):
-            #         os.mkdir(Tract_dir)
-            #     if in_t1w_nifti is not None:
-            #         run_preproc_t1(in_t1w_nifti,info_mni["dwi_preproc_mni"])
-            #         print("run_preproc_t1w done")
-            #     run_tractseg(peaks, info_mni["FA_MNI"], Tract_dir)
-            #     print("\nTractSeg successfully used")
-            # else:
-            #     print("\nNo tractography done")
-
-
-
-            # # Short version of the code doing all the processing
             # FA map
             FA_dir = os.path.join(analysis_directory, "FA")
             if not os.path.exists(FA_dir):
@@ -296,24 +229,16 @@ if __name__ == '__main__':
             run_tractseg(peaks, info_mni["FA_MNI"], Tract_dir)
             print("\nTractSeg successfully used")
 
-            # Directory definition
-            Tract_dir = os.path.join(analysis_directory, "Tracto")
-            tractseg_out_dir = os.path.join(Tract_dir, "tractseg_output")
-            bundle = os.path.join(tractseg_out_dir, "bundle_segmentations")
-
-            # All ROIs
-            roi_files = [f for f in os.listdir(bundle) if f.endswith('.nii.gz')]
-
-            roi_stats = []
-
-            for roi_file in roi_files:
-                ROI = os.path.join(bundle, roi_file)
-                d = getFAstats(info_mni["FA_MNI"], ROI, bundle)
-                roi_stats.append(d)
-
+            # ROI extraction
             tsv_file = os.path.join(bids_path, "derivatives", "FA_stats.tsv")
             subject_name = analysis_directory.split('/')[-3] + '-' + analysis_directory.split('/')[-2] + '-' + analysis_directory.split('/')[-1]
-            create_or_update_tsv(subject_name, roi_stats, tsv_file)
+            # Check if the subject is already in the TSV file or there is not such a file
+            if not os.path.isfile(tsv_file) or subject_name not in {row[0] for row in csv.reader(open(tsv_file), delimiter='\t')}:
+                # Extract ROI stats and update the TSV file
+                roi_stats = extract_roi_stats(analysis_directory, info_mni["FA_MNI"])
+                create_or_update_tsv(subject_name, roi_stats, tsv_file)
+            else:
+                print("\nFile already on the FA stats table.")
 
             print("\n \n===== THE END =====\n\n")
                    

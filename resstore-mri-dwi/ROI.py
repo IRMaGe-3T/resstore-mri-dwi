@@ -5,18 +5,8 @@ import csv
 
 def getFAstats (FA, ROI_mask, bundle):
 
-    #Create directory for the grid files
-    grid_dir = os.path.join(bundle, "grid")
-    os.makedirs(grid_dir, exist_ok=True)
-
     # Create a dictionnary
     d = {} 
-    
-    # ROI_mask_grid = os.path.join(grid_dir, os.path.basename(ROI_mask).replace(".nii.gz", "_grid.nii.gz"))
-
-    # if not verify_file(ROI_mask_grid):
-    #     cmd = ["mrgrid", ROI_mask, "regrid", "-template", FA, ROI_mask_grid, "-interp", "nearest"]
-    #     result, stderrl, sdtoutl = execute_command(cmd)
 
     cmd = ["mrstats", "-mask", ROI_mask, FA]
     result, stderrl, sdtoutl = execute_command(cmd)
@@ -35,6 +25,22 @@ def getFAstats (FA, ROI_mask, bundle):
     d['mean_FA'] = d[res[1].decode()] 
 
     return d
+
+def extract_roi_stats(analysis_directory, FA_MNI):
+    # Directory definition
+    Tract_dir = os.path.join(analysis_directory, "Tracto")
+    tractseg_out_dir = os.path.join(Tract_dir, "tractseg_output")
+    bundle = os.path.join(tractseg_out_dir, "bundle_segmentations")
+
+    # All ROIs
+    roi_files = [f for f in os.listdir(bundle) if f.endswith('.nii.gz')]
+    roi_stats = []
+    for roi_file in roi_files:
+        ROI = os.path.join(bundle, roi_file)
+        d = getFAstats(FA_MNI, ROI, bundle)
+        roi_stats.append(d)
+
+    return roi_stats
 
 def create_or_update_tsv(subject_name, roi_stats, tsv_file):
     # Check if CSV exist
@@ -74,7 +80,7 @@ def create_or_update_tsv(subject_name, roi_stats, tsv_file):
     # Verify if subject is already on the list
     subjects_in_table = {row[0] for row in existing_data[1:]}
     if subject_name in subjects_in_table:
-        return  # If there is the subject we skip
+        return False  # Subject is already in the TSV file
 
     # Create each file
     subject_data = [subject_name] + [stat['mean_FA'] for stat in roi_stats]
@@ -89,3 +95,7 @@ def create_or_update_tsv(subject_name, roi_stats, tsv_file):
     with open(tsv_file, mode='w', newline='') as file:
         writer = csv.writer(file, delimiter='\t')
         writer.writerows([expected_headers] + existing_data[1:])
+
+    print("\nSubject successfully added to FA stats table.")
+
+    return True  # Subject was added
