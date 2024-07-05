@@ -1,0 +1,13 @@
+# tractometry_path=path/tractseg_output/tractometry.csv
+# bundles=CST_right MCP CC_5 CC_6 SCP_left
+# plot_3D=
+
+# The first line has to start with '# tractometry_path=' and specify the path to the tractometry.csv file.
+# 
+# The second line can start with '# bundles=' and then a subset of bundles can be specified which shall be
+# analyzed. If the second line is left empty all bundles will be analyzed.
+#
+# All other lines must remain as there are. 
+#
+subject_id group
+1 0
