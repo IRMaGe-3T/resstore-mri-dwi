@@ -6,30 +6,30 @@ This project is a processing pipeline for MRI diffusion data of the RESSTORE stu
 
 To begin, make sure your data are in BIDS format and that they have been organized with dcm2bids_scaffold method. This means your data should look like this:
 
-├── BIDS
-│ ├── code
-│ ├── derivatives
-│ ├── sourcedata
-│ └── sub-001
-│ 	└── ses-01
-│ 		├── anat
-│ 		├── dwi
-│ 		├── fmap
-│ 		└── ...
-│ 	└── ses-02
-│ 		├── anat
-│ 		├── dwi
-│ 		├── fmap
-│ 		└── ...
-│ └── sub-002
-│ 	└── ses-01
-│ 	└── ses-02
-│ └── sub-003
-│ 	└── ses-01
-│ 	└── ses-02
-│ ├── CHANGES
-│ ├── dataset_description.json
-│ ├── ...
+├── BIDS  
+│ ├── code  
+│ ├── derivatives  
+│ ├── sourcedata  
+│ └── sub-001  
+│ 	└── ses-01  
+│ 		├── anat  
+│ 		├── dwi  
+│ 		├── fmap  
+│ 		└── ...  
+│ 	└── ses-02  
+│ 		├── anat  
+│ 		├── dwi  
+│ 		├── fmap  
+│ 		└── ...  
+│ └── sub-002  
+│ 	└── ses-01  
+│ 	└── ses-02  
+│ └── sub-003  
+│ 	└── ses-01  
+│ 	└── ses-02  
+│ ├── CHANGES  
+│ ├── dataset_description.json  
+│ ├── ...  
 
 To use this code, open the `restorre-mri-dwi` directory in your terminal and run the following command:
 ```
