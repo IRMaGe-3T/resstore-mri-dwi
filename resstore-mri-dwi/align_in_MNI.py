@@ -179,7 +179,6 @@ def map_in_MNI(map, MNI_dir, NODDI_dir, DKI_dir):
     - NODDI_dir
     - DKI_dir
     """
-        
     map_dir = os.path.dirname(map) # Either NODDI or DKI path
     _, map_name = os.path.split(map)
     map_name = map_name.replace(".nii.gz", "_MNI.nii.gz")

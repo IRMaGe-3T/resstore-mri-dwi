@@ -18,6 +18,7 @@ Files created:
 
 import os
 from useful import check_file_ext, execute_command, verify_file
+from termcolor import colored
 
 
 
@@ -27,6 +28,7 @@ def FOD(in_dwi, mask, acq,FOD_dir):
     # Get files name
     dir_name = os.path.dirname(in_dwi)
     valid_bool, in_ext, file_name = check_file_ext(in_dwi, {"MIF": "mif"})
+    print(colored("\n~~FOD estimation starts~~", 'cyan'))
     
     if acq=='abcd':
         # RF estimation 
@@ -34,7 +36,7 @@ def FOD(in_dwi, mask, acq,FOD_dir):
         wm = os.path.join(FOD_dir, "wm.txt")
         gm = os.path.join(FOD_dir, "gm.txt")
         csf = os.path.join(FOD_dir, "csf.txt")
-        if not os.path.exists(voxels):
+        if not verify_file(voxels):
             cmd = ["dwi2response", "dhollander", in_dwi, wm, gm, csf, "-voxels", voxels]
             result, stderrl, sdtoutl = execute_command(cmd)
             if result != 0:
@@ -42,15 +44,13 @@ def FOD(in_dwi, mask, acq,FOD_dir):
                 return 0, msg, info
             else:
                 print(f"\nVoxels succesfully created. Output file: {voxels}")
-        else:
-            print(f"\nSkipping RF estimation step, {voxels} already exists.")
 
         # FOD estimation 
         vf = os.path.join(FOD_dir, "vf.mif")
         wmfod = os.path.join(FOD_dir, "wmfod.mif")
         gmfod = os.path.join(FOD_dir, "gmfod.mif")
         csffod = os.path.join(FOD_dir, "csffod.mif")
-        if not os.path.exists(vf) :
+        if not verify_file(vf) :
             if not (os.path.exists(wmfod) and os.path.exists(gmfod) and os.path.exists(csffod)):
                 cmd = ["dwi2fod", "msmt_csd", in_dwi, "-mask", mask, wm, wmfod, gm, gmfod, csf, csffod]
                 result, stderrl, sdtoutl = execute_command(cmd)
@@ -81,8 +81,6 @@ def FOD(in_dwi, mask, acq,FOD_dir):
                 return 0, msg, info
             else:
                 print(f"\nIntermediary files succesfully removed. Output file: {interm_wm}")
-        else: 
-            print(f"\nSkipping FOD estimation step, {vf} already exists.")
 
         # Intensity normalization
         wmfod_norm = os.path.join(FOD_dir, "wmfod_norm.mif")
@@ -97,7 +95,7 @@ def FOD(in_dwi, mask, acq,FOD_dir):
             else:
                 print(f"\nIntensity normalization completed. Output file: {wmfod_norm}, {gmfod_norm}, {csffod_norm}")
         else:
-            print("\nIntensity normalization already done")
+            print(colored(f"\nIntensity normalization already done", 'yellow'))
 
         # Extract peaks 
         peaks = os.path.join(FOD_dir, "peaks.nii")
@@ -111,6 +109,7 @@ def FOD(in_dwi, mask, acq,FOD_dir):
                 print('\nsh2peaks done.')
 
         msg = f"\nPeaks Succesfully extracted. Output file: {peaks}"
+        print(colored("\nFOD estimation ends", 'cyan'))
         return 1, msg, peaks
     
     elif acq=='hermes':
@@ -149,6 +148,7 @@ def FOD(in_dwi, mask, acq,FOD_dir):
                     print(f"\nsh2peaks done")
 
         msg = "Peaks successfully extracted"
+        print(colored("\nFOD estimation ends", 'cyan'))
         return 1, msg, peaks_h
     
     else:

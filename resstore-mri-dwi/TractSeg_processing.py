@@ -5,6 +5,7 @@ Functions to used TracSeg software:
 """
 
 from useful import check_file_ext, execute_command, verify_file, download_subjects_txt, plot_cst_data
+from termcolor import colored
 import os
 
 EXT_NIFTI = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
@@ -25,6 +26,7 @@ def run_tractseg(peaks, Tract_dir):
 
     # Check if peaks has the right format
     valid_bool, in_ext, file_name = check_file_ext(peaks, EXT_NIFTI)
+    print(colored("\n~~TractSeg running~~", 'cyan'))
     if not valid_bool:
         msg = "\nInput image format is not recognized (NIfTI needed)...!"
         return 0, msg
@@ -87,7 +89,7 @@ def run_tractseg(peaks, Tract_dir):
             return 0, msg
 
     msg = "\nRun TracSeg done"
-    print(msg)
+    print(colored(msg, 'cyan'))
     return 1, msg
     
 
@@ -168,5 +170,5 @@ def tractometry_postprocess(map, Tract_dir):
     plot_cst_data(tracto_csv)
 
     msg = "\nRun postprocessing for tractometry done"
-    print(msg)
+    print(colored(msg, 'cyan'))
     return 1, msg

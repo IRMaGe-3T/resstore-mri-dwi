@@ -224,6 +224,7 @@ if __name__ == '__main__':
             mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map"], NODDI_dir, DKI_dir, MNI_dir) 
 
             # NODDI and DKI maps in the MNI
+            print(colored("\n~~Map in MNI step starts~~", 'cyan'))
             for file_name in os.listdir(NODDI_dir):
                 if file_name.endswith(".nii.gz"):
                     map = os.path.join(NODDI_dir, file_name)
@@ -232,6 +233,7 @@ if __name__ == '__main__':
                 if file_name.endswith(".nii.gz"):
                     map = os.path.join(DKI_dir, file_name)
                     map_in_MNI(map, MNI_dir, NODDI_dir, DKI_dir)
+            print(colored("\nMap in MNI step ends", 'cyan'))
 
             # Doing FOD estimations
             FOD_dir = os.path.join(analysis_directory, "FOD")
@@ -245,9 +247,7 @@ if __name__ == '__main__':
                 os.mkdir(Tract_dir)
             if in_t1w_nifti is not None:
                 run_preproc_t1(in_t1w_nifti,info_mni["dwi_preproc_mni"])
-                print("run_preproc_t1w done")
             run_tractseg(peaks, Tract_dir)
-            print("\nTractSeg successfully used")
 
 
             # Tractometry
@@ -265,9 +265,10 @@ if __name__ == '__main__':
             # DKI_MNI= os.path.join(MNI_dir, "DKI_MNI")
             # map_path = os.path.join(DKI_MNI, "dki_MK_MNI.nii.gz")
 
+            print(colored("\n~~Tractometry starts~~", 'cyan'))
             tractometry_postprocess(map_path2, Tract_dir)
             tractometry_postprocess(map_path, Tract_dir)
-            print("\nTractometry done.")
+            print(colored("\nTractometry done.", 'cyan'))
 
             # ROI extraction
             tsv_file = os.path.join(bids_path, "derivatives", "FA_stats.tsv")
@@ -278,7 +279,7 @@ if __name__ == '__main__':
                 roi_stats = extract_roi_stats(analysis_directory, info_mni["FA_MNI"])
                 create_or_update_tsv(subject_name, roi_stats, tsv_file)
             else:
-                print("\nFile already on the FA stats table.")
+                print(colored("\nFile already on the FA stats table.", 'yellow'))
 
             print(colored("\n \n===== THE END =====\n\n", 'cyan'))
                    

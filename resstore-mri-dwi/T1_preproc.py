@@ -1,5 +1,6 @@
 import os
 from useful import execute_command, convert_mif_to_nifti, verify_file
+from termcolor import colored
 
 def run_preproc_t1(in_t1_nifti, in_dwi):
     """
@@ -26,6 +27,7 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
     
     # Extract b0 from dwi
     in_dwi_b0 = in_dwi.replace(".mif", "_bzero.mif")
+    print(colored("\n~~T1 preprocessing starts~~", 'cyan'))
     if not verify_file(in_dwi_b0):
         cmd = ["dwiextract", in_dwi, in_dwi_b0, "-bzero"]
         result, stderrl, sdtoutl = execute_command(cmd)
@@ -143,3 +145,5 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
         info = {"in_t1_coreg": in_t1_coreg}
         msg = "\nPreprocessing T1 done"
         return 1, msg, info
+    
+    print(colored("\nT1 preprocessing ends", 'cyan'))
