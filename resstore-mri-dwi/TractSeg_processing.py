@@ -155,7 +155,7 @@ def tractometry_postprocess(map, Tract_dir):
         # Write the modified content back to the .txt file
         with open(subjects_txt, 'w') as file:
             file.writelines(lines)
-        print(f"\nUpdated the first line of {subjects_txt} with the path to the CSV file.")
+        print(f"\nUpdated the first line of {subjects_txt} with the path to the CSV file.\n")
 
     FA_graphs = os.path.join(tractseg_out_dir, map_name + "_graphs_TractSeg.png")
     if not verify_file(FA_graphs):

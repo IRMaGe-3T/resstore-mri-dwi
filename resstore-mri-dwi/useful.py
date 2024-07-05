@@ -315,7 +315,10 @@ def plot_cst_data(file_path):
     # Save the figure
     plt.tight_layout()
     dir = os.path.dirname(file_path)
-    save_path = os.path.join(dir, "FA_CST.png")
+    _,name = os.path.split(file_path)
+    name, _ = os.path.splitext(name)
+    name = name.replace("tractometry_", "")
+    save_path = os.path.join(dir, name + "_in_CST_tracto.png")
     plt.savefig(save_path)
     
     # Close the plot
