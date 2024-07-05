@@ -236,7 +236,7 @@ def get_shell(in_file):
 
 # Function to download the subjects.txt file if it doesn't exist
 def download_subjects_txt(dir_name):
-    github_repo_url = "https://github.com/IRMaGe-3T/resstore-mri-dwi/raw/525fa8803e8c6fd1cfa2886e90e52163e9e5e12c/resstore-mri-dwi/resources/subjects.txt"
+    github_repo_url = "https://github.com/IRMaGe-3T/resstore-mri-dwi/raw/596e40689940113ef7b147679f218aba4235c60a/resstore-mri-dwi/resources/subjects.txt"
     template_filename = "subjects.txt"
     template_path = os.path.join(dir_name, template_filename)
     
