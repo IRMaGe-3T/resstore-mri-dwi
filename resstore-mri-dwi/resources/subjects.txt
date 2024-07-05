@@ -1,5 +1,5 @@
 # tractometry_path=path/tractseg_output/tractometry.csv
-# bundles=CST_right MCP CC_5 CC_6 SCP_left
+# bundles=CST_left CST_right MCP CC_5 SLF_III_left
 # plot_3D=
 
 # The first line has to start with '# tractometry_path=' and specify the path to the tractometry.csv file.
