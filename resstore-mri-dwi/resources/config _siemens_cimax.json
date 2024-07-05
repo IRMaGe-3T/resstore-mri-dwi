@@ -1,0 +1,69 @@
+{
+    "descriptions": [
+        {
+            "datatype": "anat",
+            "suffix": "T1w",
+            "criteria": {
+            	"SeriesDescription": "T1 MPRAGE*",
+                "ImageType": ["ORIGINAL", "PRIMARY", "M", "NONE"]
+            }
+        },
+        {
+            "datatype": "anat",
+            "suffix": "FLAIR",
+            "criteria": {
+            	"SeriesDescription": "*FLAIR 3D*",
+                "ImageType": ["ORIGINAL", "PRIMARY", "M", "NONE"]
+            }
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": "acq-abcd_dir-PA",
+            "criteria": {
+            	"SeriesDescription": "DWI_b0_2iso_PA"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j"
+            }
+        },
+        {
+            "datatype": "func",
+            "suffix": "bold",
+            "custom_entities": "task-fe",
+            "criteria": {
+            	"SeriesDescription": "*IRMF_FE_166_RESSTORE*"
+            }
+        },
+        {
+            "datatype": "func",
+            "suffix": "bold",
+            "custom_entities": "task-rs",
+            "criteria": {
+            	"SeriesDescription": "*BOLD_2iso_mb4_pf68*"
+            }
+        },
+        {
+            "datatype": "dwi",
+            "suffix": "dwi",
+            "custom_entities": "acq-abcd_dir-PA",
+            "criteria": {
+            	"SeriesDescription": "DWI_b3000d109_2iso_PA" 
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j"
+            }
+        },
+        {
+            "datatype": "dwi",
+            "suffix": "dwi",
+            "custom_entities": "acq-abcd_dir-AP",
+            "criteria": {
+            	"SeriesDescription": "DWI_b3000d109_2iso_AP" 
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j-"
+            }
+        }
+    ]
+}

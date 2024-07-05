@@ -1,0 +1,254 @@
+{
+    "descriptions": [
+        {
+            "datatype": "anat",
+            "suffix": "T1w",
+            "criteria": {
+            	"SeriesDescription": "*3D_T1*"
+            }
+        },
+        {
+            "datatype": "anat",
+            "suffix": "T1w",
+            "criteria": {
+            	"SeriesDescription": "*sT1W_1mm_3D_32ch*"
+            }
+        },
+        {
+            "datatype": "anat",
+            "suffix": "T1w",
+            "criteria": {
+            	"SeriesDescription": "*T1W_3D_TFE_32*"
+            }
+        },
+        {
+            "datatype": "anat",
+            "suffix": "T1w",
+            "criteria": {
+            	"SeriesDescription": "T1 MPRAGE AXIAL"
+            }
+        },
+        {
+            "datatype": "anat",
+            "suffix": "FLAIR",
+            "criteria": {
+            	"SeriesDescription": "*3D_FLAIR*"
+            }
+        },
+        {
+            "datatype": "anat",
+            "suffix": "FLAIR",
+            "criteria": {
+            	"SeriesDescription": "*FLAIR 3D*"
+            }
+        },
+        {
+            "datatype": "fmap", 
+            "suffix": "epi",
+            "custom_entities": "acq-abcd_dir-AP",
+            "criteria": {
+            	"SeriesDescription": "*DTI Fieldmap A*"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j-"
+            }
+        },
+        {
+            "datatype": "fmap", 
+            "suffix": "epi",
+            "custom_entities": "acq-abcd_dir-AP",
+            "criteria": {
+            	"SeriesDescription": "DTI_multishell_102_dir_AP"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j-"
+            }
+        },        
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": "acq-abcd_dir-PA",
+            "criteria": {
+            	"SeriesDescription": "*DTI Fieldmap P*"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j"
+            }
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": "acq-abcd_dir-PA",
+            "criteria": {
+            	"SeriesDescription": "DTI_multishell_102_dir_PA"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j"
+            }
+        },
+        {
+            "datatype": "func",
+            "suffix": "bold",
+            "custom_entities": "task-fe",
+            "criteria": {
+            	"SeriesDescription": "*PareticHand_166dyn*"
+            }
+        },
+        { 
+            "datatype": "func",
+            "suffix": "bold",
+            "custom_entities": "task-fe",
+            "criteria": {
+            	"SeriesDescription": "LeftHand_166dyn*"
+            }
+        },
+        {
+            "datatype": "func",
+            "suffix": "bold",
+            "custom_entities": "task-rs",
+            "criteria": {
+            	"SeriesDescription": "*rs400*"
+            }
+        },
+        {
+            "datatype": "func",
+            "suffix": "bold",
+            "custom_entities": "fmri",
+            "criteria": {
+            	"SeriesDescription": "fmri_resstore_166"
+            }
+        },
+        {
+            "datatype": "dwi",
+            "suffix": "dwi",
+            "custom_entities": "acq-abcd1_dir-PA",
+            "criteria": {
+            	"SeriesDescription": "DTI 1" 
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j"
+            }
+        },
+        {
+            "datatype": "dwi",
+            "suffix": "dwi",
+            "custom_entities": "acq-abcd2_dir-PA",
+            "criteria": {
+            	"SeriesDescription": "DTI 2" 
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j"
+            }
+        },
+        {
+            "datatype": "dwi",
+            "suffix": "dwi",
+            "custom_entities": "acq-abcd1_dir-PA",
+            "criteria": {
+            	"SeriesDescription": "DTI 1_2mm"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j"
+            }
+        },
+        {
+            "datatype": "dwi",
+            "suffix": "dwi",
+            "custom_entities": "acq-abcd2_dir-PA",
+            "criteria": {
+            	"SeriesDescription": "DTI 2_2mm"
+            },
+            "sidecar_changes": {
+                "PhaseEnPhasecodingDirection": "j"
+            }
+        },
+        {
+            "datatype": "dwi",
+            "suffix": "dwi",
+            "custom_entities": "acq-abcd_dir-AP",
+            "criteria": {
+            	"SeriesDescription": "DTI_multishell_102_dir"
+            },
+            "sidecar_changes": {
+                "PhaseEnPhasecodingDirection": "j-"
+            }
+        },
+        {
+            "datatype": "dwi",
+            "suffix": "dwi",
+            "custom_entities": "acq-hermes_dir-PA",
+            "criteria": {
+            	"SeriesDescription": "DTI-60dir_MB2_AdaptTX_EnhG_FreeRot*"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j"
+            }
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": "acq-abcd_dir-PA",
+            "criteria": {
+            	"SeriesDescription": "DTI_APP2mm_Fieldmap P"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j"
+            }
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": "acq-abcd_dir-AP",
+            "criteria": {
+            	"SeriesDescription": "DTI_APA2mm_Fieldmap A"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j-"
+            }
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": "acq-hermes_dir-PA",
+            "criteria": {
+            	"SeriesDescription": "DTI-6dir_APP_MB2"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j"
+            }
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": "acq-hermes_dir-AP",
+            "criteria": {
+            	"SeriesDescription": "DTI-6dir_APA_MB2"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j-"
+            }
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": "acq-hermes_dir-PA",
+            "criteria": {
+            	"SeriesDescription": "DTI-b0_APP_MB2"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j"
+            }
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": "acq-hermes_dir-AP",
+            "criteria": {
+            	"SeriesDescription": "DTI-b0_APA_MB2"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j-"
+            }
+        }
+    ]
+}
