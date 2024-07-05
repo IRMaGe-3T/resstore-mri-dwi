@@ -3,6 +3,11 @@
 This project is a processing pipeline for MRI diffusion data of the RESSTORE study. This repository contains the code to process MRI diffusion data using the BIDS (Brain Imaging Data Structure) format.
 
 
+## Requirements
+
+Add here the requirements. Software + which images are mandatory. 
+
+
 
 ## Before starting: organize the database
 
