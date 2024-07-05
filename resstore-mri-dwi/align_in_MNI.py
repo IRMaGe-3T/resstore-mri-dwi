@@ -9,6 +9,7 @@ Functions for preprocessing DWI data:
 import os
 import urllib.request
 from useful import verify_file, execute_command, check_file_ext, convert_mif_to_nifti, convert_nifti_to_mif
+from termcolor import colored
 
 
 
@@ -64,6 +65,7 @@ def run_register_MNI(in_dwi, in_fa, NODDI_dir, DKI_dir, MNI_dir):
     preproc_dir = os.path.dirname(in_dwi)
     FA_dir = os.path.dirname(in_fa)
     valid_bool, in_ext, file_name = check_file_ext(in_dwi, {"MIF": "mif"})
+    print(colored("\n~~MNI step starts~~", 'cyan'))
 
     # Download the template file
     template_path = download_template(MNI_dir)
@@ -160,7 +162,7 @@ def run_register_MNI(in_dwi, in_fa, NODDI_dir, DKI_dir, MNI_dir):
 
     info_mni = {"dwi_preproc_mni": diffusion_mni_mif,"dwi_mask_mni": dwi_mask, "FA_MNI": fa_mni}
     msg = "\nMNI space step done"
-    print(msg)
+    print(colored("\nMNI step ends", 'cyan'))
     return 1, msg, info_mni
 
 

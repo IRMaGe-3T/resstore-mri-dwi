@@ -12,7 +12,7 @@ import sys
 import csv
 
 from bids import BIDSLayout
-
+from termcolor import colored
 from prepare_acquisitions import prepare_abcd_acquistions, prepare_hermes_acquistions
 from useful import convert_nifti_to_mif, execute_command, get_shell, verify_file
 from preprocessing import run_preproc_dwi
@@ -67,13 +67,14 @@ if __name__ == '__main__':
         # Get all sessions in BIDS directory
         sessions = layout.get_sessions()
 
-    print(f'\nSubjects to process: {subjects}')
-    print(f'Sessions to process: {sessions}')
-    print("\n \n===== PREPARATION OF ACQUISITIONS =====\n")
+    print(colored(f'\nSubjects to process: {subjects}','magenta'))
+    print(colored(f'Sessions to process: {sessions}','magenta'))
+    print(colored("\n \n===== PREPARATION OF ACQUISITIONS =====\n", 'cyan'))
     for sub in subjects:
-        print('\nSubject: ', sub)
+        print(colored('\nSubject: ' + sub,'magenta'))
+        #print('\nSubject: ', sub)
         for ses in sessions:
-            print('Session: ', ses)
+            print(colored('Session: ' + ses,'magenta'))
             # Check if sub / session exist
             check = layout.get(subject=sub, session=ses)
             if check == []:
@@ -180,12 +181,12 @@ if __name__ == '__main__':
 
             print(f'\nPhase encoding dir: {pe_dir}')
 
-            print("\n \n===== PREPROCESSING =====\n")
+            print(colored("\n \n===== PREPROCESSING =====\n", 'cyan'))
 
             # Launch preprocessing
             main_return, main_msg, info_preproc =run_preproc_dwi(in_dwi, pe_dir, readout_time, rpe=None, shell=SHELL, in_pepolar_PA=in_pepolar_PA, in_pepolar_AP=in_pepolar_AP)
 
-            print("\n \n===== PROCESSING =====\n")
+            print(colored("\n \n===== PROCESSING =====\n", 'cyan'))
 
             # FA map
             FA_dir = os.path.join(analysis_directory, "FA")
@@ -196,6 +197,7 @@ if __name__ == '__main__':
             # NODDI maps
             mask_nii = info_preproc["brain_mask_nii"]
             AMICO_dir = os.path.join(analysis_directory, "AMICO")
+            print(colored("\n~~DKI starts~~", 'cyan'))
             if not os.path.exists(AMICO_dir):
                 dwi_preproc = info_preproc["dwi_preproc"]
                 bval = dwi_preproc.replace(".mif", ".bval")
@@ -276,7 +278,7 @@ if __name__ == '__main__':
             else:
                 print("\nFile already on the FA stats table.")
 
-            print("\n \n===== THE END =====\n\n")
+            print(colored("\n \n===== THE END =====\n\n", 'cyan'))
                    
             
             # Take inspiration from https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/preprocessing.py#L59

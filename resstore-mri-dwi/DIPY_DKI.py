@@ -9,8 +9,10 @@ import dipy.reconst.dti as dti
 from dipy.io.image import load_nifti
 from dipy.io.gradients import read_bvals_bvecs
 from dipy.core.gradients import gradient_table
+from termcolor import colored
 from useful import convert_mif_to_nifti, verify_file
 import nibabel as nib
+
 
 
 def DKI(dwi_unbias_mif, dwi_mask_nii, DKI_dir):
@@ -20,6 +22,7 @@ def DKI(dwi_unbias_mif, dwi_mask_nii, DKI_dir):
     dwi_bvec = dwi_unbias_nii.replace('.nii.gz', '.bvec')
 
     AD = os.path.join(DKI_dir, 'dipy_dki_' + 'AD' + '.nii.gz')
+    print(colored("\n~~DKI starts~~", 'cyan'))
 
     if not verify_file(AD):
         # print('\nDTI recontruction with dipy')
@@ -64,6 +67,6 @@ def DKI(dwi_unbias_mif, dwi_mask_nii, DKI_dir):
             nib.save(img, path)
 
     info_DKI = {}
-    msg = "DKI done"
-    print(msg)
+    msg = "\nDKI done"
+    print(colored(msg, 'cyan'))
     return 1, msg, info_DKI

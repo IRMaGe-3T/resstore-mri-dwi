@@ -7,6 +7,7 @@ Functions for preprocessing DWI data:
 
 import os
 from useful import check_file_ext, convert_mif_to_nifti, execute_command, verify_file, convert_nifti_to_mif
+from termcolor import colored
 
 EXT = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
 
@@ -86,7 +87,7 @@ def run_preproc_dwi(
     # Denoise
     dwi_denoise = os.path.join(dir_name, file_name + "_denoise.mif")
     # Check if the file already exists or not
-    if not os.path.exists(dwi_denoise):
+    if not verify_file(dwi_denoise):
         cmd = ["dwidenoise", in_dwi, dwi_denoise]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
@@ -94,13 +95,11 @@ def run_preproc_dwi(
             return 0, msg, info_prepoc
         else:
             print(f"\nDenoise completed. Output file: {dwi_denoise}")
-    else:
-        print(f"\nSkipping denoise step, {dwi_denoise} already exists.")
 
     # DeGibbs / Unringing
     dwi_degibbs = dwi_denoise.replace("_denoise.mif", "_denoise_degibbs.mif")
     # Check if the file already exists or not
-    if not os.path.exists(dwi_degibbs):
+    if not verify_file(dwi_degibbs):
         cmd = ["mrdegibbs", dwi_denoise, dwi_degibbs]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
@@ -108,8 +107,6 @@ def run_preproc_dwi(
             return 0, msg, info_prepoc
         else:
             print(f"\nUnringing completed. Output file: {dwi_degibbs}")
-    else:
-        print(f"\nSkipping unringing step, {dwi_degibbs} already exists.")
 
     # Motion and distortion correction
     dwi_preproc = dwi_degibbs.replace("_degibbs.mif", "_degibbs_preproc.mif")
@@ -119,7 +116,7 @@ def run_preproc_dwi(
 
         # Create b0_pair 
         # Check if the file already exists or not
-        if not os.path.exists(b0_pair):
+        if not verify_file(b0_pair):
             # Create command for b0_pair creation if pe_dir=PA
             if pe_dir == "j" and in_pepolar_AP:
                 # Check for fmap files encoding direction (PA)
@@ -127,7 +124,7 @@ def run_preproc_dwi(
                     # Extract b0 (PA) from dwi 
                     in_pepolar_PA = in_dwi.replace(".mif", "_bzero.mif")
                     # Check if the file already exists or not
-                    if not os.path.exists(in_pepolar_PA):
+                    if not verify_file(in_pepolar_PA):
                         cmd = ["dwiextract", in_dwi, in_pepolar_PA, "-bzero"]
                         result, stderrl, sdtoutl = execute_command(cmd)
                         if result != 0:
@@ -135,8 +132,6 @@ def run_preproc_dwi(
                             return 0, msg, info_prepoc
                         else:
                             print("\nb0_PA successfully extracted")
-                    else:
-                        print("\nSkipping b0_PA extraction, file already exists")
                 # Create command for concatenation
                 cmd = ["mrcat", in_pepolar_PA, in_pepolar_AP, b0_pair]
             # Create command for b0_pair creation if pe_dir=AP
@@ -146,7 +141,7 @@ def run_preproc_dwi(
                 # Extract b0 (AP) from dwi 
                     in_pepolar_AP = in_dwi.replace(".mif", "_bzero.mif")
                     # Check if the file already exists or not
-                    if not os.path.exists(in_pepolar_AP):
+                    if not verify_file(in_pepolar_AP):
                         cmd = ["dwiextract", in_dwi, in_pepolar_AP, "-bzero"]
                         result, stderrl, sdtoutl = execute_command(cmd)
                         if result != 0:
@@ -154,8 +149,6 @@ def run_preproc_dwi(
                             return 0, msg, info_prepoc
                         else:
                             print("\nb0_AP successfully extracted")
-                    else:
-                        print("\nSkipping b0_AP extraction, file already exists")
                         
                 # Create command for concatenation
                 cmd = ["mrcat", in_pepolar_AP, in_pepolar_PA, b0_pair]
@@ -166,8 +159,7 @@ def run_preproc_dwi(
                     return 0, msg, info_prepoc
                 else:
                     print(f"\nB0_pair successfully created. Output file: {b0_pair}")
-        else:
-            print(f"\nSkipping b0_pair creation step, {b0_pair} already exists.")
+
             
         # fslpreproc (topup and Eddy)
         qc_directory = os.path.join(dir_name, "qc_text")
@@ -195,15 +187,14 @@ def run_preproc_dwi(
         else:
             print(f"\nMotion and distortion correction completed. Output file: {dwi_preproc}")
             
-    else:
-        print(f"\nSkipping motion correction step, {dwi_preproc} already exists.")
+
 
 
     # Bias correction
     dwi_unbias = dwi_preproc.replace("_degibbs_preproc.mif", "_degibbs_preproc_unbiased.mif")
     bias_output = dwi_preproc.replace("_degibbs_preproc.mif", "_degibbs_preproc_bias.mif")
     # Check if the file already exists or not
-    if not os.path.exists(dwi_unbias) and not os.path.exists(bias_output):
+    if not verify_file(dwi_unbias) and not verify_file(bias_output):
         cmd = ["dwibiascorrect", "ants", dwi_preproc, dwi_unbias, "-bias", bias_output]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
@@ -211,13 +202,11 @@ def run_preproc_dwi(
             return 0, msg
         else:
             print(f"\nBias correction completed. Output files: {dwi_unbias}, {bias_output}")
-    else:
-       print(f"\nSkipping bias correction step, {dwi_unbias} and/or {bias_output} already exists.")
 
     # Brain mask, for FA
     dwi_mask = dwi_unbias.replace("_degibbs_preproc_unbiased.mif", "_dwi_brain_mask.mif")
     # Check if the file already exists or not
-    if not os.path.exists(dwi_mask):
+    if not verify_file(dwi_mask):
         cmd = ["dwi2mask", dwi_unbias, dwi_mask]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
@@ -225,14 +214,13 @@ def run_preproc_dwi(
             return 0, msg
         else:
             print(f"\nBrain mask completed. Output file: {dwi_mask}")
-    else:
-       print(f"\nSkipping brain mask step, {dwi_mask} already exists.")
+
 
     mask_nii = dwi_mask.replace('.mif', '.nii.gz')
     if not verify_file(mask_nii):
         convert_mif_to_nifti(dwi_mask, dir_name, diff=None)
         
     info_preproc = {"dwi_preproc": dwi_unbias,"brain_mask": dwi_mask, "brain_mask_nii": mask_nii}
-    msg = "\nPreprocessing DWI done"
-    print(msg)
+    msg = "\n Preprocessing DWI done"
+    print(colored(msg, 'cyan'))
     return 1, msg, info_preproc

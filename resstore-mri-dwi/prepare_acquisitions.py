@@ -10,7 +10,7 @@ import os
 
 from bids import BIDSLayout
 
-from useful import convert_nifti_to_mif, execute_command, get_shell
+from useful import convert_nifti_to_mif, execute_command, get_shell, verify_file
 
 
 def prepare_abcd_acquistions(bids_directory, sub, ses, preproc_directory):
@@ -77,15 +77,13 @@ def prepare_abcd_acquistions(bids_directory, sub, ses, preproc_directory):
             sys.exit(1)
         # Merge DTI1 and DTI2
         dwi = dwi_1.replace(f"acq-{acq1}", "acq-abcd")
-        if not os.path.exists(dwi):
+        if not verify_file(dwi):
             cmd = ["dwicat", dwi_1, dwi_2, dwi]
             result, stderrl, sdtoutl = execute_command(cmd)
             if result != 0:
                 msg = f"\nCan not lunch dwicat (exit code {result})"
             else:
                     print("\nExtraction successfull")
-        else:
-            print(f"\nFile already exists: {dwi}")
         # Use DTI1 to get info
         dwi_json = dwi_1_nifti.replace("nii.gz", "json")
 

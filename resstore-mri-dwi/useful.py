@@ -16,6 +16,7 @@ import shutil
 import urllib.request
 import pandas as pd
 import matplotlib.pyplot as plt
+from termcolor import colored
 
 EXT_NIFTI = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
 EXT_MIF = {"MIF": "mif"}
@@ -56,7 +57,7 @@ def check_file_ext(in_file, ext_dic):
 
 def verify_file(file_path):
     if os.path.exists(file_path):
-        print(f"\nFile {file_path} already exists. Verifying contents...")
+        print(colored(f"\nFile {file_path} already exists. Verifying contents...", 'yellow'))
         return True
     else:
         return False
@@ -117,6 +118,7 @@ def convert_mif_to_nifti(in_file, out_directory, diff=True):
     valid_bool, ext, file_name = check_file_ext(in_file, EXT_MIF)
     if not valid_bool:
         msg = "\nInput image format is not " "recognized (mif needed)...!"
+        print(msg)
         return 0, msg, in_file_nifti
 
     # Convert diffusions into ".mif" format (mrtrix format)
@@ -140,9 +142,9 @@ def convert_mif_to_nifti(in_file, out_directory, diff=True):
             msg = f"Issue during conversion of {in_file} to nifti format"
             return 0, msg, in_file_nifti
         msg = f"Conversion of {in_file} to nifti format done"
+        print(msg)
     else:
-        msg= None
-    print(msg)
+        msg=None
     return 1, msg, in_file_nifti
 
 
@@ -176,8 +178,7 @@ def convert_nifti_to_mif(in_file, out_directory, diff=True):
     
     # Check if output MIF file already exists
     in_file_mif = os.path.join(out_directory, file_name + ".mif")
-    if os.path.exists(in_file_mif):
-        print(f"\nSkipping conversion of {in_file} to MIF format as MIF file already exists.")
+    if verify_file(in_file_mif):
         return 1, "", in_file_mif
 
     # Convert diffusions into ".mif" format (mrtrix format)
