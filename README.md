@@ -31,6 +31,17 @@ To begin, make sure your data are in BIDS format and that they have been organiz
 │ ├── dataset_description.json  
 │ ├── ...  
 
+- BIDS
+  - code
+  - derivatives
+  - sourcedata
+  - sub-001
+    - ses-01
+        - anat
+        - dwi
+        - ...
+    - ses-02
+
 To use this code, open the `restorre-mri-dwi` directory in your terminal and run the following command:
 ```
 python3 main.py --bids <folder_bids_path> --subjects <subject_ids> --sessions <session_ids> --acquisitions <acquisition_ids>
