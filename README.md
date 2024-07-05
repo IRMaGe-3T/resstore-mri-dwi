@@ -48,6 +48,24 @@ python3 main.py --bids 'path/to/OUTPUT_DIR' --subjects 003 --sessions 02 --acqui
 
 Here is a brief explanation of the steps done by the programm the preprocess and process the data.
 
+1) Prepare acquisition to the right format (.mif for mrtrix)) and normalize the name 
+
+1) Denoising (dwidenoise mrtrix)
+2) Unringing (dwidegibbs mrtrix)
+3) Motion and distorsion correction (dwipreporc fsl)
+4) Unbiasing (dwibiascorrect mrtrix)
+
+5) FA, ADC, AD, RD map creation (mrtrix)
+6) NODDI (mrtrix)
+7) DKI (mrtrix)
+
+8) Align everything in the MNI space using FA template
+
+9) FOD estoimation (mrtrix)
+10) Performing tractography (TractSeg)
+11) Doing tractometry (TractSeg) 
+12) Plotting some graphs of FA along tracts 
+13) Stats of mean FA in each ROI for all subjects
 
 
 ## Results
@@ -88,6 +106,15 @@ python3 main.py --bids 'path/to/OUTPUT_DIR' --subjects 003 --sessions 02 --acqui
 
 Open the pdf file located in: `preprocessing/qc_text/quad/qc.pdf`. On the 6th page you'll see a chart indicating the number of outlier in each volume. A good idea is to supress the volumes having too many outliers (high peaks on top of the chart).
 You can also visualize by hand the volumes by typing in the terminal `mrview path/to/img.mif` and decide which volume to remove. The ones where the head is tilted and the ones featuring dark bands are good to remove.
+
+
+
+
+
+## Usefull remarks
+
+Concerning the tractometry, it is done with FA maps in the MNI space by default but you can choose another reference. In the main, line 250, you can comment and uncomment the section you want to get a tractometry with ODI and MK map.  
+Concerning the graphs of FA along the tracts, named 'FA_MNI_graphs_TractSeg.png', you can choose to plot different tracts. To do so, delete the previous file, change the ROI in the subjects.txt file that should be in the same folder and re-do the tractometry.  
 
 
 
