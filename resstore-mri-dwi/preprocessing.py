@@ -221,6 +221,6 @@ def run_preproc_dwi(
         convert_mif_to_nifti(dwi_mask, dir_name, diff=None)
         
     info_preproc = {"dwi_preproc": dwi_unbias,"brain_mask": dwi_mask, "brain_mask_nii": mask_nii}
-    msg = "\n Preprocessing DWI done"
+    msg = "\nPreprocessing DWI done"
     print(colored(msg, 'cyan'))
     return 1, msg, info_preproc
