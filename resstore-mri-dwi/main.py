@@ -264,8 +264,8 @@ if __name__ == '__main__':
             # DKI_MNI= os.path.join(MNI_dir, "DKI_MNI")
             # map_path = os.path.join(DKI_MNI, "dki_MK_MNI.nii.gz")
 
-            tractometry_postprocess(map_path, Tract_dir)
             tractometry_postprocess(map_path2, Tract_dir)
+            tractometry_postprocess(map_path, Tract_dir)
             print("\nTractometry done.")
 
             # ROI extraction
