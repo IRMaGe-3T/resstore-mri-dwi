@@ -87,6 +87,7 @@ def run_tractseg(peaks, Tract_dir):
             return 0, msg
 
     msg = "\nRun TracSeg done"
+    print(msg)
     return 1, msg
     
 
@@ -154,17 +155,18 @@ def tractometry_postprocess(map, Tract_dir):
         # Write the modified content back to the .txt file
         with open(subjects_txt, 'w') as file:
             file.writelines(lines)
-        print(f"\nUpdated the first line of {subjects_txt} with the path to the CSV file.\n")
+        print(f"\nUpdated the first line of {subjects_txt} with the path to the CSV file.")
 
     FA_graphs = os.path.join(tractseg_out_dir, map_name + "_graphs_TractSeg.png")
     if not verify_file(FA_graphs):
         cmd = ["plot_tractometry_results", "-i", subjects_txt, "-o", FA_graphs, "--mc"]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
-            msg = f"\nCan not create FA plots with TractSeg: {result})"
+            msg = f"\nCan not create plots with TractSeg: {result})"
             return 0, msg
 
     plot_cst_data(tracto_csv)
 
     msg = "\nRun postprocessing for tractometry done"
+    print(msg)
     return 1, msg
