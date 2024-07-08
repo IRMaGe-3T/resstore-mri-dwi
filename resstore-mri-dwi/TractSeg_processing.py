@@ -167,7 +167,7 @@ def tractometry_postprocess(map, Tract_dir):
             msg = f"\nCan not create plots with TractSeg: {result})"
             return 0, msg
 
-    plot_cst_data(tracto_csv)
+    plot_cst_data(tracto_csv, map_name)
 
     msg = "\nRun postprocessing for tractometry done"
     print(colored(msg, 'cyan'))

@@ -294,7 +294,7 @@ def delete_directory(dir):
 
 
 
-def plot_cst_data(file_path):
+def plot_cst_data(file_path, map_name):
     # Read CSV file with the correct separator
     data = pd.read_csv(file_path, sep=';')
     
@@ -307,9 +307,11 @@ def plot_cst_data(file_path):
     plt.plot(data['CST_left'], label='CST_left', marker='o')
     plt.plot(data['CST_right'], label='CST_right', marker='x')
     
+    #Changue the map name from FA_MNI to only FA or ODI
+    map_name = map_name.split('_')[0]
     # Add titles and legends
-    plt.title('FA along the tract')
-    plt.ylabel('FA')
+    plt.title(map_name + ' along the tract')
+    plt.ylabel(map_name)
     plt.legend()
     
     # Save the figure
