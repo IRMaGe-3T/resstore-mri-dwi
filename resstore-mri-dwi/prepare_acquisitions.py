@@ -192,11 +192,11 @@ def prepare_hermes_acquistions(bids_directory, sub, ses, preproc_directory):
         sys.exit(1)
 
     # For HERMES, pepolar sequences may contain b1000 and b0
-    # Check if pepolar contain only b0 or not 
+    # Check if pepolar contain only b0 or not
     if pepolar_ap is not None:
         _, msg, shell_ap = get_shell(pepolar_ap)
         shell_ap = [bval for bval in shell_ap if bval != "0" and bval != ""]
-        pepolar_ap_bzero=pepolar_ap.replace('.mif', '_bzero.mif')
+        pepolar_ap_bzero = pepolar_ap.replace('.mif', '_bzero.mif')
 
         # If pepolar contain b0 and b1000, extract b0
         if len(shell_ap) > 0:
@@ -211,11 +211,19 @@ def prepare_hermes_acquistions(bids_directory, sub, ses, preproc_directory):
                     print("\nExtraction successfull")
             else:
                 print(f"\nFile already exists: {pepolar_ap_bzero}")
+        # If pepolar contain only b0, rename the file
+        else:
+            cmd = ["mv", pepolar_ap, pepolar_ap_bzero]
+            result, stderrl, sdtoutl = execute_command(cmd)
+            if result != 0:
+                msg = f"\nCan not rename pepolar_ap images (exit code {result})"
+    else:
+        pepolar_ap_bzero = None
 
     if pepolar_pa is not None:
         _, msg, shell_pa = get_shell(pepolar_pa)
         shell_pa = [bval for bval in shell_pa if bval != "0" and bval != ""]
-        pepolar_pa_bzero=pepolar_pa.replace('.mif', '_bzero.mif')
+        pepolar_pa_bzero = pepolar_pa.replace('.mif', '_bzero.mif')
 
         if len(shell_pa) > 0:
             # Extraction b0 PA
@@ -228,26 +236,15 @@ def prepare_hermes_acquistions(bids_directory, sub, ses, preproc_directory):
                 else:
                     print("\nExtraction successfull")
             else:
-                print(f"\nSkipping exctraction step, file alreeady exists: {pepolar_pa_bzero}")
-
-    # If pepolar contain only b0, rename the file
-    else:
-        print('\n Hermes fmaps contain only b0.')
-        if pepolar_pa is not None: 
+                print(
+                    f"\nSkipping extraction step, file alreeady exists: {pepolar_pa_bzero}")
+        # If pepolar contain only b0, rename the file
+        else:
             cmd = ["mv", pepolar_pa, pepolar_pa_bzero]
             result, stderrl, sdtoutl = execute_command(cmd)
             if result != 0:
                 msg = f"\nCan not rename pepolar_pa images (exit code {result})"
-        else:
-            pepolar_pa_bzero = None
-
-        if pepolar_ap is not None:
-            cmd = ["mv", pepolar_ap, pepolar_ap_bzero]
-            result, stderrl, sdtoutl = execute_command(cmd)
-            if result != 0:
-                msg = f"\nCan not rename pepolar_ap images (exit code {result})"
-        else:
-            pepolar_ap_bzero = None
-                
+    else:
+        pepolar_pa_bzero = None
 
     return dwi, dwi_json, pepolar_ap_bzero, pepolar_pa_bzero

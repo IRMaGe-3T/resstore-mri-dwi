@@ -13,7 +13,7 @@ import csv
 
 from bids import BIDSLayout
 from termcolor import colored
-from prepare_acquisitions import prepare_abcd_acquistions, prepare_hermes_acquistions
+from prepare_acquisitions import prepare_abcd_acquistions, prepare_hermes_acquistions, prepare_orandani_acquistions
 from useful import convert_nifti_to_mif, execute_command, get_shell, verify_file
 from preprocessing import run_preproc_dwi
 from MRtrix_FOD import FOD
@@ -184,7 +184,13 @@ if __name__ == '__main__':
             print(colored("\n \n===== PREPROCESSING =====\n", 'cyan'))
 
             # Launch preprocessing
-            main_return, main_msg, info_preproc =run_preproc_dwi(in_dwi, pe_dir, readout_time, rpe=None, shell=SHELL, in_pepolar_PA=in_pepolar_PA, in_pepolar_AP=in_pepolar_AP)
+            main_return, main_msg, info_preproc = run_preproc_dwi(
+                in_dwi, pe_dir,
+                readout_time,
+                shell=SHELL,
+                in_pepolar_PA=in_pepolar_PA,
+                in_pepolar_AP=in_pepolar_AP
+            )
 
             print(colored("\n \n===== PROCESSING =====\n", 'cyan'))
 

@@ -59,7 +59,7 @@ def get_dwifslpreproc_command(
     return command
 
 def run_preproc_dwi(
-    in_dwi, pe_dir, readout_time, rpe=None, shell=True, in_pepolar_PA=None, in_pepolar_AP=None
+    in_dwi, pe_dir, readout_time, shell=True, in_pepolar_PA=None, in_pepolar_AP=None
 ):
     """
     Run preproc for whole brain diffusion using MRtrix command and an optional FOD estimation 
@@ -68,7 +68,6 @@ def run_preproc_dwi(
     - in_dwi: input file .mif format to be preprocessed
     - pe_dir: phase encoding direction
     - readout_time: the time it takes to acquire the k-space data after the excitation pulse (s)
-    - rpe: (optionnal) ratio of partial echo = fraction of the k-space that are encoded
     - shell: (default:True) info was given on the b-values
     - in_pepolar_PA: (optionnal), fmap PA in .mif format
     - in_pepolar_AP: (optionnal), fmap AP in .mif format
@@ -110,18 +109,19 @@ def run_preproc_dwi(
 
     # Motion and distortion correction
     dwi_preproc = dwi_degibbs.replace("_degibbs.mif", "_degibbs_preproc.mif")
-    b0_pair = os.path.join(dir_name, "b0_pair.mif")
     # Check if the file already exists or not
-    if not os.path.exists(dwi_preproc):
-
-        # Create b0_pair 
+    if not verify_file(dwi_preproc):
+        # Create b0_pair if possible 
+        # and choose rpe option for dwifslpreproc cmd
+        b0_pair = os.path.join(dir_name, "b0_pair.mif")
         # Check if the file already exists or not
         if not verify_file(b0_pair):
-            # Create command for b0_pair creation if pe_dir=PA
+            # If pe_dir=PA (j) and fmap AP exist
             if pe_dir == "j" and in_pepolar_AP:
+                rpe = "pair"
                 # Check for fmap files encoding direction (PA)
                 if in_pepolar_PA is None:
-                    # Extract b0 (PA) from dwi 
+                    # Extract b0 (PA) from main dwi
                     in_pepolar_PA = in_dwi.replace(".mif", "_bzero.mif")
                     # Check if the file already exists or not
                     if not verify_file(in_pepolar_PA):
@@ -132,10 +132,17 @@ def run_preproc_dwi(
                             return 0, msg, info_prepoc
                         else:
                             print("\nb0_PA successfully extracted")
-                # Create command for concatenation
+                # Concatenate both b0 images to create b0_pair
                 cmd = ["mrcat", in_pepolar_PA, in_pepolar_AP, b0_pair]
-            # Create command for b0_pair creation if pe_dir=AP
-            if pe_dir == "j-" and in_pepolar_PA:
+                result, stderrl, sdtoutl = execute_command(cmd)
+                if result != 0:
+                    msg = f"\nCannot launch mrcat to create b0_pair (exit code {result})"
+                    return 0, msg, info_prepoc
+                else:
+                    print(f"\nB0_pair successfully created. Output file: {b0_pair}")
+            # If pe_dir=AP (j-) and fmap PA exist
+            elif pe_dir == "j-" and in_pepolar_PA:
+                rpe = "pair"
                 # Check for fmap files encoding direction (AP)
                 if in_pepolar_AP is None:
                 # Extract b0 (AP) from dwi 
@@ -150,45 +157,36 @@ def run_preproc_dwi(
                         else:
                             print("\nb0_AP successfully extracted")
                         
-                # Create command for concatenation
+                # Concatenate both b0 images to create b0_pair
                 cmd = ["mrcat", in_pepolar_AP, in_pepolar_PA, b0_pair]
-                # Concatenate both b0 images to create b0_pair     
                 result, stderrl, sdtoutl = execute_command(cmd)
                 if result != 0:
                     msg = f"\nCannot launch mrcat to create b0_pair (exit code {result})"
                     return 0, msg, info_prepoc
                 else:
                     print(f"\nB0_pair successfully created. Output file: {b0_pair}")
+            # If no inverse fmap available (pe_dir AP or PA)
+            else:
+                rpe = None
+                b0_pair = None
+                print(
+                    "\nfmap not available. Due to use of a single fixed phase encoding, "
+                    "no EPI distortion correction can be applied in this case."
+                )
 
-            
         # fslpreproc (topup and Eddy)
         qc_directory = os.path.join(dir_name, "qc_text")
         if not os.path.exists(qc_directory):
             os.makedirs(qc_directory)
-        if b0_pair:
-            cmd = get_dwifslpreproc_command(
-                dwi_degibbs, dwi_preproc, pe_dir, readout_time, qc_directory, b0_pair, rpe, shell,
-            )
-        else:
-            cmd = get_dwifslpreproc_command(
-                dwi_degibbs,
-                dwi_preproc,
-                pe_dir,
-                readout_time,
-                qc_directory,
-                b0_pair=None,
-                rpe=rpe,
-                shell=shell,
-            )
+        cmd = get_dwifslpreproc_command(
+            dwi_degibbs, dwi_preproc, pe_dir, readout_time, qc_directory, b0_pair, rpe, shell,
+        )
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
             msg = f"\nCannot launch dwifslpreproc (exit code {result})"
             return 0, msg, info_prepoc
         else:
             print(f"\nMotion and distortion correction completed. Output file: {dwi_preproc}")
-            
-
-
 
     # Bias correction
     dwi_unbias = dwi_preproc.replace("_degibbs_preproc.mif", "_degibbs_preproc_unbiased.mif")
@@ -219,7 +217,7 @@ def run_preproc_dwi(
     mask_nii = dwi_mask.replace('.mif', '.nii.gz')
     if not verify_file(mask_nii):
         convert_mif_to_nifti(dwi_mask, dir_name, diff=None)
-        
+
     info_preproc = {"dwi_preproc": dwi_unbias,"brain_mask": dwi_mask, "brain_mask_nii": mask_nii}
     msg = "\nPreprocessing DWI done"
     print(colored(msg, 'cyan'))
