@@ -182,118 +182,118 @@ if __name__ == "__main__":
                 else:
                     SHELL = False
 
-            print(f"\nPhase encoding dir: {pe_dir}")
+                print(f"\nMain phase encoding dir: {pe_dir}")
 
-            print(colored("\n \n===== PREPROCESSING =====\n", "cyan"))
+                print(colored("\n \n===== PREPROCESSING =====\n", "cyan"))
 
-            # Launch preprocessing
-            main_return, main_msg, info_preproc = run_preproc_dwi(
-                in_dwi, pe_dir,
-                readout_time,
-                shell=SHELL,
-                in_pepolar_PA=in_pepolar_PA,
-                in_pepolar_AP=in_pepolar_AP
-            )
+                # Launch preprocessing
+                main_return, main_msg, info_preproc = run_preproc_dwi(
+                    in_dwi, pe_dir,
+                    readout_time,
+                    shell=SHELL,
+                    in_pepolar_PA=in_pepolar_PA,
+                    in_pepolar_AP=in_pepolar_AP
+                )
 
-            print(colored("\n \n===== PROCESSING =====\n", "cyan"))
+                print(colored("\n \n===== PROCESSING =====\n", "cyan"))
 
-            # FA map
-            FA_dir = os.path.join(analysis_directory, "FA")
-            if not os.path.exists(FA_dir):
-                os.mkdir(FA_dir)
-            fa_return, fa_msg, info_fa = FA_map(
-                info_preproc["dwi_preproc"], info_preproc["brain_mask"], FA_dir)
+                # FA map
+                FA_dir = os.path.join(analysis_directory, "FA")
+                if not os.path.exists(FA_dir):
+                    os.mkdir(FA_dir)
+                fa_return, fa_msg, info_fa = FA_map(
+                    info_preproc["dwi_preproc"], info_preproc["brain_mask"], FA_dir)
 
-            # NODDI maps
-            mask_nii = info_preproc["brain_mask_nii"]
-            AMICO_dir = os.path.join(analysis_directory, "AMICO")
-            print(colored("\n~~NOODI starts~~", "cyan"))
-            if not verify_file(AMICO_dir):
-                dwi_preproc = info_preproc["dwi_preproc"]
-                bval = dwi_preproc.replace(".mif", ".bval")
-                bvec = dwi_preproc.replace(".mif", ".bvec")
-                NODDI_dir = NODDI(dwi_preproc, bval, bvec, mask_nii)
-            else:
-                base_dir = os.path.dirname(os.path.dirname(mask_nii))
-                NODDI_dir = os.path.join(base_dir, "AMICO", "NODDI")
-                print(colored("\nNOODI ends", "cyan"))
+                # NODDI maps
+                mask_nii = info_preproc["brain_mask_nii"]
+                AMICO_dir = os.path.join(analysis_directory, "AMICO")
+                print(colored("\n~~NOODI starts~~", "cyan"))
+                if not verify_file(AMICO_dir):
+                    dwi_preproc = info_preproc["dwi_preproc"]
+                    bval = dwi_preproc.replace(".mif", ".bval")
+                    bvec = dwi_preproc.replace(".mif", ".bvec")
+                    NODDI_dir = NODDI(dwi_preproc, bval, bvec, mask_nii)
+                else:
+                    base_dir = os.path.dirname(os.path.dirname(mask_nii))
+                    NODDI_dir = os.path.join(base_dir, "AMICO", "NODDI")
+                    print(colored("\nNOODI ends", "cyan"))
 
-            # DKI maps, only works for abcd since it requires 3 b values
-            if acq == "abcd":
-                DKI_dir = os.path.join(analysis_directory, "DKI")
-                if not os.path.exists(DKI_dir):
-                    os.mkdir(DKI_dir)
-                DKI_return, DKI_msg, info_DKI = DKI(
-                    info_preproc["dwi_preproc"], info_preproc["brain_mask_nii"], DKI_dir)
-            else:
-                DKI_dir = None
+                # DKI maps, only works for abcd since it requires 3 b values
+                if acq == "abcd":
+                    DKI_dir = os.path.join(analysis_directory, "DKI")
+                    if not os.path.exists(DKI_dir):
+                        os.mkdir(DKI_dir)
+                    DKI_return, DKI_msg, info_DKI = DKI(
+                        info_preproc["dwi_preproc"], info_preproc["brain_mask_nii"], DKI_dir)
+                else:
+                    DKI_dir = None
 
-            # Aligning in the MNI space
-            MNI_dir = os.path.join(analysis_directory, "preprocessing_MNI")
-            if not os.path.exists(MNI_dir):
-                os.mkdir(MNI_dir)
-            mni_return, mni_msg, info_mni = run_register_MNI(
-                info_preproc["dwi_preproc"], info_fa["FA_map"], NODDI_dir, DKI_dir, MNI_dir)
+                # Aligning in the MNI space
+                MNI_dir = os.path.join(analysis_directory, "preprocessing_MNI")
+                if not os.path.exists(MNI_dir):
+                    os.mkdir(MNI_dir)
+                mni_return, mni_msg, info_mni = run_register_MNI(
+                    info_preproc["dwi_preproc"], info_fa["FA_map"], NODDI_dir, DKI_dir, MNI_dir)
 
-            # NODDI and DKI maps in the MNI
-            print(colored("\n~~Map in MNI step starts~~", "cyan"))
-            for file_name in os.listdir(NODDI_dir):
-                if file_name.endswith(".nii.gz"):
-                    map = os.path.join(NODDI_dir, file_name)
-                    map_in_MNI(map, MNI_dir, NODDI_dir, DKI_dir)
-            for file_name in os.listdir(DKI_dir):
-                if file_name.endswith(".nii.gz"):
-                    map = os.path.join(DKI_dir, file_name)
-                    map_in_MNI(map, MNI_dir, NODDI_dir, DKI_dir)
-            print(colored("\nMap in MNI step ends", "cyan"))
+                # NODDI and DKI maps in the MNI
+                print(colored("\n~~Map in MNI step starts~~", "cyan"))
+                for file_name in os.listdir(NODDI_dir):
+                    if file_name.endswith(".nii.gz"):
+                        map_noddi = os.path.join(NODDI_dir, file_name)
+                        map_in_MNI(map_noddi, MNI_dir, NODDI_dir, DKI_dir)
+                for file_name in os.listdir(DKI_dir):
+                    if file_name.endswith(".nii.gz"):
+                        map_dki = os.path.join(DKI_dir, file_name)
+                        map_in_MNI(map_dki, MNI_dir, NODDI_dir, DKI_dir)
+                print(colored("\nMap in MNI step ends", "cyan"))
 
-            # Doing FOD estimations
-            FOD_dir = os.path.join(analysis_directory, "FOD")
-            if not os.path.exists(FOD_dir):
-                os.mkdir(FOD_dir)
-            _, msg, peaks = FOD(
-                info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"], acq, FOD_dir)
+                # Doing FOD estimations
+                FOD_dir = os.path.join(analysis_directory, "FOD")
+                if not os.path.exists(FOD_dir):
+                    os.mkdir(FOD_dir)
+                _, msg, peaks = FOD(
+                    info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"], acq, FOD_dir)
 
-            # Tractography
-            Tract_dir = os.path.join(analysis_directory, "Tracto")
-            if not os.path.exists(Tract_dir):
-                os.mkdir(Tract_dir)
-            if in_t1w_nifti is not None:
-                run_preproc_t1(in_t1w_nifti, info_mni["dwi_preproc_mni"])
-            run_tractseg(peaks, Tract_dir)
+                # Tractography
+                Tract_dir = os.path.join(analysis_directory, "Tracto")
+                if not os.path.exists(Tract_dir):
+                    os.mkdir(Tract_dir)
+                if in_t1w_nifti is not None:
+                    run_preproc_t1(in_t1w_nifti, info_mni["dwi_preproc_mni"])
+                run_tractseg(peaks, Tract_dir)
 
-            # Tractometry
-            # Change here if you want to perform tractometry with another map than the FA
-            # Be carefull: the map must be in the MNI space
+                # Tractometry
+                # Change here if you want to perform tractometry with another map than the FA
+                # Be carefull: the map must be in the MNI space
 
-            # For the FA
-            map_path = info_mni["FA_MNI"]
+                # For the FA
+                map_path = info_mni["FA_MNI"]
 
-            # # For the ODI map
-            NODDI_MNI = os.path.join(MNI_dir, "NODDI_MNI")
-            map_path2 = os.path.join(NODDI_MNI, "ODI_MNI.nii.gz")
+                # For the ODI map
+                NODDI_MNI = os.path.join(MNI_dir, "NODDI_MNI")
+                map_path2 = os.path.join(NODDI_MNI, "ODI_MNI.nii.gz")
 
-            # # For the MK map
-            # DKI_MNI= os.path.join(MNI_dir, "DKI_MNI")
-            # map_path = os.path.join(DKI_MNI, "dki_MK_MNI.nii.gz")
+                # For the MK map
+                # DKI_MNI= os.path.join(MNI_dir, "DKI_MNI")
+                # map_path = os.path.join(DKI_MNI, "dki_MK_MNI.nii.gz")
 
-            print(colored("\n~~Tractometry starts~~", "cyan"))
-            tractometry_postprocess(map_path2, Tract_dir)
-            tractometry_postprocess(map_path, Tract_dir)
-            print(colored("\nTractometry done.", "cyan"))
+                print(colored("\n~~Tractometry starts~~", "cyan"))
+                tractometry_postprocess(map_path2, Tract_dir)
+                tractometry_postprocess(map_path, Tract_dir)
+                print(colored("\nTractometry done.", "cyan"))
 
-            # ROI extraction
-            tsv_file = os.path.join(bids_path, "derivatives", "FA_stats.tsv")
-            subject_name = analysis_directory.split(
-                "/")[-3] + "-" + analysis_directory.split("/")[-2] + "-" + analysis_directory.split("/")[-1]
-            # Check if the subject is already in the TSV file or there is not such a file
-            if not os.path.isfile(tsv_file) or subject_name not in {row[0] for row in csv.reader(open(tsv_file), delimiter="\t")}:
-                # Extract ROI stats and update the TSV file
-                roi_stats = extract_roi_stats(
-                    analysis_directory, info_mni["FA_MNI"])
-                create_or_update_tsv(subject_name, roi_stats, tsv_file)
-            else:
-                print(colored("\nFile already on the FA stats table.", "yellow"))
+                # ROI extraction
+                tsv_file = os.path.join(bids_path, "derivatives", "FA_stats.tsv")
+                subject_name = analysis_directory.split(
+                    "/")[-3] + "-" + analysis_directory.split("/")[-2] + "-" + analysis_directory.split("/")[-1]
+                # Check if the subject is already in the TSV file or there is not such a file
+                if not os.path.isfile(tsv_file) or subject_name not in {row[0] for row in csv.reader(open(tsv_file), delimiter="\t")}:
+                    # Extract ROI stats and update the TSV file
+                    roi_stats = extract_roi_stats(
+                        analysis_directory, info_mni["FA_MNI"])
+                    create_or_update_tsv(subject_name, roi_stats, tsv_file)
+                else:
+                    print(colored("\nFile already on the FA stats table.", "yellow"))
 
             print(colored("\n \n===== THE END =====\n\n", "cyan"))
 
