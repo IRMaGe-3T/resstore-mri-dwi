@@ -233,18 +233,24 @@ if __name__ == "__main__":
                 if not os.path.exists(MNI_dir):
                     os.mkdir(MNI_dir)
                 mni_return, mni_msg, info_mni = run_register_MNI(
-                    info_preproc["dwi_preproc"], info_fa["FA_map"], NODDI_dir, DKI_dir, MNI_dir)
+                    info_preproc["dwi_preproc"], info_fa["FA_map"], MNI_dir)
 
                 # NODDI and DKI maps in the MNI
                 print(colored("\n~~Map in MNI step starts~~", "cyan"))
                 for file_name in os.listdir(NODDI_dir):
                     if file_name.endswith(".nii.gz"):
                         map_noddi = os.path.join(NODDI_dir, file_name)
-                        map_in_MNI(map_noddi, MNI_dir, NODDI_dir, DKI_dir)
+                        out_dir = os.path.join(MNI_dir, "NODDI_MNI")
+                        if not os.path.exists(out_dir):
+                            os.mkdir(out_dir)
+                        map_in_MNI(map_noddi, out_dir, MNI_dir)
                 for file_name in os.listdir(DKI_dir):
                     if file_name.endswith(".nii.gz"):
                         map_dki = os.path.join(DKI_dir, file_name)
-                        map_in_MNI(map_dki, MNI_dir, NODDI_dir, DKI_dir)
+                        out_dir = os.path.join(MNI_dir, "DKI_MNI")
+                        if not os.path.exists(out_dir):
+                            os.mkdir(out_dir)
+                        map_in_MNI(map_dki, out_dir, MNI_dir)
                 print(colored("\nMap in MNI step ends", "cyan"))
 
                 # Doing FOD estimations
