@@ -1,10 +1,10 @@
-''' 
+""" 
 Functions to get sequences and prepare 
 sequences for processing:
     - prepare_abcd_acquistions
     - prepare_hermes_acquistions
 
-'''
+"""
 import sys
 import os
 
@@ -14,7 +14,7 @@ from useful import convert_nifti_to_mif, execute_command, get_shell, verify_file
 
 
 def prepare_abcd_acquistions(bids_directory, sub, ses, preproc_directory):
-    '''
+    """
     Get acquistions to process for abdc protocol 
     and do some preprocessings
 
@@ -28,14 +28,14 @@ def prepare_abcd_acquistions(bids_directory, sub, ses, preproc_directory):
         - dwi_json: diffusion json (.json) 
         - pepolar_ap: pepolar AP sequence to use for next steps (.mif)
         - pepolar_pa: pepolar PA sequence to use for next steps (.mif)
-    '''
+    """
 
     layout = BIDSLayout(bids_directory)
-    acq = 'abcd'
+    acq = "abcd"
     # For ABCD, 1 DWI
     all_sequences_dwi_concatenated = layout.get(
-        subject=sub, session=ses, extension='nii.gz',
-        suffix='dwi', acquisition=acq, return_type='filename'
+        subject=sub, session=ses, extension="nii.gz",
+        suffix="dwi", acquisition=acq, return_type="filename"
     )
     if all_sequences_dwi_concatenated:
         dwi_nifti = all_sequences_dwi_concatenated[0]
@@ -51,14 +51,14 @@ def prepare_abcd_acquistions(bids_directory, sub, ses, preproc_directory):
         # For ABCD, 2 DWI
         acq1 = acq + "1"
         all_sequences_dwi1 = layout.get(
-            subject=sub, session=ses, extension='nii.gz',
-            suffix='dwi', acquisition=acq1, return_type='filename'
+            subject=sub, session=ses, extension="nii.gz",
+            suffix="dwi", acquisition=acq1, return_type="filename"
         )
         dwi_1_nifti = all_sequences_dwi1[0]
         acq2 = acq + "2"
         all_sequences_dwi2 = layout.get(
-            subject=sub, session=ses, extension='nii.gz',
-            suffix='dwi', acquisition=acq2, return_type='filename'
+            subject=sub, session=ses, extension="nii.gz",
+            suffix="dwi", acquisition=acq2, return_type="filename"
         )
         dwi_2_nifti = all_sequences_dwi2[0]
 
@@ -83,17 +83,17 @@ def prepare_abcd_acquistions(bids_directory, sub, ses, preproc_directory):
             if result != 0:
                 msg = f"\nCan not lunch dwicat (exit code {result})"
             else:
-                    print("\nExtraction successfull")
+                print("\nExtraction successfull")
         # Use DTI1 to get info
         dwi_json = dwi_1_nifti.replace("nii.gz", "json")
 
     # Get both pepolar sequences
     all_sequences_pepolar_ap = layout.get(
-        subject=sub, session=ses, extension='nii.gz',
-        suffix='epi', acquisition=acq, direction='AP',
-        return_type='filename'
+        subject=sub, session=ses, extension="nii.gz",
+        suffix="epi", acquisition=acq, direction="AP",
+        return_type="filename"
     )
-    if len(all_sequences_pepolar_ap)!=0:
+    if len(all_sequences_pepolar_ap) != 0:
         pepolar_ap_nifti = all_sequences_pepolar_ap[0]
         result, msg, pepolar_ap = convert_nifti_to_mif(
             pepolar_ap_nifti, preproc_directory, diff=False
@@ -102,16 +102,16 @@ def prepare_abcd_acquistions(bids_directory, sub, ses, preproc_directory):
             print(msg)
             sys.exit(1)
     else:
-        pepolar_ap_nifti=None
-        pepolar_ap=None
+        pepolar_ap_nifti = None
+        pepolar_ap = None
 
     all_sequences_pepolar_pa = layout.get(
-        subject=sub, session=ses, extension='nii.gz',
-        suffix='epi', acquisition=acq, direction='PA',
-        return_type='filename'
+        subject=sub, session=ses, extension="nii.gz",
+        suffix="epi", acquisition=acq, direction="PA",
+        return_type="filename"
     )
 
-    if len(all_sequences_pepolar_pa)!=0:
+    if len(all_sequences_pepolar_pa) != 0:
         pepolar_pa_nifti = all_sequences_pepolar_pa[0]
         result, msg, pepolar_pa = convert_nifti_to_mif(
             pepolar_pa_nifti, preproc_directory, diff=False
@@ -120,14 +120,14 @@ def prepare_abcd_acquistions(bids_directory, sub, ses, preproc_directory):
             print(msg)
             sys.exit(1)
     else:
-        pepolar_pa_nifti=None
-        pepolar_pa=None
+        pepolar_pa_nifti = None
+        pepolar_pa = None
 
     return dwi, dwi_json, pepolar_ap, pepolar_pa
 
 
 def prepare_hermes_acquistions(bids_directory, sub, ses, preproc_directory):
-    '''
+    """
     Get acquistions to process for hermes protocol 
     and do some preprocessings
 
@@ -141,14 +141,14 @@ def prepare_hermes_acquistions(bids_directory, sub, ses, preproc_directory):
         - dwi_json: diffusion json (.json) 
         - pepolar_ap: pepolar AP sequence to use for next steps (.mif)
         - pepolar_pa: pepolar PA sequence to use for next steps (.mif)
-    '''
+    """
 
     layout = BIDSLayout(bids_directory)
-    acq = 'hermes'
+    acq = "hermes"
     # Get DWI
     all_sequences_dwi = layout.get(
-        subject=sub, session=ses, extension='nii.gz',
-        suffix='dwi', acquisition=acq, return_type='filename'
+        subject=sub, session=ses, extension="nii.gz",
+        suffix="dwi", acquisition=acq, return_type="filename"
     )
     dwi_nifti = all_sequences_dwi[0]
     dwi_json = dwi_nifti.replace("nii.gz", "json")
@@ -160,13 +160,13 @@ def prepare_hermes_acquistions(bids_directory, sub, ses, preproc_directory):
         sys.exit(1)
     # Get both pepolar sequences
     all_sequences_pepolar_ap = layout.get(
-        subject=sub, session=ses, extension='nii.gz',
-        suffix='epi', acquisition=acq, direction='AP',
-        return_type='filename'
+        subject=sub, session=ses, extension="nii.gz",
+        suffix="epi", acquisition=acq, direction="AP",
+        return_type="filename"
     )
     pepolar_ap_nifti = None
     pepolar_ap = None
-    if len(all_sequences_pepolar_ap)>0:
+    if len(all_sequences_pepolar_ap) > 0:
         pepolar_ap_nifti = all_sequences_pepolar_ap[0]
         result, msg, pepolar_ap = convert_nifti_to_mif(
             pepolar_ap_nifti, preproc_directory, diff=True
@@ -176,13 +176,13 @@ def prepare_hermes_acquistions(bids_directory, sub, ses, preproc_directory):
         sys.exit(1)
 
     all_sequences_pepolar_pa = layout.get(
-        subject=sub, session=ses, extension='nii.gz',
-        suffix='epi', acquisition=acq, direction='PA',
-        return_type='filename'
+        subject=sub, session=ses, extension="nii.gz",
+        suffix="epi", acquisition=acq, direction="PA",
+        return_type="filename"
     )
     pepolar_pa_nifti = None
-    pepolar_pa = None 
-    if len(all_sequences_pepolar_pa)>0:
+    pepolar_pa = None
+    if len(all_sequences_pepolar_pa) > 0:
         pepolar_pa_nifti = all_sequences_pepolar_pa[0]
         result, msg, pepolar_pa = convert_nifti_to_mif(
             pepolar_pa_nifti, preproc_directory, diff=True
@@ -196,14 +196,14 @@ def prepare_hermes_acquistions(bids_directory, sub, ses, preproc_directory):
     if pepolar_ap is not None:
         _, msg, shell_ap = get_shell(pepolar_ap)
         shell_ap = [bval for bval in shell_ap if bval != "0" and bval != ""]
-        pepolar_ap_bzero = pepolar_ap.replace('.mif', '_bzero.mif')
+        pepolar_ap_bzero = pepolar_ap.replace(".mif", "_bzero.mif")
 
         # If pepolar contain b0 and b1000, extract b0
         if len(shell_ap) > 0:
-            print('\n Hermes fmaps contain b1000 and b0. b0 must be extracted')
+            print("\n Hermes fmaps contain b1000 and b0. b0 must be extracted")
             # Extraction b0 AP
             if not os.path.exists(pepolar_ap_bzero):
-                cmd = ["dwiextract", pepolar_ap, pepolar_ap_bzero, '-bzero']
+                cmd = ["dwiextract", pepolar_ap, pepolar_ap_bzero, "-bzero"]
                 result, stderrl, sdtoutl = execute_command(cmd)
                 if result != 0:
                     msg = f"\nCan not launch dwicat (exit code {result})"
@@ -223,13 +223,13 @@ def prepare_hermes_acquistions(bids_directory, sub, ses, preproc_directory):
     if pepolar_pa is not None:
         _, msg, shell_pa = get_shell(pepolar_pa)
         shell_pa = [bval for bval in shell_pa if bval != "0" and bval != ""]
-        pepolar_pa_bzero = pepolar_pa.replace('.mif', '_bzero.mif')
+        pepolar_pa_bzero = pepolar_pa.replace(".mif", "_bzero.mif")
 
         if len(shell_pa) > 0:
             # Extraction b0 PA
             if not os.path.exists(pepolar_pa_bzero):
                 cmd = ["dwiextract", pepolar_pa, pepolar_pa.replace(
-                    '.mif', '_bzero.mif'), '-bzero']
+                    ".mif", "_bzero.mif"), "-bzero"]
                 result, stderrl, sdtoutl = execute_command(cmd)
                 if result != 0:
                     msg = f"\nCan not lunch dwicat (exit code {result})"

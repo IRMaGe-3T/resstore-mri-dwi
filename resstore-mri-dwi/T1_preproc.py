@@ -2,6 +2,7 @@ import os
 from useful import execute_command, convert_mif_to_nifti, verify_file
 from termcolor import colored
 
+
 def run_preproc_t1(in_t1_nifti, in_dwi):
     """
     Coregister T1w to DWI
@@ -21,20 +22,20 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
         If the status is 1, info will contain the path to the coregistered T1 image.
     """
 
-    # Get name directory and create info 
+    # Get name directory and create info
     info = {}
     MNI_dir = os.path.dirname(in_dwi)
-    
+
     # Extract b0 from dwi
     in_dwi_b0 = in_dwi.replace(".mif", "_bzero.mif")
-    print(colored("\n~~T1 preprocessing starts~~", 'cyan'))
+    print(colored("\n~~T1 preprocessing starts~~", "cyan"))
     if not verify_file(in_dwi_b0):
         cmd = ["dwiextract", in_dwi, in_dwi_b0, "-bzero"]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
             msg = f"\nCan not lunch dwiextract (exit code {result})"
             return 0, msg, info
-        
+
     # Convert preprocessed dwi back to nifti
     in_dwi_b0_nii = in_dwi_b0.replace(".mif", ".nii.gz")
     if not verify_file(in_dwi_b0_nii):
@@ -51,7 +52,7 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
             msg = f"\nCan not lunch 5ttgen (exit code {result})"
             return 0, msg, info
 
-    # Extract gm info 
+    # Extract gm info
     grey_matter = tissue_type.replace(".nii.gz", "_gm.nii.gz")
     if not verify_file(grey_matter):
         cmd = ["fslroi", tissue_type, grey_matter, "0", "1"]
@@ -60,9 +61,8 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
             msg = f"\nCan not lunch fslroi (exit code {result})"
             return 0, msg, info
 
-
     # Coregistration of T1 with DWI
-    # Get transfo matrix to go from dwi to gm 
+    # Get transfo matrix to go from dwi to gm
     transfo_mat = os.path.join(MNI_dir, "diff2struct_fsl.mat")
     if not verify_file(transfo_mat):
         cmd = [
@@ -82,7 +82,6 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
         if result != 0:
             msg = f"\nCan not lunch flirt (exit code {result})"
             return 0, msg, info
-
 
     # Convert the matrix (dwi --> gm) to the right format (diff2struct.txt) for the next step
     diff2struct = os.path.join(MNI_dir, "diff2struct_mrtrix.txt")
@@ -145,5 +144,5 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
         info = {"in_t1_coreg": in_t1_coreg}
         msg = "\nPreprocessing T1 done"
         return 1, msg, info
-    
-    print(colored("\nT1 preprocessing ends", 'cyan'))
+
+    print(colored("\nT1 preprocessing ends", "cyan"))

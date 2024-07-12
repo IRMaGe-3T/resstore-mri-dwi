@@ -11,6 +11,7 @@ from termcolor import colored
 
 EXT = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
 
+
 def get_dwifslpreproc_command(
     in_dwi, dwi_out, pe_dir, readout_time, qc_directory, b0_pair=None, rpe=None, shell=False
 ):
@@ -57,6 +58,7 @@ def get_dwifslpreproc_command(
     else:
         command += ["-eddy_options", "--slm=linear"]
     return command
+
 
 def run_preproc_dwi(
     in_dwi, pe_dir, readout_time, shell=True, in_pepolar_PA=None, in_pepolar_AP=None
@@ -111,7 +113,7 @@ def run_preproc_dwi(
     dwi_preproc = dwi_degibbs.replace("_degibbs.mif", "_degibbs_preproc.mif")
     # Check if the file already exists or not
     if not verify_file(dwi_preproc):
-        # Create b0_pair if possible 
+        # Create b0_pair if possible
         # and choose rpe option for dwifslpreproc cmd
         b0_pair = os.path.join(dir_name, "b0_pair.mif")
         # Check if the file already exists or not
@@ -139,13 +141,14 @@ def run_preproc_dwi(
                     msg = f"\nCannot launch mrcat to create b0_pair (exit code {result})"
                     return 0, msg, info_prepoc
                 else:
-                    print(f"\nB0_pair successfully created. Output file: {b0_pair}")
+                    print(
+                        f"\nB0_pair successfully created. Output file: {b0_pair}")
             # If pe_dir=AP (j-) and fmap PA exist
             elif pe_dir == "j-" and in_pepolar_PA:
                 rpe = "pair"
                 # Check for fmap files encoding direction (AP)
                 if in_pepolar_AP is None:
-                # Extract b0 (AP) from dwi 
+                    # Extract b0 (AP) from dwi
                     in_pepolar_AP = in_dwi.replace(".mif", "_bzero.mif")
                     # Check if the file already exists or not
                     if not verify_file(in_pepolar_AP):
@@ -156,7 +159,7 @@ def run_preproc_dwi(
                             return 0, msg, info_prepoc
                         else:
                             print("\nb0_AP successfully extracted")
-                        
+
                 # Concatenate both b0 images to create b0_pair
                 cmd = ["mrcat", in_pepolar_AP, in_pepolar_PA, b0_pair]
                 result, stderrl, sdtoutl = execute_command(cmd)
@@ -164,7 +167,8 @@ def run_preproc_dwi(
                     msg = f"\nCannot launch mrcat to create b0_pair (exit code {result})"
                     return 0, msg, info_prepoc
                 else:
-                    print(f"\nB0_pair successfully created. Output file: {b0_pair}")
+                    print(
+                        f"\nB0_pair successfully created. Output file: {b0_pair}")
             # If no inverse fmap available (pe_dir AP or PA)
             else:
                 rpe = None
@@ -186,23 +190,29 @@ def run_preproc_dwi(
             msg = f"\nCannot launch dwifslpreproc (exit code {result})"
             return 0, msg, info_prepoc
         else:
-            print(f"\nMotion and distortion correction completed. Output file: {dwi_preproc}")
+            print(
+                f"\nMotion and distortion correction completed. Output file: {dwi_preproc}")
 
     # Bias correction
-    dwi_unbias = dwi_preproc.replace("_degibbs_preproc.mif", "_degibbs_preproc_unbiased.mif")
-    bias_output = dwi_preproc.replace("_degibbs_preproc.mif", "_degibbs_preproc_bias.mif")
+    dwi_unbias = dwi_preproc.replace(
+        "_degibbs_preproc.mif", "_degibbs_preproc_unbiased.mif")
+    bias_output = dwi_preproc.replace(
+        "_degibbs_preproc.mif", "_degibbs_preproc_bias.mif")
     # Check if the file already exists or not
     if not verify_file(dwi_unbias) and not verify_file(bias_output):
-        cmd = ["dwibiascorrect", "ants", dwi_preproc, dwi_unbias, "-bias", bias_output]
+        cmd = ["dwibiascorrect", "ants", dwi_preproc,
+               dwi_unbias, "-bias", bias_output]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
             msg = f"\nCannot launch bias correction (exit code {result})"
             return 0, msg
         else:
-            print(f"\nBias correction completed. Output files: {dwi_unbias}, {bias_output}")
+            print(
+                f"\nBias correction completed. Output files: {dwi_unbias}, {bias_output}")
 
     # Brain mask, for FA
-    dwi_mask = dwi_unbias.replace("_degibbs_preproc_unbiased.mif", "_dwi_brain_mask.mif")
+    dwi_mask = dwi_unbias.replace(
+        "_degibbs_preproc_unbiased.mif", "_dwi_brain_mask.mif")
     # Check if the file already exists or not
     if not verify_file(dwi_mask):
         cmd = ["dwi2mask", dwi_unbias, dwi_mask]
@@ -213,12 +223,12 @@ def run_preproc_dwi(
         else:
             print(f"\nBrain mask completed. Output file: {dwi_mask}")
 
-
-    mask_nii = dwi_mask.replace('.mif', '.nii.gz')
+    mask_nii = dwi_mask.replace(".mif", ".nii.gz")
     if not verify_file(mask_nii):
         convert_mif_to_nifti(dwi_mask, dir_name, diff=None)
 
-    info_preproc = {"dwi_preproc": dwi_unbias,"brain_mask": dwi_mask, "brain_mask_nii": mask_nii}
+    info_preproc = {"dwi_preproc": dwi_unbias,
+                    "brain_mask": dwi_mask, "brain_mask_nii": mask_nii}
     msg = "\nPreprocessing DWI done"
-    print(colored(msg, 'cyan'))
+    print(colored(msg, "cyan"))
     return 1, msg, info_preproc

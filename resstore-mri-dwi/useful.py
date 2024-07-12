@@ -22,10 +22,6 @@ EXT_NIFTI = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
 EXT_MIF = {"MIF": "mif"}
 
 
-
-
-
-
 def check_file_ext(in_file, ext_dic):
     """Check file extension
     
@@ -55,9 +51,18 @@ def check_file_ext(in_file, ext_dic):
 
     return valid_bool, in_ext, file_name
 
+
 def verify_file(file_path):
+    """
+    Check if a file alerady exist
+
+    Parameters:
+    - file_path: path to a file (a string)
+
+    """
     if os.path.exists(file_path):
-        print(colored(f"\nFile {file_path} already exists. Verifying contents...", 'yellow'))
+        print(
+            colored(f"\nFile {file_path} already exists. Verifying contents...", "yellow"))
         return True
     else:
         return False
@@ -70,7 +75,7 @@ def execute_command(command):
     - command: command to execute (a list)
 
     Examples:
-    - command = ['cd', 'path']
+    - command = ["cd", "path"]
     """
     print("\n", command)
     p = subprocess.Popen(
@@ -93,9 +98,6 @@ def execute_command(command):
     result = p.wait()
 
     return result, stderrl, sdtoutl
-
-
-
 
 
 def convert_mif_to_nifti(in_file, out_directory, diff=True):
@@ -144,12 +146,8 @@ def convert_mif_to_nifti(in_file, out_directory, diff=True):
         msg = f"Conversion of {in_file} to nifti format done"
         print(msg)
     else:
-        msg=None
+        msg = None
     return 1, msg, in_file_nifti
-
-
-
-
 
 
 def convert_nifti_to_mif(in_file, out_directory, diff=True):
@@ -166,7 +164,7 @@ def convert_nifti_to_mif(in_file, out_directory, diff=True):
     - in_file_mif: converted file in .mif format
     """
     in_file_mif = None
-    
+
     # Check inputs files and get files name
     valid_bool, ext, file_name = check_file_ext(in_file, EXT_NIFTI)
     if not valid_bool:
@@ -175,14 +173,14 @@ def convert_nifti_to_mif(in_file, out_directory, diff=True):
             "recognized (nii or nii.gz needed)...!"
         )
         return 0, msg, in_file_mif
-    
+
     # Check if output MIF file already exists
     in_file_mif = os.path.join(out_directory, file_name + ".mif")
     if verify_file(in_file_mif):
         return 1, "", in_file_mif
 
     # Convert diffusions into ".mif" format (mrtrix format)
-    #in_file_mif = os.path.join(out_directory, file_name + ".mif")
+    # in_file_mif = os.path.join(out_directory, file_name + ".mif")
     if diff:
         bvec = in_file.replace(ext, "bvec")
         bval = in_file.replace(ext, "bval")
@@ -201,10 +199,6 @@ def convert_nifti_to_mif(in_file, out_directory, diff=True):
     return 1, msg, in_file_mif
 
 
-
-
-
-
 def get_shell(in_file):
     """Get shell info (b values)
     
@@ -220,7 +214,7 @@ def get_shell(in_file):
     # Check inputs files and get files name
     valid_bool, ext, file_name = check_file_ext(in_file, EXT_MIF)
     if not valid_bool:
-        msg = "\nInput image format is not " "recognized (mif needed)...!"
+        msg = "\nInput image format is not recognized (mif needed)...!"
         return 0, msg, shell
 
     cmd = ["mrinfo", in_file, "-shell_bvalues"]
@@ -230,16 +224,24 @@ def get_shell(in_file):
         msg = f"\nCan not get info for {in_file}"
         return 0, msg, shell
     shell = sdtoutl.decode("utf-8").replace("\n", "").split(" ")
+    shell = [i for i in shell if i != ""]
     msg = f"\nShell found for {in_file}"
 
     return 1, msg, shell
 
-# Function to download the subjects.txt file if it doesn't exist
+
 def download_subjects_txt(dir_name):
+    """
+    Function to download the subjects.txt file if it doesn"t exist
+
+    Parameters: 
+    - dir_name: directory where the file is copied
+
+    """
     github_repo_url = "https://github.com/IRMaGe-3T/resstore-mri-dwi/raw/596e40689940113ef7b147679f218aba4235c60a/resstore-mri-dwi/resources/subjects.txt"
     template_filename = "subjects.txt"
     template_path = os.path.join(dir_name, template_filename)
-    
+
     # Check if the template file already exists
     if not verify_file(template_path):
         try:
@@ -249,15 +251,16 @@ def download_subjects_txt(dir_name):
         except Exception as e:
             print(f"\nFailed to download the subjects.txt file: {e}")
             return None
-    
+
     return template_path
 
-def delete_directory(dir):
+
+def delete_directory(dir_name):
     """
     Remove a directory and all its contents recursively.
 
     Args:
-    - dir (str): Path to the directory to be deleted.
+    - dir_name (str): Path to the directory to be deleted.
 
     Returns:
     - None
@@ -272,7 +275,7 @@ def delete_directory(dir):
     """
     try:
         # Check if the directory exists
-        if os.path.exists(dir):
+        if os.path.exists(dir_name):
             # Delete all files inside the directory
             for fichier in os.listdir(dir):
                 file_path = os.path.join(dir, fichier)
@@ -283,47 +286,50 @@ def delete_directory(dir):
                         shutil.rmtree(file_path)
                 except Exception as e:
                     print(f"Error deleting file {file_path}: {e}")
-            
-            # Delete the directory itself
-            shutil.rmtree(dir)
-            print(f"Directory '{dir}' and its contents have been successfully deleted.")
-        else:
-            print(f"Directory '{dir}' does not exist.")
-    except Exception as e:
-        print(f"Error deleting directory '{dir}': {e}")
 
+            # Delete the directory itself
+            shutil.rmtree(dir_name)
+            print(f"Directory '{dir_name}' and its contents have been successfully deleted.")
+        else:
+            print(f"Directory '{dir_name}' does not exist.")
+    except Exception as e:
+        print(f"Error deleting directory '{dir_name}': {e}")
 
 
 def plot_cst_data(file_path, map_name):
+    """
+    Plot CST data
+    
+    """
     # Read CSV file with the correct separator
-    data = pd.read_csv(file_path, sep=';')
-    
+    data = pd.read_csv(file_path, sep=";")
+
     # Verify that the CST data exists
-    if 'CST_left' not in data.columns or 'CST_right' not in data.columns:
+    if "CST_left" not in data.columns or "CST_right" not in data.columns:
         raise ValueError("Le fichier doit contenir les colonnes 'CST_left' et 'CST_right'")
-    
+
     # Plot the results
     plt.figure(figsize=(10, 6))
-    plt.plot(data['CST_left'], label='CST_left', marker='o')
-    plt.plot(data['CST_right'], label='CST_right', marker='x')
-    
-    #Changue the map name from FA_MNI to only FA or ODI
-    map_name = map_name.split('_')[0]
+    plt.plot(data["CST_left"], label="CST_left", marker="o")
+    plt.plot(data["CST_right"], label="CST_right", marker="x")
+
+    # Changue the map name from FA_MNI to only FA or ODI
+    map_name = map_name.split("_")[0]
     # Add titles and legends
-    plt.title(map_name + ' along the tract')
+    plt.title(map_name + " along the tract")
     plt.ylabel(map_name)
     plt.legend()
-    
+
     # Save the figure
     plt.tight_layout()
-    dir = os.path.dirname(file_path)
-    _,name = os.path.split(file_path)
+    dir_name = os.path.dirname(file_path)
+    _, name = os.path.split(file_path)
     name, _ = os.path.splitext(name)
     name = name.replace("tractometry_", "")
-    save_path = os.path.join(dir, name + "_in_CST_tracto.png")
+    save_path = os.path.join(dir_name, name + "_in_CST_tracto.png")
     plt.savefig(save_path)
-    
+
     # Close the plot
-    plt.close('all')
-    
+    plt.close("all")
+
     print(f"Graph saved to {save_path}")
