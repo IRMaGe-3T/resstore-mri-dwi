@@ -189,7 +189,7 @@ def map_in_MNI(map_to_register, out_dir, MNI_dir):
         cmd = [
             "flirt",
             "-ref", template, 
-            "-in", map,
+            "-in", map_to_register,
             "-out", map_mni,
             "-omat", "FA_2_MNI.mat",
             "-dof", "6",
