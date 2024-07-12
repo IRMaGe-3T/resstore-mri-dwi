@@ -134,6 +134,13 @@ def run_preproc_dwi(
                             return 0, msg, info_prepoc
                         else:
                             print("\nb0_PA successfully extracted")
+                        # Check dimension and average b0 if needed
+                        cmd = ["mrinfo", "-ndim", in_pepolar_PA]
+                        result, stderrl, sdtoutl = execute_command(cmd)
+                        dim = int(sdtoutl.decode("utf-8").replace("\n", ""))
+                        if dim == 4:
+                            cmd = ["mrmath", in_pepolar_PA, "mean", in_pepolar_PA, "-axis", "3", "-force"]
+                            result, stderrl, sdtoutl = execute_command(cmd)
                 # Concatenate both b0 images to create b0_pair
                 cmd = ["mrcat", in_pepolar_PA, in_pepolar_AP, b0_pair]
                 result, stderrl, sdtoutl = execute_command(cmd)
@@ -159,6 +166,13 @@ def run_preproc_dwi(
                             return 0, msg, info_prepoc
                         else:
                             print("\nb0_AP successfully extracted")
+                        # Check dimension and average b0 if needed
+                        cmd = ["mrinfo", "-ndim", in_pepolar_AP]
+                        result, stderrl, sdtoutl = execute_command(cmd)
+                        dim = int(sdtoutl.decode("utf-8").replace("\n", ""))
+                        if dim == 4:
+                            cmd = ["mrmath", in_pepolar_AP, "mean", in_pepolar_AP, "-axis", "3", "-force"]
+                            result, stderrl, sdtoutl = execute_command(cmd)
 
                 # Concatenate both b0 images to create b0_pair
                 cmd = ["mrcat", in_pepolar_AP, in_pepolar_PA, b0_pair]
