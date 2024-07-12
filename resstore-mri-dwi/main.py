@@ -1,9 +1,9 @@
-'''
+"""
 Main code to launch to process RESSTORE diffusion data
 
 python main.py --bids folder_bids_path 
 --subjects 01001 01002 --sessions V2 V5 --acquisitions abcd hermes
-'''
+"""
 
 import argparse
 import json
@@ -18,7 +18,7 @@ from useful import convert_nifti_to_mif, execute_command, get_shell, verify_file
 from preprocessing import run_preproc_dwi
 from MRtrix_FOD import FOD
 from MRTrix_FA import FA_map
-from T1_preproc import run_preproc_t1  
+from T1_preproc import run_preproc_t1
 from TractSeg_processing import run_tractseg, tractometry_postprocess
 from remove_volume import remove_volumes
 from ROI_stats import create_or_update_tsv, extract_roi_stats
@@ -26,28 +26,28 @@ from DIPY_DKI import DKI
 from AMICO_NODDI import NODDI
 from align_in_MNI import map_in_MNI, run_register_MNI
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='Process RESSTORE diffusion data'
+        description="Process RESSTORE diffusion data"
     )
     parser.add_argument(
-        '--bids', required=True, help='bids directory'
+        "--bids", required=True, help="bids directory"
     )
     parser.add_argument(
-        '--subjects', required=True, nargs='+',
-        help='subjects to proces, if you want to process all subjects use --subjects all'
+        "--subjects", required=True, nargs="+",
+        help="subjects to proces, if you want to process all subjects use --subjects all"
     )
     parser.add_argument(
-        '--sessions', required=True,  nargs='+',
-        help='sessions to process, if you want to process all sessions use --sessions all'
+        "--sessions", required=True,  nargs="+",
+        help="sessions to process, if you want to process all sessions use --sessions all"
     )
     parser.add_argument(
-        '--acquisitions', required=True,  nargs='+',
-        help='diffusion acquisition to process (abcd, hermes)'
+        "--acquisitions", required=True,  nargs="+",
+        help="diffusion acquisition to process (abcd, hermes)"
     )
     parser.add_argument(
-        '--volumes', required=None, 
-        help='list of volumes to remove (.txt)'
+        "--volumes", required=None,
+        help="list of volumes to remove (.txt)"
     )
 
     # Set path
@@ -58,36 +58,36 @@ if __name__ == '__main__':
     acquisitions = args.acquisitions
     volumes = args.volumes
     layout = BIDSLayout(bids_path)
-    
-    if subjects == ['all']:
+
+    if subjects == ["all"]:
         # Get all subjects in BIDS directory
         subjects = layout.get_subjects()
 
-    if sessions == ['all']:
+    if sessions == ["all"]:
         # Get all sessions in BIDS directory
         sessions = layout.get_sessions()
 
-    print(colored(f'\nSubjects to process: {subjects}','magenta'))
-    print(colored(f'Sessions to process: {sessions}','magenta'))
-    print(colored("\n \n===== PREPARATION OF ACQUISITIONS =====\n", 'cyan'))
+    print(colored(f"\nSubjects to process: {subjects}", "magenta"))
+    print(colored(f"Sessions to process: {sessions}", "magenta"))
+    print(colored("\n \n===== PREPARATION OF ACQUISITIONS =====\n", "cyan"))
     for sub in subjects:
-        print(colored('\nSubject: ' + sub,'magenta'))
-        #print('\nSubject: ', sub)
+        print(colored("\nSubject: " + sub, "magenta"))
+        # print("\nSubject: ", sub)
         for ses in sessions:
-            print(colored('Session: ' + ses,'magenta'))
+            print(colored("Session: " + ses, "magenta"))
             # Check if sub / session exist
             check = layout.get(subject=sub, session=ses)
             if check == []:
-                print(f'\nNo data for {sub} for session {ses}')
+                print(f"\nNo data for {sub} for session {ses}")
                 continue
             for acq in acquisitions:
                 # Check if acquistion exist for this subject
                 check = layout.get(subject=sub, session=ses, acquisition=acq)
                 if check == []:
-                    print(f'\nNo data for {sub} for session {ses} for {acq}')
+                    print(f"\nNo data for {sub} for session {ses} for {acq}")
                     continue
 
-                if volumes==None:
+                if volumes is None:
                     # Create analysis directory
                     analysis_directory = os.path.join(
                         bids_path,
@@ -125,18 +125,21 @@ if __name__ == '__main__':
                 # Get T1w and convert to MIF
                 all_sequences_t1 = layout.get(
                     subject=sub, session=ses,
-                    extension='nii.gz', suffix='T1w', return_type='filename')
+                    extension="nii.gz", suffix="T1w", return_type="filename")
                 if all_sequences_t1:
                     in_t1w_nifti = all_sequences_t1[0]
                     result, msg, in_t1w = convert_nifti_to_mif(
                         in_t1w_nifti, preproc_directory, diff=False
                     )
-                    if result == 0: 
+                    if result == 0:
                         print(msg)
                         sys.exit(1)
                 else:
-                    print(f"\nNo T1w data found for subject {sub} in session {ses}. Proceeding without T1w data.")
-                    in_t1w = None  
+                    print(
+                        f"\nNo T1w data found for subject {sub} in session {ses}."
+                        "Proceeding without T1w data."
+                    )
+                    in_t1w = None
                     in_t1w_nifti = None
 
                 # Get DWI and pepolar, convert to MIF, merge DWI and get info
@@ -147,16 +150,16 @@ if __name__ == '__main__':
                 elif "hermes" in acq:
                     in_dwi, in_dwi_json, in_pepolar_AP, in_pepolar_PA = prepare_hermes_acquistions(
                         bids_path, sub, ses, preproc_directory)
-                    
+
                 # Remove volume from dwi if needed
-                if not volumes==None:
+                if volumes:
                     in_dwi_rm_vol = in_dwi.replace(".mif", "_removed_vol.mif")
                     remove_volumes(in_dwi, in_dwi_rm_vol, volumes)
-                    cmd = ["mv",in_dwi_rm_vol, in_dwi]
+                    cmd = ["mv", in_dwi_rm_vol, in_dwi]
                     result, stderrl, sdtoutl = execute_command(cmd)
                     if result != 0:
                         msg = f"\nCan not move dwi_rm_vol file (exit code {result})"
-                    cmd = ["rm",in_dwi_rm_vol]
+                    cmd = ["rm", in_dwi_rm_vol]
                     result, stderrl, sdtoutl = execute_command(cmd)
                     if result != 0:
                         msg = f"\nCan not delete dwi_rm_vol file (exit code {result})"
@@ -179,9 +182,9 @@ if __name__ == '__main__':
                 else:
                     SHELL = False
 
-            print(f'\nPhase encoding dir: {pe_dir}')
+            print(f"\nPhase encoding dir: {pe_dir}")
 
-            print(colored("\n \n===== PREPROCESSING =====\n", 'cyan'))
+            print(colored("\n \n===== PREPROCESSING =====\n", "cyan"))
 
             # Launch preprocessing
             main_return, main_msg, info_preproc = run_preproc_dwi(
@@ -192,18 +195,19 @@ if __name__ == '__main__':
                 in_pepolar_AP=in_pepolar_AP
             )
 
-            print(colored("\n \n===== PROCESSING =====\n", 'cyan'))
+            print(colored("\n \n===== PROCESSING =====\n", "cyan"))
 
             # FA map
             FA_dir = os.path.join(analysis_directory, "FA")
             if not os.path.exists(FA_dir):
                 os.mkdir(FA_dir)
-            fa_return, fa_msg, info_fa = FA_map(info_preproc["dwi_preproc"], info_preproc["brain_mask"],FA_dir)
+            fa_return, fa_msg, info_fa = FA_map(
+                info_preproc["dwi_preproc"], info_preproc["brain_mask"], FA_dir)
 
             # NODDI maps
             mask_nii = info_preproc["brain_mask_nii"]
             AMICO_dir = os.path.join(analysis_directory, "AMICO")
-            print(colored("\n~~NOODI starts~~", 'cyan'))
+            print(colored("\n~~NOODI starts~~", "cyan"))
             if not verify_file(AMICO_dir):
                 dwi_preproc = info_preproc["dwi_preproc"]
                 bval = dwi_preproc.replace(".mif", ".bval")
@@ -212,25 +216,27 @@ if __name__ == '__main__':
             else:
                 base_dir = os.path.dirname(os.path.dirname(mask_nii))
                 NODDI_dir = os.path.join(base_dir, "AMICO", "NODDI")
-                print(colored("\nNOODI ends", 'cyan'))
+                print(colored("\nNOODI ends", "cyan"))
 
             # DKI maps, only works for abcd since it requires 3 b values
-            if acq=="abcd":
+            if acq == "abcd":
                 DKI_dir = os.path.join(analysis_directory, "DKI")
                 if not os.path.exists(DKI_dir):
                     os.mkdir(DKI_dir)
-                DKI_return, DKI_msg, info_DKI = DKI(info_preproc["dwi_preproc"], info_preproc["brain_mask_nii"],DKI_dir)
+                DKI_return, DKI_msg, info_DKI = DKI(
+                    info_preproc["dwi_preproc"], info_preproc["brain_mask_nii"], DKI_dir)
             else:
-                DKI_dir=None
+                DKI_dir = None
 
             # Aligning in the MNI space
             MNI_dir = os.path.join(analysis_directory, "preprocessing_MNI")
             if not os.path.exists(MNI_dir):
                 os.mkdir(MNI_dir)
-            mni_return, mni_msg, info_mni = run_register_MNI(info_preproc["dwi_preproc"], info_fa["FA_map"], NODDI_dir, DKI_dir, MNI_dir) 
+            mni_return, mni_msg, info_mni = run_register_MNI(
+                info_preproc["dwi_preproc"], info_fa["FA_map"], NODDI_dir, DKI_dir, MNI_dir)
 
             # NODDI and DKI maps in the MNI
-            print(colored("\n~~Map in MNI step starts~~", 'cyan'))
+            print(colored("\n~~Map in MNI step starts~~", "cyan"))
             for file_name in os.listdir(NODDI_dir):
                 if file_name.endswith(".nii.gz"):
                     map = os.path.join(NODDI_dir, file_name)
@@ -239,22 +245,22 @@ if __name__ == '__main__':
                 if file_name.endswith(".nii.gz"):
                     map = os.path.join(DKI_dir, file_name)
                     map_in_MNI(map, MNI_dir, NODDI_dir, DKI_dir)
-            print(colored("\nMap in MNI step ends", 'cyan'))
+            print(colored("\nMap in MNI step ends", "cyan"))
 
             # Doing FOD estimations
             FOD_dir = os.path.join(analysis_directory, "FOD")
             if not os.path.exists(FOD_dir):
                 os.mkdir(FOD_dir)
-            _,msg, peaks = FOD(info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"], acq, FOD_dir)
+            _, msg, peaks = FOD(
+                info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"], acq, FOD_dir)
 
             # Tractography
             Tract_dir = os.path.join(analysis_directory, "Tracto")
             if not os.path.exists(Tract_dir):
                 os.mkdir(Tract_dir)
             if in_t1w_nifti is not None:
-                run_preproc_t1(in_t1w_nifti,info_mni["dwi_preproc_mni"])
+                run_preproc_t1(in_t1w_nifti, info_mni["dwi_preproc_mni"])
             run_tractseg(peaks, Tract_dir)
-
 
             # Tractometry
             # Change here if you want to perform tractometry with another map than the FA
@@ -264,34 +270,30 @@ if __name__ == '__main__':
             map_path = info_mni["FA_MNI"]
 
             # # For the ODI map
-            NODDI_MNI= os.path.join(MNI_dir, "NODDI_MNI")
+            NODDI_MNI = os.path.join(MNI_dir, "NODDI_MNI")
             map_path2 = os.path.join(NODDI_MNI, "ODI_MNI.nii.gz")
 
             # # For the MK map
             # DKI_MNI= os.path.join(MNI_dir, "DKI_MNI")
             # map_path = os.path.join(DKI_MNI, "dki_MK_MNI.nii.gz")
 
-            print(colored("\n~~Tractometry starts~~", 'cyan'))
+            print(colored("\n~~Tractometry starts~~", "cyan"))
             tractometry_postprocess(map_path2, Tract_dir)
             tractometry_postprocess(map_path, Tract_dir)
-            print(colored("\nTractometry done.", 'cyan'))
+            print(colored("\nTractometry done.", "cyan"))
 
             # ROI extraction
             tsv_file = os.path.join(bids_path, "derivatives", "FA_stats.tsv")
-            subject_name = analysis_directory.split('/')[-3] + '-' + analysis_directory.split('/')[-2] + '-' + analysis_directory.split('/')[-1]
+            subject_name = analysis_directory.split(
+                "/")[-3] + "-" + analysis_directory.split("/")[-2] + "-" + analysis_directory.split("/")[-1]
             # Check if the subject is already in the TSV file or there is not such a file
-            if not os.path.isfile(tsv_file) or subject_name not in {row[0] for row in csv.reader(open(tsv_file), delimiter='\t')}:
+            if not os.path.isfile(tsv_file) or subject_name not in {row[0] for row in csv.reader(open(tsv_file), delimiter="\t")}:
                 # Extract ROI stats and update the TSV file
-                roi_stats = extract_roi_stats(analysis_directory, info_mni["FA_MNI"])
+                roi_stats = extract_roi_stats(
+                    analysis_directory, info_mni["FA_MNI"])
                 create_or_update_tsv(subject_name, roi_stats, tsv_file)
             else:
-                print(colored("\nFile already on the FA stats table.", 'yellow'))
+                print(colored("\nFile already on the FA stats table.", "yellow"))
 
-            print(colored("\n \n===== THE END =====\n\n", 'cyan'))
-                   
-            
-            # Take inspiration from https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/preprocessing.py#L59
- 
-            # Compare with Fabrice Hanneau code
+            print(colored("\n \n===== THE END =====\n\n", "cyan"))
 
-            # Take inspiration from https://github.com/IRMaGe-3T/mri_dwi_cluni/blob/master/mri_dwi_cluni/processing_fod.py            
