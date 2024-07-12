@@ -13,7 +13,7 @@ import csv
 
 from bids import BIDSLayout
 from termcolor import colored
-from prepare_acquisitions import prepare_abcd_acquistions, prepare_hermes_acquistions, prepare_orandani_acquistions
+from prepare_acquisitions import prepare_abcd_acquistions, prepare_hermes_acquistions
 from useful import convert_nifti_to_mif, execute_command, get_shell, verify_file
 from preprocessing import run_preproc_dwi
 from MRtrix_FOD import FOD
