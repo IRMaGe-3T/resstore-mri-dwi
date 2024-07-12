@@ -277,8 +277,8 @@ def delete_directory(dir_name):
         # Check if the directory exists
         if os.path.exists(dir_name):
             # Delete all files inside the directory
-            for fichier in os.listdir(dir):
-                file_path = os.path.join(dir, fichier)
+            for fichier in os.listdir(dir_name):
+                file_path = os.path.join(dir_name, fichier)
                 try:
                     if os.path.isfile(file_path):
                         os.unlink(file_path)
