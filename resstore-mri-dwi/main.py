@@ -209,10 +209,8 @@ if __name__ == "__main__":
                 AMICO_dir = os.path.join(analysis_directory, "AMICO")
                 print(colored("\n~~NOODI starts~~", "cyan"))
                 if not verify_file(AMICO_dir):
-                    dwi_preproc = info_preproc["dwi_preproc"]
-                    bval = dwi_preproc.replace(".mif", ".bval")
-                    bvec = dwi_preproc.replace(".mif", ".bvec")
-                    NODDI_dir = NODDI(dwi_preproc, bval, bvec, mask_nii)
+                    dwi_preproc_nii = info_preproc["dwi_preproc_nii"]
+                    NODDI_dir = NODDI(dwi_preproc_nii, mask_nii)
                 else:
                     base_dir = os.path.dirname(os.path.dirname(mask_nii))
                     NODDI_dir = os.path.join(base_dir, "AMICO", "NODDI")

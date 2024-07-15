@@ -3,22 +3,20 @@ import os
 from useful import convert_mif_to_nifti, delete_directory, verify_file
 
 
-def NODDI(dwi_mif, bval_file, bvec_file, mask_nii):
-    # dwi and mask are given . mif and should be .nii.gz
+def NODDI(dwi, mask):
 
     # Paths
-    base_dir = os.path.dirname(os.path.dirname(dwi_mif))
+    base_dir = os.path.dirname(os.path.dirname(dwi))
     AMICO_dir = os.path.join(base_dir, "AMICO")
-
+    bval_file = dwi.replace(".nii.gz", ".bval")
+    bvec_file = dwi.replace(".nii.gz", ".bvec")
     if not verify_file(AMICO_dir):
         # Setup AMICO
+        os.chdir(base_dir)
         print("Setting up AMICO...")
         amico.setup()
         print("AMICO setup complete.\n")
-
-        # Paths
-        dir_name = os.path.dirname(dwi_mif)
-        dwi_file = dwi_mif.replace("mif", "nii.gz")
+        dir_name = os.path.dirname(dwi)
         scheme_file = os.path.join(dir_name, "scheme")
 
         # Convert FSL scheme
@@ -30,7 +28,7 @@ def NODDI(dwi_mif, bval_file, bvec_file, mask_nii):
         # Load data
         print("Loading data...")
         ae = amico.Evaluation()
-        ae.load_data(dwi_file, scheme_file, mask_filename=mask_nii, b0_thr=0)
+        ae.load_data(dwi, scheme_file, mask_filename=mask, b0_thr=0)
         print("Data loaded.\n")
 
         # Set model and generate kernels
@@ -59,10 +57,9 @@ def NODDI(dwi_mif, bval_file, bvec_file, mask_nii):
         kernels = os.path.join(analysis_dir, "kernels")
         delete_directory(kernels)
 
-    preproc_dir = os.path.dirname(dwi_mif)
+    preproc_dir = os.path.dirname(dwi)
     analysis_dir = os.path.dirname(preproc_dir)
-    AMICO_dir = os.path.join(analysis_dir, "AMICO")
-    NODDI_dir = os.path.join(AMICO_dir, "NODDI")
+    NODDI_dir = os.path.join(analysis_dir, "AMICO", "NODDI")
     os.remove(scheme_file)
 
     print("AMICO processing completed.")

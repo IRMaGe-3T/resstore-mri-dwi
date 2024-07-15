@@ -240,8 +240,11 @@ def run_preproc_dwi(
     mask_nii = dwi_mask.replace(".mif", ".nii.gz")
     if not verify_file(mask_nii):
         convert_mif_to_nifti(dwi_mask, dir_name, diff=None)
+    dwi_unbias_nii = dwi_unbias.replace(".mif", ".nii.gz")
+    if not verify_file(dwi_unbias_nii):
+        convert_mif_to_nifti(dwi_unbias, dir_name, diff=True)
 
-    info_preproc = {"dwi_preproc": dwi_unbias,
+    info_preproc = {"dwi_preproc": dwi_unbias, "dwi_preproc_nii": dwi_unbias_nii,
                     "brain_mask": dwi_mask, "brain_mask_nii": mask_nii}
     msg = "\nPreprocessing DWI done"
     print(colored(msg, "cyan"))
