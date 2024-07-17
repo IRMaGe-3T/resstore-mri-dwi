@@ -34,6 +34,7 @@ def extract_roi_stats(analysis_directory, FA_MNI):
 
     # All ROIs
     roi_files = [f for f in os.listdir(bundle) if f.endswith('.nii.gz')]
+    roi_files.sort()
     roi_stats = []
     for roi_file in roi_files:
         ROI = os.path.join(bundle, roi_file)
