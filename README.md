@@ -1,18 +1,29 @@
 # RESSTORE MRI-DWI Processing
 
-This project is a processing pipeline for MRI diffusion data of the RESSTORE study. This repository contains the code to process MRI diffusion data using the BIDS (Brain Imaging Data Structure) format.
+This project is a processing pipeline for MRI diffusion data of the RESSTORE study. This repository contains the information to convert the dicom data to BIDS format and the instructions for the code to use to process MRI diffusion data.
 
 
 ## Requirements
 
-Add here the requirements. Software + which images are mandatory. 
-
+To use the programs, you'll need the following softwares and librairies. The versions indicated work with this code, other versions might cause some troubles. 
+- MRtrix 3.0.4
+- dcm2bids 3.1.1
+- ANTs 2.5.2
+- FSL 6.0.7.11
+- TractSeg 2.9
+- Xvfb 2:21.1.4
+- PyTorch 2.3.1
+- dmri-AMICO 2.0.3
+- NumPy 1.26.4
+- SciPy 1.14.0
+- NiBabel 5.2.1
+- Dipy 1.9.0
+- Termcolor 2.4.0
 
 
 ## Before starting: organize the database
 
 To begin, make sure your data are in BIDS format and that they have been organized with dcm2bids_scaffold method. To do so, you can follow the tutorial `dcm2bids tutorial` available in `ressources`. After using the tutorial, your data should be organized like this:
-
 
 - BIDS
   - code
@@ -40,7 +51,7 @@ To use this code, open the `restorre-mri-dwi` directory in your terminal and run
 ```
 python3 main.py --bids <folder_bids_path> --subjects <subject_ids> --sessions <session_ids> --acquisitions <acquisition_ids>
 ```
-Replace `<folder_bids_path>` with the path to your BIDS dataset folder, `<subject_ids>` with the IDs of the subjects you want to process, `<session_ids>` with the IDs of the sessions you want to process, and `<acquisition_ids>` with the IDs of the acquisitions you want to process (ex. hermes or abcd).
+Replace `<folder_bids_path>` with the path to your BIDS dataset folder, `<subject_ids>` with the IDs of the subjects you want to process, `<session_ids>` with the IDs of the sessions you want to process, and `<acquisition_ids>` with the IDs of the acquisitions you want to process (hermes and/or abcd).
 
 **Example Command**
 ```
@@ -55,9 +66,9 @@ Here is a brief explanation of the steps done by the programm the preprocess and
 
 1) Prepare acquisition to the right format (.mif for mrtrix)) and normalize the name 
 
-1) Denoising (dwidenoise mrtrix)
-2) Unringing (dwidegibbs mrtrix)
-3) Motion and distorsion correction (dwipreporc fsl)
+2) Denoising (dwidenoise mrtrix)
+3) Unringing (dwidegibbs mrtrix)
+4) Motion and distorsion correction (dwipreporc fsl)
 4) Unbiasing (dwibiascorrect mrtrix)
 
 5) FA, ADC, AD, RD map creation (mrtrix)
@@ -75,8 +86,7 @@ Here is a brief explanation of the steps done by the programm the preprocess and
 
 ## Results
 
-The program creates different ressources that are organize as follow in the `derivatives` directory:
-
+The program creates a wide range of images, maps, graph and stats which are organized as follow in the `derivatives` directory:
 
 - sub-001
   - ses-01
@@ -111,8 +121,8 @@ python3 main.py --bids 'path/to/OUTPUT_DIR' --subjects 003 --sessions 02 --acqui
 
 ## How to choose which volumes to remove
 
-Open the pdf file located in: `preprocessing/qc_text/quad/qc.pdf`. On the 6th page you'll see a chart indicating the number of outlier in each volume. A good idea is to supress the volumes having too many outliers (high peaks on top of the chart).
-You can also visualize by hand the volumes by typing in the terminal `mrview path/to/img.mif` and decide which volume to remove. The ones where the head is tilted and the ones featuring dark bands are good to remove.
+Once you've run the program completely for the subject with all the volumes, open the pdf file located in: `preprocessing/qc_text/quad/qc.pdf`. On the 6th page you'll see a chart indicating the number of outlier in each volume. A good idea is to supress the volumes having too many outliers (high peaks on top of the chart).
+You can also visualize by hand the volumes by typing in the terminal `mrview path/to/img.mif` and decide which volume to remove. The ones where the head is tilted and the ones featuring dark bands are good to remove.  
 
 
 
@@ -120,15 +130,12 @@ You can also visualize by hand the volumes by typing in the terminal `mrview pat
 
 ## Usefull remarks
 
-Concerning the tractometry, it is done with FA maps in the MNI space by default but you can choose another reference. In the main, line 250, you can comment and uncomment the section you want to get a tractometry with ODI and MK map.  
-  
-Concerning the graphs of FA along the tracts, named 'FA_MNI_graphs_TractSeg.png', you can choose to plot different tracts. To do so, delete the previous file, change the ROI in the subjects.txt file that should be in the same folder and re-do the tractometry.  
+Concerning the graphs of FA along the tracts, named 'FA_MNI_graphs_TractSeg.png' or 'ODI_MNI_graphs_TractSeg.png', you can choose to plot different tracts. To do so, delete the graphs or save them elsewhere, change the list of ROIs in the subjects.txt file that should be in the same folder and re-do the tractometry by simply re-running the main program (only the tractometry will be done since the other steps have already been done).  
 
 
 
 ## Important Notes
 
-* Make sure you have the BIDS files in the `OUTPUT_DIR` folder.
 * The processed output will be stored in the `derivatives` directory.
 * **Respect the BIDS format**: Ensure that your input files are in the correct BIDS format, as incorrect formatting may cause errors or incorrect results.
 
