@@ -138,4 +138,7 @@ Concerning the graphs of FA along the tracts, named 'FA_MNI_graphs_TractSeg.png'
 
 * The processed output will be stored in the `derivatives` directory.
 * **Respect the BIDS format**: Ensure that your input files are in the correct BIDS format, as incorrect formatting may cause errors or incorrect results.
+* Don't try to run the program on a subject that do not have any diffusion images, this could create derivatives wich are ompletely false.
+* The program runs with only diffusion acquired in one direction. If you have both you need to delete one of the direction from the subject file. Make sure that you have the pepolar fmap for the remaining acquisition.
+* Global correction using both AP and PA is possible but must be done manually. 
 
