@@ -227,7 +227,7 @@ if __name__ == "__main__":
                     DKI_dir = None
 
                 # Aligning in the MNI space
-                MNI_dir = os.path.join(analysis_directory, "preprocessing_MNI")
+                MNI_dir = os.path.join(analysis_directory, "Results_MNI")
                 if not os.path.exists(MNI_dir):
                     os.mkdir(MNI_dir)
                 mni_return, mni_msg, info_mni = run_register_MNI(
