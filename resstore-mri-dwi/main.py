@@ -276,6 +276,9 @@ if __name__ == "__main__":
                 # For the ODI map
                 NODDI_MNI = os.path.join(MNI_dir, "NODDI_MNI")
                 map_path2 = os.path.join(NODDI_MNI, "ODI_MNI.nii.gz")
+                map_path_NDI = os.path.join(NODDI_MNI, "NDI_MNI.nii.gz")
+                DKI_MNI = os.path.join(MNI_dir, "DKI_MNI")
+                map_path_KFA = os.path.join(DKI_MNI, "dki_kFA_MNI.nii.gz")
 
                 # For the MK map
                 # DKI_MNI= os.path.join(MNI_dir, "DKI_MNI")
@@ -284,6 +287,8 @@ if __name__ == "__main__":
                 print(colored("\n~~Tractometry starts~~", "cyan"))
                 tractometry_postprocess(map_path2, Tract_dir)
                 tractometry_postprocess(map_path, Tract_dir)
+                tractometry_postprocess(map_path_NDI, Tract_dir)
+                tractometry_postprocess(map_path_KFA, Tract_dir)
                 print(colored("\nTractometry done.", "cyan"))
 
                 # ROI extraction

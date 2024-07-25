@@ -7,7 +7,7 @@ Functions to used TracSeg software:
 from useful import check_file_ext, execute_command, verify_file, download_subjects_txt, plot_cst_data
 from termcolor import colored
 import os
-
+import pandas as pd
 EXT_NIFTI = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
 EXT_MIF = {"MIF": "mif"}
 
@@ -94,6 +94,11 @@ def run_tractseg(peaks, Tract_dir):
     return 1, msg
 
 
+def replace_dots_with_commas(value):
+    if isinstance(value, str):
+        return value.replace('.', ',')
+    return value
+
 def tractometry_postprocess(map, Tract_dir):
     """
     Tractometry
@@ -144,6 +149,7 @@ def tractometry_postprocess(map, Tract_dir):
                 msg = f"\nCan not run tractometry: {result})"
                 return 0, msg
 
+
     if verify_file(peaks_tracto):
         cmd = ["rm", peaks_tracto]
         result, stderrl, sdtoutl = execute_command(cmd)
@@ -177,6 +183,10 @@ def tractometry_postprocess(map, Tract_dir):
             return 0, msg
 
     plot_cst_data(tracto_csv, map_name)
+
+    df = pd.read_csv(tracto_csv)
+    df = df.applymap(replace_dots_with_commas)
+    df.to_csv(tracto_csv, index=False)
 
     msg = "\nRun postprocessing for tractometry done"
     print(colored(msg, "cyan"))
