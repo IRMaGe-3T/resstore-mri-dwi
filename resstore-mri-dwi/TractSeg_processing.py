@@ -6,6 +6,7 @@ Functions to used TracSeg software:
 
 from useful import check_file_ext, execute_command, verify_file, download_subjects_txt, plot_cst_data
 from termcolor import colored
+import csv
 import os
 import pandas as pd
 EXT_NIFTI = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
@@ -141,7 +142,8 @@ def tractometry_postprocess(map, Tract_dir):
         map_name = map_name.replace("dipy_", "")
         tracto_csv = os.path.join(
             tractseg_out_dir, "tractometry_" + map_name + ".csv")
-        if not verify_file(tracto_csv):
+        tsv_file_path = tracto_csv.replace('.csv', '.tsv')
+        if not verify_file(tsv_file_path):
             cmd = ["Tractometry", "-i", TOM_trackings, "-o",
                    tracto_csv, "-e", ending_segm, "-s", map_nii]
             result, stderrl, sdtoutl = execute_command(cmd)
@@ -187,6 +189,21 @@ def tractometry_postprocess(map, Tract_dir):
     df = pd.read_csv(tracto_csv)
     df = df.applymap(replace_dots_with_commas)
     df.to_csv(tracto_csv, index=False)
+
+
+    # Read the CSV file and process it line by line
+    with open(tracto_csv, 'r', newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        lines = list(reader)
+
+    # Write the processed lines to a TSV file
+    with open(tsv_file_path, 'w', newline='', encoding='utf-8') as tsvfile:
+        writer = csv.writer(tsvfile, delimiter='\t')
+        writer.writerows(lines)
+
+    # Remove the original CSV file
+    os.remove(tracto_csv)
+
 
     msg = "\nRun postprocessing for tractometry done"
     print(colored(msg, "cyan"))
