@@ -121,7 +121,7 @@ def run_preproc_dwi(
             # If pe_dir=PA (j) and fmap AP exist
             if pe_dir == "j" and in_pepolar_AP:
                 rpe = "pair"
-                # Check for fmap files encoding direction (PA)
+                # No fmap files in the encoding direction (PA) is given
                 if in_pepolar_PA is None:
                     # Extract b0 (PA) from main dwi
                     in_pepolar_PA = in_dwi.replace(".mif", "_bzero.mif")
@@ -134,15 +134,31 @@ def run_preproc_dwi(
                             return 0, msg, info_prepoc
                         else:
                             print("\nb0_PA successfully extracted")
-                        # Check dimension and average b0 if needed
-                        cmd = ["mrinfo", "-ndim", in_pepolar_PA]
-                        result, stderrl, sdtoutl = execute_command(cmd)
-                        dim = int(sdtoutl.decode("utf-8").replace("\n", ""))
-                        if dim == 4:
-                            cmd = ["mrmath", in_pepolar_PA, "mean", in_pepolar_PA, "-axis", "3", "-force"]
-                            result, stderrl, sdtoutl = execute_command(cmd)
+                # Check dimension and average b0 if needed
+                # All fmaps are averaged to ensure that dwifslpreproc will run correctly 
+                # It can only run with even number of volumes in the fmaps
+                cmd = ["mrinfo", "-ndim", in_pepolar_PA]
+                result, stderrl, sdtoutl = execute_command(cmd)
+                dim = int(sdtoutl.decode("utf-8").replace("\n", ""))
+                in_pep_PA_mean = in_pepolar_PA.replace(".mif", "_mean.mif")
+                if dim == 4:
+                    cmd = ["mrmath", in_pepolar_PA, "mean", in_pep_PA_mean, "-axis", "3", "-force"]
+                    result, stderrl, sdtoutl = execute_command(cmd)
+                else:
+                    in_pep_PA_mean = in_pepolar_PA
+
+                cmd = ["mrinfo", "-ndim", in_pepolar_AP]
+                result, stderrl, sdtoutl = execute_command(cmd)
+                dim = int(sdtoutl.decode("utf-8").replace("\n", ""))
+                in_pep_AP_mean = in_pepolar_AP.replace(".mif", "_mean.mif")
+                if dim == 4:
+                    cmd = ["mrmath", in_pepolar_AP, "mean", in_pep_AP_mean, "-axis", "3", "-force"]
+                    result, stderrl, sdtoutl = execute_command(cmd)
+                else:
+                    in_pep_AP_mean = in_pepolar_AP
+
                 # Concatenate both b0 images to create b0_pair
-                cmd = ["mrcat", in_pepolar_PA, in_pepolar_AP, b0_pair]
+                cmd = ["mrcat", in_pepolar_PA, in_pep_AP_mean, b0_pair]
                 result, stderrl, sdtoutl = execute_command(cmd)
                 if result != 0:
                     msg = f"\nCannot launch mrcat to create b0_pair (exit code {result})"
@@ -166,16 +182,29 @@ def run_preproc_dwi(
                             return 0, msg, info_prepoc
                         else:
                             print("\nb0_AP successfully extracted")
-                        # Check dimension and average b0 if needed
-                        cmd = ["mrinfo", "-ndim", in_pepolar_AP]
-                        result, stderrl, sdtoutl = execute_command(cmd)
-                        dim = int(sdtoutl.decode("utf-8").replace("\n", ""))
-                        if dim == 4:
-                            cmd = ["mrmath", in_pepolar_AP, "mean", in_pepolar_AP, "-axis", "3", "-force"]
-                            result, stderrl, sdtoutl = execute_command(cmd)
+                # Check dimension and average b0 if needed
+                cmd = ["mrinfo", "-ndim", in_pepolar_AP]
+                result, stderrl, sdtoutl = execute_command(cmd)
+                dim = int(sdtoutl.decode("utf-8").replace("\n", ""))
+                in_pep_AP_mean = in_pepolar_AP.replace(".mif", "_mean.mif")
+                if dim == 4:
+                    cmd = ["mrmath", in_pepolar_AP, "mean", in_pep_AP_mean, "-axis", "3", "-force"]
+                    result, stderrl, sdtoutl = execute_command(cmd)
+                else:
+                    in_pep_AP_mean = in_pepolar_AP
+
+                cmd = ["mrinfo", "-ndim", in_pepolar_PA]
+                result, stderrl, sdtoutl = execute_command(cmd)
+                dim = int(sdtoutl.decode("utf-8").replace("\n", ""))
+                in_pep_PA_mean = in_pepolar_PA.replace(".mif", "_mean.mif")
+                if dim == 4:
+                    cmd = ["mrmath", in_pepolar_AP, "mean", in_pep_PA_mean, "-axis", "3", "-force"]
+                    result, stderrl, sdtoutl = execute_command(cmd)
+                else:
+                    in_pep_PA_mean = in_pepolar_PA
 
                 # Concatenate both b0 images to create b0_pair
-                cmd = ["mrcat", in_pepolar_AP, in_pepolar_PA, b0_pair]
+                cmd = ["mrcat", in_pep_AP_mean, in_pep_PA_mean, b0_pair]
                 result, stderrl, sdtoutl = execute_command(cmd)
                 if result != 0:
                     msg = f"\nCannot launch mrcat to create b0_pair (exit code {result})"
