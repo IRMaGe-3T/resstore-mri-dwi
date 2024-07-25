@@ -32,11 +32,11 @@ To begin, make sure your data are in BIDS format and that they have been organiz
   - sub-001
     - ses-01
         - anat
-          -T1
-        - dwi
-          -DWI from  one or both acquisitions (ABCD/Hermes)
+            -T1
+        -dwi
+            -DWI from  one or both acquisitions (ABCD/Hermes)
         - fmap
-          -Fieldmap from  one or both acquisitions (ABCD/Hermes)
+            -Fieldmap from  one or both acquisitions (ABCD/Hermes)
         - ...
     - ses-02
   - sub-002
