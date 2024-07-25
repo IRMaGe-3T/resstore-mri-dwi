@@ -32,8 +32,11 @@ To begin, make sure your data are in BIDS format and that they have been organiz
   - sub-001
     - ses-01
         - anat
+          -T1
         - dwi
+          -DWI from  one or both acquisitions (ABCD/Hermes)
         - fmap
+          -Fieldmap from  one or both acquisitions (ABCD/Hermes)
         - ...
     - ses-02
   - sub-002
@@ -66,18 +69,15 @@ Here is a brief explanation of the steps done by the programm the preprocess and
 
 1) Prepare acquisition to the right format (.mif for mrtrix)) and normalize the name 
 
-2) Denoising (dwidenoise mrtrix)
-3) Unringing (dwidegibbs mrtrix)
+2) Denoising (dwidenoise MRtrix)
+3) Unringing (dwidegibbs MRtrix)
 4) Motion and distorsion correction (dwipreporc fsl)
-4) Unbiasing (dwibiascorrect mrtrix)
-
-5) FA, ADC, AD, RD map creation (mrtrix)
-6) NODDI (mrtrix)
-7) DKI (mrtrix)
-
+4) Unbiasing (dwibiascorrect MRtrix)
+5) FA, ADC, AD, RD map creation (MRtrix)
+6) NODDI (AMICO)
+7) DKI (DIPPY)
 8) Align everything in the MNI space using FA template
-
-9) FOD estoimation (mrtrix)
+9) FOD estoimation (MRtrix)
 10) Performing tractography (TractSeg)
 11) Doing tractometry (TractSeg) 
 12) Plotting some graphs of FA along tracts 
