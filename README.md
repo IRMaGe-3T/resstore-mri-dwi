@@ -19,6 +19,7 @@ To use the programs, you'll need the following softwares and librairies. The ver
 - NiBabel 5.2.1
 - Dipy 1.9.0
 - Termcolor 2.4.0
+- Pandas 2.2.2
 
 
 ## Before starting: organize the database
