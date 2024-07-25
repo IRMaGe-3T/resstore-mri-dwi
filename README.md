@@ -25,26 +25,28 @@ To use the programs, you'll need the following softwares and librairies. The ver
 
 To begin, make sure your data are in BIDS format and that they have been organized with dcm2bids_scaffold method. To do so, you can follow the tutorial `dcm2bids tutorial` available in `ressources`. After using the tutorial, your data should be organized like this:
 
-BIDS/
-├── code/
-├── derivatives/
-├── sourcedata/
-├── sub-001/
-│ ├── ses-01/
-│ │ ├── anat/
-│ │ │ └── T1
-│ │ ├── dwi/
-│ │ │ └── DWI from one or both acquisitions (ABCD/Hermes)
-│ │ ├── fmap/
-│ │ │ └── Fieldmap from one or both acquisitions (ABCD/Hermes)
-│ │ └── ...
-│ ├── ses-02/
-├── sub-002/
-│ ├── ses-01/
-│ └── ses-02/
-├── CHANGES
-├── dataset_description.json
-└── ...
+- BIDS
+  - code
+  - derivatives
+  - sourcedata
+  - sub-001
+    - ses-01
+      - anat
+        - T1
+      - dwi
+        - DWI from one or both acquisitions (ABCD/Hermes)
+      - fmap
+        - Fieldmap from one or both acquisitions (ABCD/Hermes)
+      - ...
+    - ses-02
+  - sub-002
+    - ses-01
+    - ses-02
+  - CHANGES
+  - dataset_description.json
+  - ...
+
+
 
 
 ## Getting started: launch the program 
