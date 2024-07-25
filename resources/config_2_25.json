@@ -1,0 +1,69 @@
+{
+    "descriptions": [
+        {
+            "datatype": "anat",
+            "suffix": "T1w",
+            "criteria": {
+            	"SeriesDescription": "*3D_T1*"
+            }
+        },
+        {
+            "datatype": "anat",
+            "suffix": "FLAIR",
+            "criteria": {
+            	"SeriesDescription": "*3D_FLAIR*"
+            }
+        },
+        {
+            "datatype": "anat",
+            "suffix": "FLAIR",
+            "criteria": {
+            	"SeriesDescription": "*FLAIR 3D*"
+            }
+        },
+        {
+            "datatype": "dwi",
+            "suffix": "dwi",
+            "custom_entities": "acq-abcd1_dir-PA",
+            "criteria": {
+            	"SeriesDescription": "DTI 1_2.25mm"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j"
+            }
+        },
+        {
+            "datatype": "dwi",
+            "suffix": "dwi",
+            "custom_entities": "acq-abcd2_dir-PA",
+            "criteria": {
+            	"SeriesDescription": "DTI 2_2.25mm"
+            },
+            "sidecar_changes": {
+                "PhaseEnPhasecodingDirection": "j"
+            }
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": "acq-abcd_dir-AP",
+            "criteria": {
+            	"SeriesDescription": "DTI 1_APP_2.25mm"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j-"
+            }
+        },
+        {
+            "datatype": "fmap",
+            "suffix": "epi",
+            "custom_entities": "acq-abcd_dir-PA",
+            "criteria": {
+            	"SeriesDescription": "DTI 1_APA_2.25mm"
+            },
+            "sidecar_changes": {
+                "PhaseEncodingDirection": "j"
+            }
+        }
+    ]
+}
