@@ -158,7 +158,7 @@ def run_preproc_dwi(
                     in_pep_AP_mean = in_pepolar_AP
 
                 # Concatenate both b0 images to create b0_pair
-                cmd = ["mrcat", in_pepolar_PA, in_pep_AP_mean, b0_pair]
+                cmd = ["mrcat", in_pep_PA_mean, in_pep_AP_mean, b0_pair]
                 result, stderrl, sdtoutl = execute_command(cmd)
                 if result != 0:
                     msg = f"\nCannot launch mrcat to create b0_pair (exit code {result})"
@@ -198,7 +198,7 @@ def run_preproc_dwi(
                 dim = int(sdtoutl.decode("utf-8").replace("\n", ""))
                 in_pep_PA_mean = in_pepolar_PA.replace(".mif", "_mean.mif")
                 if dim == 4:
-                    cmd = ["mrmath", in_pepolar_AP, "mean", in_pep_PA_mean, "-axis", "3", "-force"]
+                    cmd = ["mrmath", in_pepolar_PA, "mean", in_pep_PA_mean, "-axis", "3", "-force"]
                     result, stderrl, sdtoutl = execute_command(cmd)
                 else:
                     in_pep_PA_mean = in_pepolar_PA
