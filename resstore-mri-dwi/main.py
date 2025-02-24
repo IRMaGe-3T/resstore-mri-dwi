@@ -204,17 +204,21 @@ if __name__ == "__main__":
                 fa_return, fa_msg, info_fa = FA_map(
                     info_preproc["dwi_preproc"], info_preproc["brain_mask"], FA_dir)
 
-                # NODDI maps
-                mask_nii = info_preproc["brain_mask_nii"]
-                AMICO_dir = os.path.join(analysis_directory, "AMICO")
-                print(colored("\n~~NOODI starts~~", "cyan"))
-                if not verify_file(AMICO_dir):
-                    dwi_preproc_nii = info_preproc["dwi_preproc_nii"]
-                    NODDI_dir = NODDI(dwi_preproc_nii, mask_nii)
+                # NODDI maps, only valid for multishell data
+                if acq == "abcd":
+                    mask_nii = info_preproc["brain_mask_nii"]
+                    AMICO_dir = os.path.join(analysis_directory, "AMICO")
+                    print(colored("\n~~NOODI starts~~", "cyan"))
+                    if not verify_file(AMICO_dir):
+                        dwi_preproc_nii = info_preproc["dwi_preproc_nii"]
+                        NODDI_dir = NODDI(dwi_preproc_nii, mask_nii)
+                    else:
+                        base_dir = os.path.dirname(os.path.dirname(mask_nii))
+                        NODDI_dir = os.path.join(base_dir, "AMICO", "NODDI")
+                        print(colored("\nNOODI ends", "cyan"))
                 else:
-                    base_dir = os.path.dirname(os.path.dirname(mask_nii))
-                    NODDI_dir = os.path.join(base_dir, "AMICO", "NODDI")
-                    print(colored("\nNOODI ends", "cyan"))
+                    AMICO_dir = None
+                    NODDI_dir = None
 
                 # DKI maps, only works for abcd since it requires 3 b values
                 if acq == "abcd":
@@ -273,36 +277,49 @@ if __name__ == "__main__":
                 # For the FA
                 map_path = info_mni["FA_MNI"]
 
-                # For the ODI map
+                # For the others map
                 NODDI_MNI = os.path.join(MNI_dir, "NODDI_MNI")
-                map_path2 = os.path.join(NODDI_MNI, "ODI_MNI.nii.gz")
+                map_path_ODI = os.path.join(NODDI_MNI, "ODI_MNI.nii.gz")
                 map_path_NDI = os.path.join(NODDI_MNI, "NDI_MNI.nii.gz")
                 DKI_MNI = os.path.join(MNI_dir, "DKI_MNI")
                 map_path_KFA = os.path.join(DKI_MNI, "dki_kFA_MNI.nii.gz")
-
-                # For the MK map
-                # DKI_MNI= os.path.join(MNI_dir, "DKI_MNI")
-                # map_path = os.path.join(DKI_MNI, "dki_MK_MNI.nii.gz")
+                map_path_MK = os.path.join(DKI_MNI, "dki_MK_MNI.nii.gz")
 
                 print(colored("\n~~Tractometry starts~~", "cyan"))
-                tractometry_postprocess(map_path2, Tract_dir)
                 tractometry_postprocess(map_path, Tract_dir)
-                tractometry_postprocess(map_path_NDI, Tract_dir)
-                tractometry_postprocess(map_path_KFA, Tract_dir)
+                if acq == "abcd":
+                    tractometry_postprocess(map_path_NDI, Tract_dir)
+                    tractometry_postprocess(map_path_KFA, Tract_dir)
+                    tractometry_postprocess(map_path_MK, Tract_dir)
+                    tractometry_postprocess(map_path_ODI, Tract_dir)
                 print(colored("\nTractometry done.", "cyan"))
 
                 # ROI extraction
-                tsv_file = os.path.join(bids_path, "derivatives", "FA_stats.tsv")
+                PATH_METRIC = {
+                    "FA":  info_mni["FA_MNI"],
+                    "dki_MK" : map_path_MK,
+                    "dki_kFA" : map_path_KFA,
+                    "noddi_ODI" : map_path_ODI,
+                    "noddi_NDI" : map_path_NDI
+                }
                 subject_name = analysis_directory.split(
-                    "/")[-3] + "-" + analysis_directory.split("/")[-2] + "-" + analysis_directory.split("/")[-1]
-                # Check if the subject is already in the TSV file or there is not such a file
-                if not os.path.isfile(tsv_file) or subject_name not in {row[0] for row in csv.reader(open(tsv_file), delimiter="\t")}:
-                    # Extract ROI stats and update the TSV file
-                    roi_stats = extract_roi_stats(
-                        analysis_directory, info_mni["FA_MNI"])
-                    create_or_update_tsv(subject_name, roi_stats, tsv_file)
+                    "/")[-3] + "-" + analysis_directory.split(
+                        "/")[-2] + "-" + analysis_directory.split("/")[-1]
+                if acq == "abcd":    
+                    list_metrics = ["FA", "dki_MK", "dki_kFA", "noddi_ODI", "noddi_NDI"]
                 else:
-                    print(colored("\nFile already on the FA stats table.", "yellow"))
+                    list_metrics = ["FA"]
+                for metric in list_metrics:  
+                    # Check if the subject is already in the TSV file or there is not such a file
+                    tsv_file = os.path.join(
+                        bids_path, "derivatives", "current_" + metric + "_tractseg_stats.tsv"
+                    )
+                    if not os.path.isfile(tsv_file) or subject_name not in {row[0] for row in csv.reader(open(tsv_file), delimiter="\t")}:
+                        # Extract ROI stats and update the TSV file
+                        roi_stats = extract_roi_stats(
+                            analysis_directory, PATH_METRIC[metric])
+                        create_or_update_tsv(subject_name, roi_stats, tsv_file)
+                    else:
+                        print(colored(f"\nFile already on the {metric} stats table.", "yellow"))
 
             print(colored("\n \n===== THE END =====\n\n", "cyan"))
-

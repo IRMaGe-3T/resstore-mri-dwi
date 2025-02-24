@@ -16,7 +16,7 @@ def getFAstats (FA, ROI_mask, bundle):
     d['FA'] = FA
     d['ROI_mask'] = os.path.basename(ROI_mask).replace(".nii.gz", "")
     d[res[0]]=res[8].decode()
-    d[res[1].decode()] = res[10].decode().replace('.', ',')
+    d[res[1].decode()] = res[10].decode()
     d[res[2]]=res[11].decode()
     d[res[3]]=res[12].decode()
     d[res[4]]=res[13].decode()
@@ -97,6 +97,6 @@ def create_or_update_tsv(subject_name, roi_stats, tsv_file):
         writer = csv.writer(file, delimiter='\t')
         writer.writerows([expected_headers] + existing_data[1:])
 
-    print("\nSubject successfully added to FA stats table.")
+    print("\nSubject successfully added to stats table.")
 
     return True  # Subject was added
