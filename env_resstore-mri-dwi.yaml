@@ -1,0 +1,13 @@
+name: env_resstore-mri-dwi
+dependencies:
+  - python=3.12.2
+  - numpy
+  - dcm2bids
+  - conda-forge::nibabel
+  - pybids
+  - pandas
+  - termcolor
+  - dipy
+  - scipy
+  - pytorch
+  - dmri-amico
