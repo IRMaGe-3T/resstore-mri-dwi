@@ -7,6 +7,7 @@ sequences for processing:
 """
 import sys
 import os
+import shutil
 
 from bids import BIDSLayout
 
@@ -32,7 +33,7 @@ def prepare_abcd_acquistions(bids_directory, sub, ses, preproc_directory):
 
     layout = BIDSLayout(bids_directory)
     acq = "abcd"
-    # For ABCD, 1 DWI
+    # For ABCD, 1 DWI (Siemens, GE)
     all_sequences_dwi_concatenated = layout.get(
         subject=sub, session=ses, extension="nii.gz",
         suffix="dwi", acquisition=acq, return_type="filename"
@@ -48,44 +49,56 @@ def prepare_abcd_acquistions(bids_directory, sub, ses, preproc_directory):
         print("\nDWI processing successful")
         dwi_json = dwi_nifti.replace("nii.gz", "json")
     else:
-        # For ABCD, 2 DWI
+        # For ABCD, 2 DWI (Philips)
+        # In some case only one acquired
         acq1 = acq + "1"
         all_sequences_dwi1 = layout.get(
             subject=sub, session=ses, extension="nii.gz",
             suffix="dwi", acquisition=acq1, return_type="filename"
         )
-        dwi_1_nifti = all_sequences_dwi1[0]
+        if all_sequences_dwi1:
+            dwi_1_nifti = all_sequences_dwi1[0]
+            result, msg, dwi_1 = convert_nifti_to_mif(
+                dwi_1_nifti, preproc_directory, diff=True
+            )
+            if result == 0:
+                print(msg)
+                sys.exit(1)
         acq2 = acq + "2"
         all_sequences_dwi2 = layout.get(
             subject=sub, session=ses, extension="nii.gz",
             suffix="dwi", acquisition=acq2, return_type="filename"
         )
-        dwi_2_nifti = all_sequences_dwi2[0]
-
-        result, msg, dwi_1 = convert_nifti_to_mif(
-            dwi_1_nifti, preproc_directory, diff=True
-        )
-        if result == 0:
-            print(msg)
-            sys.exit(1)
-
-        result, msg, dwi_2 = convert_nifti_to_mif(
-            dwi_2_nifti, preproc_directory, diff=True
-        )
-        if result == 0:
-            print(msg)
-            sys.exit(1)
-        # Merge DTI1 and DTI2
-        dwi = dwi_1.replace(f"acq-{acq1}", "acq-abcd")
-        if not verify_file(dwi):
-            cmd = ["dwicat", dwi_1, dwi_2, dwi]
-            result, stderrl, sdtoutl = execute_command(cmd)
-            if result != 0:
-                msg = f"\nCan not lunch dwicat (exit code {result})"
-            else:
-                print("\nExtraction successfull")
-        # Use DTI1 to get info
-        dwi_json = dwi_1_nifti.replace("nii.gz", "json")
+        if all_sequences_dwi2:
+            dwi_2_nifti = all_sequences_dwi2[0]
+            result, msg, dwi_2 = convert_nifti_to_mif(
+                dwi_2_nifti, preproc_directory, diff=True
+            )
+            if result == 0:
+                print(msg)
+                sys.exit(1)
+        if all_sequences_dwi1 and all_sequences_dwi2:
+            dwi = dwi_1.replace(f"acq-{acq1}", "acq-abcd")
+            # Use DTI1 to get info
+            dwi_json = dwi_1_nifti.replace("nii.gz", "json")
+            # Merge DTI1 and DTI2
+            if not verify_file(dwi):
+                cmd = ["dwicat", dwi_1, dwi_2, dwi]
+                result, stderrl, sdtoutl = execute_command(cmd)
+                if result != 0:
+                    msg = f"\nCan not lunch dwicat (exit code {result})"
+                else:
+                    print("\nExtraction successfull")
+        elif all_sequences_dwi1 and not all_sequences_dwi2:
+            # Only dti1 acquired
+            dwi = dwi_1.replace(f"acq-{acq1}", "acq-abcd")
+            shutil.copyfile(dwi_1, dwi)
+            dwi_json = dwi_1_nifti.replace("nii.gz", "json")
+        elif all_sequences_dwi2 and not all_sequences_dwi1:
+            # Only dti2 acquired
+            dwi = dwi_2.replace(f"acq-{acq2}", "acq-abcd")
+            dwi_json = dwi_2_nifti.replace("nii.gz", "json")
+            shutil.copyfile(dwi_2, dwi)
 
     # Get both pepolar sequences
     all_sequences_pepolar_ap = layout.get(
