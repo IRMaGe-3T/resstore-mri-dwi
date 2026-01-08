@@ -1,19 +1,5 @@
-""" FOD processing 
-Function for FOD estimation:
-    - Performs RF estimation using the dhollander algorithm
-    - Estimates FOD using MSMT CSD
-    - Converts the resulting FOD files into a volume fraction (VF) file
-    - Normalizes the intensity of the FOD files
-
-Parameters:
-    in_dwi (str): Path to the input DWI file in MIF format.
-    mask (str): Path to the brain mask file in MIF format. 
-
-Files created:
-    - voxels.mif
-    - wm.txt, gm.txt, csf.txt
-    - wmfod.mif, gmfod.mif, csffod.mif
-    - wmfod_norm.mif, gmfod_norm.mif, csffod_norm.mif
+""" 
+FOD processing 
 """
 
 import os
@@ -21,36 +7,57 @@ from useful import check_file_ext, execute_command, verify_file
 from termcolor import colored
 
 
-def FOD(in_dwi, mask, acq, FOD_dir):
+def FOD(in_dwi, mask, FOD_dir, multishell=True):
+    """
+    Functions for FOD estimation.
+    For single shell data:
+    - Use average response function
+    - Estimates FOD using CSD
+    - Extract peaks
+
+    For mult-shell data:
+    - Use average responses functions
+    - Estimates FOD using MSMT CSD
+    - Normalizes the intensity of the FOD files
+    - Extract peaks
+    """
 
     info = {}
-    # Get files name
-    dir_name = os.path.dirname(in_dwi)
     valid_bool, in_ext, file_name = check_file_ext(in_dwi, {"MIF": "mif"})
+    cur_path = os.path.dirname(__file__)
+    print(cur_path)
+    print(os.path.dirname(cur_path))
+    print(os.path.basename(cur_path))
+    resources_path = os.path.join(os.path.dirname(cur_path), "resources")
     print(colored("\n~~FOD estimation starts~~", "cyan"))
 
-    if acq == "abcd":
+    if multishell:
         # RF estimation
-        voxels = os.path.join(FOD_dir, "voxels.mif")
-        wm = os.path.join(FOD_dir, "wm.txt")
-        gm = os.path.join(FOD_dir, "gm.txt")
-        csf = os.path.join(FOD_dir, "csf.txt")
-        if not verify_file(voxels):
-            cmd = ["dwi2response", "dhollander",
-                   in_dwi, wm, gm, csf, "-voxels", voxels]
-            result, stderrl, sdtoutl = execute_command(cmd)
-            if result != 0:
-                msg = f"\nCan not launch dwi2response hollander (exit code {result})"
-                return 0, msg, info
-            else:
-                print(f"\nVoxels succesfully created. Output file: {voxels}")
+        # voxels = os.path.join(FOD_dir, "voxels.mif")
+        # wm = os.path.join(FOD_dir, "wm.txt")
+        # gm = os.path.join(FOD_dir, "gm.txt")
+        # csf = os.path.join(FOD_dir, "csf.txt")
+        # if not verify_file(voxels):
+        #     cmd = ["dwi2response", "dhollander",
+        #            in_dwi, wm, gm, csf, "-voxels", voxels]
+        #     result, stderrl, sdtoutl = execute_command(cmd)
+        #     if result != 0:
+        #         msg = f"\nCan not launch dwi2response hollander (exit code {result})"
+        #         return 0, msg, info
+        #     else:
+        #         print(f"\nVoxels succesfully created. Output file: {voxels}")
 
-        # FOD estimation
+        # Use average responses functions
+        wm = os.path.join(resources_path, "average_response_function", "abcd_groupe_average_response_wm.txt")
+        gm = os.path.join(resources_path, "average_response_function", "abcd_groupe_average_response_gm.txt")
+        csf = os.path.join(resources_path, "average_response_function", "abcd_groupe_average_response_csf.txt")
+        print(f"\nAverage responses functions used : {wm}, {gm}, {csf}")
         vf = os.path.join(FOD_dir, "vf.mif")
         wmfod = os.path.join(FOD_dir, "wmfod.mif")
         gmfod = os.path.join(FOD_dir, "gmfod.mif")
         csffod = os.path.join(FOD_dir, "csffod.mif")
         if not verify_file(vf):
+            # FOD estimation
             if not (os.path.exists(wmfod) and os.path.exists(gmfod) and os.path.exists(csffod)):
                 cmd = ["dwi2fod", "msmt_csd", in_dwi, "-mask",
                        mask, wm, wmfod, gm, gmfod, csf, csffod]
@@ -118,21 +125,25 @@ def FOD(in_dwi, mask, acq, FOD_dir):
         print(colored("\nFOD estimation ends", "cyan"))
         return 1, msg, peaks
 
-    elif acq == "hermes":
+    else:
         peaks_h = os.path.join(FOD_dir, "peaks.nii")
         if not verify_file(peaks_h):
 
-            # dwi2response
-            rf = os.path.join(FOD_dir, "rf.response")
-            if not verify_file(rf):
-                cmd = ["dwi2response", "tournier", in_dwi, rf, "-mask", mask]
-                result, stderrl, stdoutl = execute_command(cmd)
-                if result != 0:
-                    msg = f"\nCannot launch dwi2response (exit code {result})"
-                    return 0, msg, info
-                else:
-                    print(
-                        f"\nResponse estimation for FOD done. Output file: {rf}")
+            # # dwi2response
+            # rf = os.path.join(FOD_dir, "rf.response")
+            # if not verify_file(rf):
+            #     cmd = ["dwi2response", "tournier", in_dwi, rf, "-mask", mask]
+            #     result, stderrl, stdoutl = execute_command(cmd)
+            #     if result != 0:
+            #         msg = f"\nCannot launch dwi2response (exit code {result})"
+            #         return 0, msg, info
+            #     else:
+            #         print(
+            #             f"\nResponse estimation for FOD done. Output file: {rf}")
+
+            # Use average response function
+            rf = os.path.join(resources_path, "average_response_function", "hermes_groupe_average_response.txt")
+            print(f"\nAverage response funcion used: {rf}")
 
             # dwi2fod
             fod = os.path.join(FOD_dir, "FOD.mif")
@@ -158,6 +169,3 @@ def FOD(in_dwi, mask, acq, FOD_dir):
         print(colored("\nFOD estimation ends", "cyan"))
         return 1, msg, peaks_h
 
-    else:
-        msg = "\nType of acquisition not recognized for FOD estimation."
-        return 0, msg, None

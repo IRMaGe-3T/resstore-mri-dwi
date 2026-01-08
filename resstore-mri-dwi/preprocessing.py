@@ -23,6 +23,7 @@ def get_dwifslpreproc_command(
     - dwi_out: file that will contain the motion and distortion corrected images
     - pe_dir: phase encoding direction
     - readout_time: the time it takes to acquire the k-space data after the excitation pulse (s)
+    - qc_directory: directory for QC data
     - b0_pair: (optionnal) b0_pair file in .mif format 
     - rpe: (optionnal) ratio of partial echo = fraction of the k-space that are encoded
     - shell: (default:False) no info was given on the b-values
@@ -56,7 +57,7 @@ def get_dwifslpreproc_command(
     if shell:
         command += ["-eddy_options", "--slm=linear --data_is_shelled"]
     else:
-        command += ["-eddy_options", "--slm=linear"]
+        command += ["-eddy_options", "--slm=linear "]
     return command
 
 
@@ -116,11 +117,10 @@ def run_preproc_dwi(
         # Create b0_pair if possible
         # and choose rpe option for dwifslpreproc cmd
         b0_pair = os.path.join(dir_name, "b0_pair.mif")
-        # Check if the file already exists or not
-        if not verify_file(b0_pair):
-            # If pe_dir=PA (j) and fmap AP exist
-            if pe_dir == "j" and in_pepolar_AP:
-                rpe = "pair"
+        # If pe_dir=PA (j) and fmap AP exist
+        if pe_dir == "j" and in_pepolar_AP:
+            rpe = "pair"
+            if not verify_file(b0_pair):
                 # No fmap files in the encoding direction (PA) is given
                 if in_pepolar_PA is None:
                     # Extract b0 (PA) from main dwi
@@ -166,9 +166,10 @@ def run_preproc_dwi(
                 else:
                     print(
                         f"\nB0_pair successfully created. Output file: {b0_pair}")
-            # If pe_dir=AP (j-) and fmap PA exist
-            elif pe_dir == "j-" and in_pepolar_PA:
-                rpe = "pair"
+        # If pe_dir=AP (j-) and fmap PA exist
+        elif pe_dir == "j-" and in_pepolar_PA:
+            rpe = "pair"
+            if not verify_file(b0_pair):
                 # Check for fmap files encoding direction (AP)
                 if in_pepolar_AP is None:
                     # Extract b0 (AP) from dwi
@@ -212,14 +213,14 @@ def run_preproc_dwi(
                 else:
                     print(
                         f"\nB0_pair successfully created. Output file: {b0_pair}")
-            # If no inverse fmap available (pe_dir AP or PA)
-            else:
-                rpe = None
-                b0_pair = None
-                print(
-                    "\nfmap not available. Due to use of a single fixed phase encoding, "
-                    "no EPI distortion correction can be applied in this case."
-                )
+        # If no inverse fmap available (pe_dir AP or PA)
+        else:
+            rpe = None
+            b0_pair = None
+            print(
+                "\nfmap not available. Due to use of a single fixed phase encoding, "
+                "no EPI distortion correction can be applied in this case."
+            )
 
         # fslpreproc (topup and Eddy)
         qc_directory = os.path.join(dir_name, "qc_text")
@@ -252,29 +253,75 @@ def run_preproc_dwi(
         else:
             print(
                 f"\nBias correction completed. Output files: {dwi_unbias}, {bias_output}")
-
-    # Brain mask, for FA
-    dwi_mask = dwi_unbias.replace(
-        "_degibbs_preproc_unbiased.mif", "_dwi_brain_mask.mif")
-    # Check if the file already exists or not
-    if not verify_file(dwi_mask):
-        cmd = ["dwi2mask", dwi_unbias, dwi_mask]
-        result, stderrl, sdtoutl = execute_command(cmd)
-        if result != 0:
-            msg = f"\nCannot launch mask (exit code {result})"
-            return 0, msg
-        else:
-            print(f"\nBrain mask completed. Output file: {dwi_mask}")
-
-    mask_nii = dwi_mask.replace(".mif", ".nii.gz")
-    if not verify_file(mask_nii):
-        convert_mif_to_nifti(dwi_mask, dir_name, diff=None)
+    
     dwi_unbias_nii = dwi_unbias.replace(".mif", ".nii.gz")
     if not verify_file(dwi_unbias_nii):
         convert_mif_to_nifti(dwi_unbias, dir_name, diff=True)
+    
+    # # Upsampling
+    # dwi_upsamp = dwi_unbias.replace("_unbiased.mif", "_unbiased_up.mif")
+    # if not verify_file(dwi_upsamp):
+    #     cmd = [
+    #         "mrgrid", dwi_unbias, "regrid", "-voxel", "1.25", dwi_upsamp
+    #     ]
+    #     result, stderrl, stdoutl = execute_command(cmd)
+    #     if result != 0:
+    #         msg = f"\nCannot launch upsampling (exit code {result})"
+    #         return 0, msg
+    #     else:
+    #         print(
+    #             f"\n Upsampling completed. Output files: {dwi_upsamp}")
+    # dwi_upsamp_nii = dwi_upsamp.replace(".mif", ".nii.gz")
+    # if not verify_file(dwi_upsamp_nii):
+    #     convert_mif_to_nifti(dwi_upsamp, dir_name, diff=True)
+
+    # Brain mask, for FA
+    dwi_mask = os.path.join(dir_name, "dwi_up_mask_bet_mask.mif")
+    dwi_mask_nii = dwi_mask.replace(".mif", ".nii.gz")
+    bzeros =  dwi_unbias_nii.replace(".nii.gz","_bzero.nii.gz")
+    bzeros_mean =  dwi_unbias_nii.replace(".nii.gz","_bzero_mean.nii.gz")
+    # Check if the file already exists or not
+    if not verify_file(dwi_mask):
+        # cmd = ["dwi2mask", dwi_unbias, dwi_mask]
+        # result, stderrl, sdtoutl = execute_command(cmd)
+        # if result != 0:
+        #     msg = f"\nCannot launch mask (exit code {result})"
+        #     return 0, msg
+        # else:
+        #     print(f"\nBrain mask completed. Output file: {dwi_mask}")
+        
+        # Compute mask using bet
+        if not verify_file(bzeros_mean):
+            cmd = [
+                "dwiextract", dwi_unbias, bzeros, "-bzero"
+
+            ]
+            result, stderrl, stdoutl = execute_command(cmd)
+            if result != 0:
+                msg = f"\nCannot launch dwiextract (exit code {result})"
+                return 0, msg
+
+            cmd = [
+                "mrmath", bzeros, "mean",  bzeros_mean,  "-axis",  "3"
+            ]
+            result, stderrl, stdoutl = execute_command(cmd)
+            if result != 0:
+                msg = f"\nCannot launch mrmaths (exit code {result})"
+                return 0, msg
+
+        cmd = [
+            "bet", bzeros_mean, dwi_mask_nii.replace("_mask.nii.gz",""),  "-m", "-n"
+        ]
+        result, stderrl, stdoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"\nCannot launch bet (exit code {result})"
+            return 0, msg
+        if not verify_file(dwi_mask):
+            convert_nifti_to_mif(dwi_mask_nii, dir_name, diff=False)    
 
     info_preproc = {"dwi_preproc": dwi_unbias, "dwi_preproc_nii": dwi_unbias_nii,
-                    "brain_mask": dwi_mask, "brain_mask_nii": mask_nii}
+                    "brain_mask": dwi_mask, "brain_mask_nii": dwi_mask_nii,
+                    "mean_b0": bzeros_mean }
     msg = "\nPreprocessing DWI done"
     print(colored(msg, "cyan"))
     return 1, msg, info_preproc

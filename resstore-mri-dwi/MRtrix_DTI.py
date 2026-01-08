@@ -1,6 +1,5 @@
 """
-Create FA map 
-
+Use MRTrix to fit Diffusion Tensor Imaging (DTI)
 """
 
 import os
@@ -8,8 +7,10 @@ from useful import check_file_ext, execute_command, verify_file
 from termcolor import colored
 
 
-def FA_map(in_dwi, mask, FA_dir):
-
+def mrtrix_DTI(in_dwi, mask, FA_dir):
+    """
+    Fit DTI using mrtrix
+    """
     info = {}
     # Get files name
     valid_bool, in_ext, file_name = check_file_ext(in_dwi, {"MIF": "mif"})
@@ -33,10 +34,11 @@ def FA_map(in_dwi, mask, FA_dir):
     ADC_map = os.path.join(FA_dir, "ADC_map.mif")
     RD_map = os.path.join(FA_dir,  "RD_map.mif")
     AD_map = os.path.join(FA_dir,  "AD_map.mif")
+    vector = os.path.join(FA_dir,  "vector.mif")
     # Check if the file already exist or not
     if not (os.path.exists(FA_map) or os.path.exists(ADC_map) or os.path.exists(RD_map) or os.path.exists(AD_map)):
         cmd = ["tensor2metric", "-fa", FA_map, "-adc",
-               ADC_map, "-rd", RD_map, "-ad", AD_map, tensor]
+               ADC_map, "-rd", RD_map, "-ad", AD_map, "-vector", vector, "-mask", mask, tensor]
         result, stderrl, sdtoutl = execute_command(cmd)
         if result != 0:
             msg = f"\nCan not launch tensor2metric (exit code {result})"

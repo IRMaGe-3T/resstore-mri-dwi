@@ -3,6 +3,21 @@ from useful import execute_command, convert_mif_to_nifti, verify_file
 from termcolor import colored
 
 
+def t1_bet(in_t1,out_dir):
+    """ use BET (FSL)"""
+    info = {}
+    t1_brain = os.path.join(out_dir, "T1_brain.nii.gz")
+    if not verify_file(t1_brain):
+        cmd = ["bet", in_t1, t1_brain, "-R"]
+        result, stderrl, sdtoutl = execute_command(cmd)
+        if result != 0:
+            msg = f"\nCan not lunch bet (exit code {result})"
+            return 0, msg, info
+    msg = "\nbet T1 done"
+    info = {"t1_brain": t1_brain}
+    return 1, msg, info
+
+    
 def run_preproc_t1(in_t1_nifti, in_dwi):
     """
     Coregister T1w to DWI

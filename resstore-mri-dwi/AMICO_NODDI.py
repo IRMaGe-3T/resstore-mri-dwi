@@ -1,9 +1,15 @@
+"""
+Use AMICO - Accelerated Microstructure Imaging via Convex Optimization to fit NODDI model
+"""
 import amico
 import os
-from useful import convert_mif_to_nifti, delete_directory, verify_file
+from useful import delete_directory, verify_file
 
 
 def NODDI(dwi, mask):
+    """
+    Run AMICO
+    """
 
     # Paths
     base_dir = os.path.dirname(os.path.dirname(dwi))

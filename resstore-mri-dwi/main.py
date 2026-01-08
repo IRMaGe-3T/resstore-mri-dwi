@@ -14,17 +14,16 @@ import csv
 from bids import BIDSLayout
 from termcolor import colored
 from prepare_acquisitions import prepare_abcd_acquistions, prepare_hermes_acquistions
-from useful import convert_nifti_to_mif, execute_command, get_shell, verify_file
+from useful import convert_nifti_to_mif, convert_mif_to_nifti, execute_command, get_shell, verify_file
 from preprocessing import run_preproc_dwi
 from MRtrix_FOD import FOD
-from MRTrix_FA import FA_map
-from T1_preproc import run_preproc_t1
-from TractSeg_processing import run_tractseg, tractometry_postprocess
+from MRtrix_DTI import mrtrix_DTI
+from T1_preproc import t1_bet
+from TractSeg_processing import run_tractseg, tractometry_postprocess, map_in_MNI_flirt_applyxfm, register_to_MNI_FA
+from JHU_analysis import register_to_MNI_using_T1w, map_in_MNI_applywarp
 from remove_volume import remove_volumes
-from ROI_stats import create_or_update_tsv, extract_roi_stats
-from DIPY_DKI import DKI
+from DIPY_DKI_DTI import dipy_DKI, dipy_DTI
 from AMICO_NODDI import NODDI
-from align_in_MNI import map_in_MNI, run_register_MNI
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -175,8 +174,9 @@ if __name__ == "__main__":
                         readout_time = str(data["EstimatedTotalReadoutTime"])
                     pe_dir = str(data["PhaseEncodingDirection"])
                 # Check if it is multishell data
-                result, msg, shell = get_shell(in_dwi)
-                shell = [bval for bval in shell if bval != "0" and bval != ""]
+                result, msg, shell_res = get_shell(in_dwi)
+                shell = [bval for bval in shell_res if float(bval) >= 5 and bval != ""]
+                print("Shell: ", shell)
                 if len(shell) > 1:
                     SHELL = True
                 else:
@@ -197,15 +197,22 @@ if __name__ == "__main__":
 
                 print(colored("\n \n===== PROCESSING =====\n", "cyan"))
 
-                # FA map
+                # Compute FA map (mtrix)
                 FA_dir = os.path.join(analysis_directory, "FA")
                 if not os.path.exists(FA_dir):
                     os.mkdir(FA_dir)
-                fa_return, fa_msg, info_fa = FA_map(
+                fa_return, fa_msg, info_fa = mrtrix_DTI(
                     info_preproc["dwi_preproc"], info_preproc["brain_mask"], FA_dir)
+                
+                # Compute FA map dipy
+                DTI_dir = os.path.join(analysis_directory, "DTI_dipy")
+                if not os.path.exists(DTI_dir):
+                    os.mkdir(DTI_dir)
+                DTI_return, DTI_msg, info_DTI = dipy_DTI(
+                    info_preproc["dwi_preproc"], info_preproc["brain_mask_nii"], DTI_dir)
 
                 # NODDI maps, only valid for multishell data
-                if acq == "abcd":
+                if SHELL:
                     mask_nii = info_preproc["brain_mask_nii"]
                     AMICO_dir = os.path.join(analysis_directory, "AMICO")
                     print(colored("\n~~NOODI starts~~", "cyan"))
@@ -220,106 +227,110 @@ if __name__ == "__main__":
                     AMICO_dir = None
                     NODDI_dir = None
 
-                # DKI maps, only works for abcd since it requires 3 b values
-                if acq == "abcd":
+                # DKI maps, (requires 3 b values)
+                if SHELL:
                     DKI_dir = os.path.join(analysis_directory, "DKI")
                     if not os.path.exists(DKI_dir):
                         os.mkdir(DKI_dir)
-                    DKI_return, DKI_msg, info_DKI = DKI(
+                    DKI_return, DKI_msg, info_DKI = dipy_DKI(
                         info_preproc["dwi_preproc"], info_preproc["brain_mask_nii"], DKI_dir)
                 else:
                     DKI_dir = None
-
-                # Aligning in the MNI space
-                MNI_dir = os.path.join(analysis_directory, "Results_MNI")
+                
+                ## Tractseg analysis
+                # Aligning in the MNI space for tractseg
+                tractseg_dir = os.path.join(analysis_directory, "analysis_tractseg")
+                if not os.path.exists(tractseg_dir):
+                    os.mkdir(tractseg_dir)
+                MNI_dir = os.path.join(tractseg_dir, "Results_MNI")
                 if not os.path.exists(MNI_dir):
                     os.mkdir(MNI_dir)
-                mni_return, mni_msg, info_mni = run_register_MNI(
-                    info_preproc["dwi_preproc"], info_fa["FA_map"], MNI_dir)
-
-                # NODDI and DKI maps in the MNI
-                print(colored("\n~~Map in MNI step starts~~", "cyan"))
-                for file_name in os.listdir(NODDI_dir):
-                    if file_name.endswith(".nii.gz"):
-                        map_noddi = os.path.join(NODDI_dir, file_name)
-                        out_dir = os.path.join(MNI_dir, "NODDI_MNI")
-                        if not os.path.exists(out_dir):
-                            os.mkdir(out_dir)
-                        map_in_MNI(map_noddi, out_dir, MNI_dir)
-                for file_name in os.listdir(DKI_dir):
-                    if file_name.endswith(".nii.gz"):
-                        map_dki = os.path.join(DKI_dir, file_name)
-                        out_dir = os.path.join(MNI_dir, "DKI_MNI")
-                        if not os.path.exists(out_dir):
-                            os.mkdir(out_dir)
-                        map_in_MNI(map_dki, out_dir, MNI_dir)
+                mni_return, mni_msg, info_mni = register_to_MNI_FA(
+                    info_preproc["dwi_preproc"], info_DTI["FA_map"], MNI_dir)
+                
+                # MD in MNI
+                map_md = info_DTI["FA_map"].replace("FA", "MD")
+                if ".mif" in map_md:
+                    nii_return, nii_msg, map_md_nii = convert_mif_to_nifti(map_md, FA_dir, diff=False)
+                else:
+                    map_md_nii = map_md
+                map_in_MNI_flirt_applyxfm(map_md_nii, MNI_dir, MNI_dir)
+                if SHELL:
+                    # NODDI and DKI maps in the MNI
+                    NODDI_MNI = os.path.join(MNI_dir, "NODDI_MNI")
+                    DKI_MNI = os.path.join(MNI_dir, "DKI_MNI")
+                    if not os.path.exists(NODDI_MNI):
+                        os.mkdir(NODDI_MNI)
+                    if not os.path.exists(DKI_MNI):
+                        os.mkdir(DKI_MNI)
+                    print(colored("\n~~Map in MNI step starts~~", "cyan"))
+                    for file_name in os.listdir(NODDI_dir):
+                        if file_name.endswith(".nii.gz"):
+                            map_noddi = os.path.join(NODDI_dir, file_name)
+                            map_in_MNI_flirt_applyxfm(map_noddi, NODDI_MNI, MNI_dir)
+                    for file_name in os.listdir(DKI_dir):
+                        if file_name.endswith(".nii.gz"):
+                            map_dki = os.path.join(DKI_dir, file_name)
+                            map_in_MNI_flirt_applyxfm(map_dki, DKI_MNI, MNI_dir)
                 print(colored("\nMap in MNI step ends", "cyan"))
 
                 # Doing FOD estimations
-                FOD_dir = os.path.join(analysis_directory, "FOD")
+                FOD_dir = os.path.join(tractseg_dir, "FOD")
                 if not os.path.exists(FOD_dir):
                     os.mkdir(FOD_dir)
                 _, msg, peaks = FOD(
-                    info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"], acq, FOD_dir)
+                    info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"], FOD_dir, multishell=SHELL)
 
                 # Tractography
-                Tract_dir = os.path.join(analysis_directory, "Tracto")
+                Tract_dir = os.path.join(tractseg_dir, "Tracto")
                 if not os.path.exists(Tract_dir):
                     os.mkdir(Tract_dir)
-                if in_t1w_nifti is not None:
-                    run_preproc_t1(in_t1w_nifti, info_mni["dwi_preproc_mni"])
                 run_tractseg(peaks, Tract_dir)
 
-                # Tractometry
-                # Change here if you want to perform tractometry with another map than the FA
-                # Be carefull: the map must be in the MNI space
-
-                # For the FA
+                # Tractometry (map must be in the MNI space)
                 map_path = info_mni["FA_MNI"]
-
-                # For the others map
-                NODDI_MNI = os.path.join(MNI_dir, "NODDI_MNI")
-                map_path_ODI = os.path.join(NODDI_MNI, "ODI_MNI.nii.gz")
-                map_path_NDI = os.path.join(NODDI_MNI, "NDI_MNI.nii.gz")
-                DKI_MNI = os.path.join(MNI_dir, "DKI_MNI")
-                map_path_KFA = os.path.join(DKI_MNI, "dki_kFA_MNI.nii.gz")
-                map_path_MK = os.path.join(DKI_MNI, "dki_MK_MNI.nii.gz")
-
                 print(colored("\n~~Tractometry starts~~", "cyan"))
                 tractometry_postprocess(map_path, Tract_dir)
-                if acq == "abcd":
+                map_path_MD =  info_mni["FA_MNI"].replace("FA_MNI", "dti_MD_MNI")
+                tractometry_postprocess(map_path_MD, Tract_dir)
+                if SHELL:
+                    map_path_ODI = os.path.join(NODDI_MNI, "ODI_MNI.nii.gz")
+                    map_path_NDI = os.path.join(NODDI_MNI, "NDI_MNI.nii.gz")
+                    map_path_KFA = os.path.join(DKI_MNI, "dki_kFA_MNI.nii.gz")
+                    map_path_MK = os.path.join(DKI_MNI, "dki_MK_MNI.nii.gz")
                     tractometry_postprocess(map_path_NDI, Tract_dir)
                     tractometry_postprocess(map_path_KFA, Tract_dir)
                     tractometry_postprocess(map_path_MK, Tract_dir)
                     tractometry_postprocess(map_path_ODI, Tract_dir)
+                else:
+                    map_path_KFA = None
+                    map_path_MK = None
+                    map_path_NDI = None
+                    map_path_ODI = None
                 print(colored("\nTractometry done.", "cyan"))
 
-                # ROI extraction
-                PATH_METRIC = {
-                    "FA":  info_mni["FA_MNI"],
-                    "dki_MK" : map_path_MK,
-                    "dki_kFA" : map_path_KFA,
-                    "noddi_ODI" : map_path_ODI,
-                    "noddi_NDI" : map_path_NDI
-                }
-                subject_name = analysis_directory.split(
-                    "/")[-3] + "-" + analysis_directory.split(
-                        "/")[-2] + "-" + analysis_directory.split("/")[-1]
-                if acq == "abcd":    
-                    list_metrics = ["FA", "dki_MK", "dki_kFA", "noddi_ODI", "noddi_NDI"]
-                else:
-                    list_metrics = ["FA"]
-                for metric in list_metrics:  
-                    # Check if the subject is already in the TSV file or there is not such a file
-                    tsv_file = os.path.join(
-                        bids_path, "derivatives", "current_" + metric + "_tractseg_stats.tsv"
-                    )
-                    if not os.path.isfile(tsv_file) or subject_name not in {row[0] for row in csv.reader(open(tsv_file), delimiter="\t")}:
-                        # Extract ROI stats and update the TSV file
-                        roi_stats = extract_roi_stats(
-                            analysis_directory, PATH_METRIC[metric])
-                        create_or_update_tsv(subject_name, roi_stats, tsv_file)
-                    else:
-                        print(colored(f"\nFile already on the {metric} stats table.", "yellow"))
+                ## Jhu analysis (registration to MNI space)
+                jhu_dir = os.path.join(analysis_directory, "analysis_jhu")
+                if not os.path.exists(jhu_dir):
+                    os.mkdir(jhu_dir)
+                bet_return, bet_msg, info_bet = t1_bet(in_t1w_nifti, jhu_dir)
+                fa_nii = info_DTI["FA_map"]
+                mni_jhu_return, mni_jhu_msg, info_mni_jhu = register_to_MNI_using_T1w(
+                    in_t1w_nifti, info_bet["t1_brain"], 
+                    info_preproc["mean_b0"], fa_nii, jhu_dir
+                )
+        
+                print(colored("\n~~Map in MNI step starts~~", "cyan"))
+                map_in_MNI_applywarp(map_md_nii, info_mni_jhu["T12MNI_warp"], info_mni_jhu["b0_to_T1_mat"], jhu_dir)
+                for file_name in os.listdir(NODDI_dir):
+                    if file_name.endswith(".nii.gz"):
+                        map_noddi = os.path.join(NODDI_dir, file_name)
+                        map_in_MNI_applywarp(map_noddi, info_mni_jhu["T12MNI_warp"], info_mni_jhu["b0_to_T1_mat"], jhu_dir)
+                for file_name in os.listdir(DKI_dir):
+                    if file_name.endswith(".nii.gz"):
+                        map_dki = os.path.join(DKI_dir, file_name)
+                        map_in_MNI_applywarp(map_dki, info_mni_jhu["T12MNI_warp"], info_mni_jhu["b0_to_T1_mat"], jhu_dir)
+                print(colored("\nMap in MNI step ends", "cyan"))
+
 
             print(colored("\n \n===== THE END =====\n\n", "cyan"))

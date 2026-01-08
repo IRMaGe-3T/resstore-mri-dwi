@@ -8,9 +8,7 @@ sequences for processing:
 import sys
 import os
 import shutil
-
 from bids import BIDSLayout
-
 from useful import convert_nifti_to_mif, execute_command, get_shell, verify_file
 
 
@@ -208,7 +206,7 @@ def prepare_hermes_acquistions(bids_directory, sub, ses, preproc_directory):
     # Check if pepolar contain only b0 or not
     if pepolar_ap is not None:
         _, msg, shell_ap = get_shell(pepolar_ap)
-        shell_ap = [bval for bval in shell_ap if bval != "0" and bval != ""]
+        shell_ap = [bval for bval in shell_ap if float(bval) >= 5 and bval != ""]
         pepolar_ap_bzero = pepolar_ap.replace(".mif", "_bzero.mif")
 
         # If pepolar contain b0 and b1000, extract b0
@@ -235,7 +233,7 @@ def prepare_hermes_acquistions(bids_directory, sub, ses, preproc_directory):
 
     if pepolar_pa is not None:
         _, msg, shell_pa = get_shell(pepolar_pa)
-        shell_pa = [bval for bval in shell_pa if bval != "0" and bval != ""]
+        shell_pa = [bval for bval in shell_pa if float(bval) >= 5 and bval != ""]
         pepolar_pa_bzero = pepolar_pa.replace(".mif", "_bzero.mif")
 
         if len(shell_pa) > 0:
