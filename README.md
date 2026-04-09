@@ -1,11 +1,46 @@
-# RESSTORE MRI-DWI Processing
+Table of contents
+1. [Overview](#overview)
+2. [Diffusion MRI protocol](#mriprotocol)
+3. [Installation and configuration](#installation)
+4. [How it works](#how-it-works)
 
-This project is a processing pipeline for MRI diffusion data of the RESSTORE study. This repository contains the information to convert the dicom data to BIDS format and the instructions for the code to use to process MRI diffusion data.
+
+<a name="overview"></a>
+# Overview
+This repository contains the diffusion MRI protocol and processing pipeline for [RESSTORE (Regenerative Stem Cell Therapy for Stroke in Europe)](https://doi.org/10.3389/fstro.2024.1416490), a multicenter randomized controlled trial evaluating intravenous allogeneic adipose-derived stem cells in subacute ischemic stroke. 
+
+Within the context of RESSTORE, a clinically compatible four-shell diffusion MRI protocol has been implemented. The pipeline provided here enables processing of the acquired data.
+
+The MRI protocol, processing pipeline, and validation (test–retest on healthy volunteers and feasibility in stroke patients) are described in a submitted MethodsX article.
+
+## What this repository provides
+
+- A clinically validated diffusion MRI acquisition protocol
+- A complete processing pipeline for multi-shell diffusion data
+- Quantitative outputs including DTI, DKI, NODDI, and tract-based analysis
+
+<a name="mriprotocol"></a>
+# Diffusion MRI protocol
+
+- Philips MRI scanner:
+
+  Diffusion adapted from the ABCD framework (Casey et al., 2018; Cetin-Karayumak et al., 2023) and optimized for clinical feasibility on a Philips system.  Diffusion data were acquired using two runs of 51 directions each. Reversed phase-encoded b=0 images were acquired. Protocol is available in `resources`
+
+- GE and Siemens MRI scanner:
+
+   Diffusion protocol derived from the ABCD framework (Casey et al., 2018; Cetin-Karayumak et al., 2023) used. 
 
 
+<a name="installation"></a>
+# Installation and configuration
+
+### Clone this repository
+
+```bash
+git clone  https://github.com/IRMaGe-3T/resstore-mri-dwi.git
+```
 ## Requirements
-
-To use the programs, you'll need the following softwares and librairies. The versions indicated work with this code, other versions might cause some troubles. 
+To use the program, you'll need the following software and libraries. The versions indicated work with this code, other versions might cause issue. 
 - MRtrix 3.0.4
 - dcm2bids 3.1.1
 - ANTs 2.5.2
@@ -21,126 +56,132 @@ To use the programs, you'll need the following softwares and librairies. The ver
 - Termcolor 2.4.0
 - Pandas 2.2.2
 
-
-## Before starting: organize the database
-
-To begin, make sure your data are in BIDS format and that they have been organized with dcm2bids_scaffold method. To do so, you can follow the tutorial `dcm2bids tutorial` available in `ressources`. After using the tutorial, your data should be organized like this:
-
-- BIDS
-  - code
-  - derivatives
-  - sourcedata
-  - sub-001
-    - ses-01
-      - anat
-        - T1
-      - dwi
-        - DWI from one or both acquisitions (ABCD/Hermes)
-      - fmap
-        - Fieldmap from one or both acquisitions (ABCD/Hermes)
-      - ...
-    - ses-02
-  - sub-002
-    - ses-01
-    - ses-02
-  - CHANGES
-  - dataset_description.json
-  - ...
+Tested on Linux (Ubuntu 24.04). Compatibility with other systems is not guaranteed.
 
 
+<a name="how-it-works"></a>
+# How it works
 
+## Data organization 
 
-## Getting started: launch the program 
+The data should be organized following the BIDS format. 
+To do so, you can follow the tutorial available in `resources/data_conversion`.
 
-To use this code, open the `restorre-mri-dwi` directory in your terminal and run the following command:
+**Example of data organization for Philips data:**
 ```
-python3 main.py --bids <folder_bids_path> --subjects <subject_ids> --sessions <session_ids> --acquisitions <acquisition_ids>
+/BIDS_FOLDER_PATH
+├── dataset_description.json
+├── derivatives
+├── sub-013
+│   ├── ses-02
+│   │   ├── anat
+│   │   │   ├── sub-013_ses-02_T1w.json
+│   │   │   ├── sub-013_ses-02_T1w.nii.gz
+│   │   ├── dwi
+│   │   │   ├── sub-013_ses-02_acq-abcd1_dir-PA_dwi.bval
+│   │   │   ├── sub-013_ses-02_acq-abcd1_dir-PA_dwi.bvec
+│   │   │   ├── sub-013_ses-02_acq-abcd1_dir-PA_dwi.json
+│   │   │   ├── sub-013_ses-02_acq-abcd1_dir-PA_dwi.nii.gz
+│   │   │   ├── sub-013_ses-02_acq-abcd2_dir-PA_dwi.bval
+│   │   │   ├── sub-013_ses-02_acq-abcd2_dir-PA_dwi.bvec
+│   │   │   ├── sub-013_ses-02_acq-abcd2_dir-PA_dwi.json
+│   │   │   └── sub-013_ses-02_acq-abcd2_dir-PA_dwi.nii.gz
+│   │   ├── fmap
+│   │   │   ├── sub-013_ses-02_acq-abcd_dir-AP_epi.json
+│   │   │   ├── sub-013_ses-02_acq-abcd_dir-AP_epi.nii.gz
+│   │   │   ├── sub-013_ses-02_acq-abcd_dir-PA_epi.json
+│   │   │   └── sub-013_ses-02_acq-abcd_dir-PA_epi.nii.gz
+
 ```
-Replace `<folder_bids_path>` with the path to your BIDS dataset folder, `<subject_ids>` with the IDs of the subjects you want to process, `<session_ids>` with the IDs of the sessions you want to process, and `<acquisition_ids>` with the IDs of the acquisitions you want to process (hermes and/or abcd).
+
+## Launch analysis
+To use the analysis pipeline, open the `restorre-mri-dwi` directory in your terminal and run the following command:
+```
+python main.py --bids <folder_bids_path> --subjects <subject_ids> --sessions <session_ids> --acquisitions <acquisition_ids>
+```
+Arguments: 
+- --bids: Path to the BIDS dataset
+- --subjects: List of subject IDs (without "sub-")
+- --sessions: List of session IDs (without "ses-")
+- --acquisitions: Acquisition type (abcd or hermes)
 
 **Example Command**
 ```
-python3 main.py --bids 'path/to/OUTPUT_DIR' --subjects 003 --sessions 02 --acquisitions hermes
+python main.py --bids /BIDS_FOLDER_PATH --subjects 013 014 --sessions 02 --acquisitions abcd
 ```
 
+## Workflow description
 
+The pipeline includes the following steps:
 
-## Methods used by the program
+1) Data preparation(conversion to .mif format, data concatenation, fmap preparation)
+2) Denoising 
+3) Unringing
+4) Motion and distortion correction 
+5) Bias field correction
+6) Diffusion Tensor Imaging (DTI) (MRtrix and DIPY)
+7) NODDI (AMICO)
+8) Diffusion Kurtosis Imaging (DKI) (DIPY)
+9) TractSeg analysis
+    - Align diffusion and metric maps in the MNI space using FA template
+    - FOD estimation 
+    - Tractography (TractSeg)
+    - Tractometry (TractSeg)
+10) JHU analysis
+    - Align diffusion and metric maps in the JHU space (MNI space)
+    - Warp JHU atlas to subject space
 
-Here is a brief explanation of the steps done by the programm the preprocess and process the data.
+## Outputs
 
-1) Prepare acquisition to the right format (.mif for mrtrix)) and normalize the name 
+Main outputs include:
 
-2) Denoising (dwidenoise MRtrix)
-3) Unringing (dwidegibbs MRtrix)
-4) Motion and distorsion correction (dwipreporc fsl)
-4) Unbiasing (dwibiascorrect MRtrix)
-5) FA, ADC, AD, RD map creation (MRtrix)
-6) NODDI (AMICO)
-7) DKI (DIPPY)
-8) Align everything in the MNI space using FA template
-9) FOD estoimation (MRtrix)
-10) Performing tractography (TractSeg)
-11) Doing tractometry (TractSeg) 
-12) Plotting some graphs of FA along tracts 
-13) Stats of mean FA in each ROI for all subjects
+- **DTI metrics**: FA, MD, AD, RD
+- **DKI metrics**: MK, AK, RK
+- **NODDI metrics**: ODI, NDI, FWF
+- **TractSeg results**: bundle segmentation and tractometry
+- **JHU analysis**: atlas-based metrics
 
+Each step also generates intermediate files for quality control.
 
-## Results
+All the outputs are stored in the `derivatives` directory:
 
-The program creates a wide range of images, maps, graph and stats which are organized as follow in the `derivatives` directory:
-
-- sub-001
-  - ses-01
+- sub-XX
+  - ses-XX
     - dwi-abcd
-        - AMICO: NODDI maps (ODI, NDI, FWF,...)
-        - DKI: DKI maps (AK, MK, RK, ...) --> only for multishell data
-        - FA: FA maps and others (FA, ADC, RD, AD)
-        - FOD: all files linked to FOD estimations
+        - AMICO: NODDI maps (ODI, NDI, FWF,...) --> only for multishell data
+        - analysis_jhu: results from JHU analysis
+        - analysis_tractseg: results from TractSeg analysis
+        - DKI: DKI maps (AK, MK, RK, ...)       --> only for multishell data
+        - DTI_dipy: DTI maps created using DIPY
+        - DTI_mrtrix: DTI maps created using MRTrix
         - preprocessing: preprocessed data from each step 
-        - preprocessing_MNI: processed data passed in the MNI space (DWI, FA, NODDI, DKI, ...)
-        - Tracto: all files related to tractography and some postprocessed data (graphs)
-        - FA_2_MNI.mat
- - ...
- - FA_stats: tsv file containing stats for mean FA in all subjects
 
 
+## Optional: Removing corrupted volumes
 
-## Going further: Removing volumes
+To improve data quality, you may remove corrupted volumes.
 
-If you want to remove some volumes of your images to increase the quality of the processing, here's how you can do:  
-  
-	- Create a text file in which you write the indices of the volumes that you want to remove. Each index must be separated from the other with a space. You can find an example in `ressources`.   
-	  
-	- Run the same command as in the 'Getting started' section but add an option `--volumes` followed by the path to the text file that you just created. The program will create a new folder: `dwi-acq_removed_volumes` where you can find the results of the pre and post processing on the image with removed volumes.  
-	
-**Example command**	
+### Steps
+
+1. Create a text file containing the indices of volumes to remove (space-separated)
+2. Run the pipeline with:
+
+
 ```
-python3 main.py --bids 'path/to/OUTPUT_DIR' --subjects 003 --sessions 02 --acquisitions hermes --volumes 'path/to/volumes_to_remove.txt'
+python main.py --bids /BIDS_FOLDER_PATH --subjects 003 --sessions 02 --acquisitions hermes --volumes 'path/to/volumes_to_remove.txt'
 ```
 
+Warning: Removing volumes may affect downstream modeling (especially multi-shell methods like NODDI).
+Use this option carefully.
 
 
-## How to choose which volumes to remove
+### How to choose which volumes to remove
 
-Once you've run the program completely for the subject with all the volumes, open the pdf file located in: `preprocessing/qc_text/quad/qc.pdf`. On the 6th page you'll see a chart indicating the number of outlier in each volume. A good idea is to supress the volumes having too many outliers (high peaks on top of the chart).
-You can also visualize by hand the volumes by typing in the terminal `mrview path/to/img.mif` and decide which volume to remove. The ones where the head is tilted and the ones featuring dark bands are good to remove.  
-
-
-
-
-
-## Usefull remarks
-
-Concerning the graphs of FA along the tracts, named 'FA_MNI_graphs_TractSeg.png' or 'ODI_MNI_graphs_TractSeg.png', you can choose to plot different tracts. To do so, delete the graphs or save them elsewhere, change the list of ROIs in the subjects.txt file that should be in the same folder and re-do the tractometry by simply re-running the main program (only the tractometry will be done since the other steps have already been done).  
+Once you've run the program completely for the subject with all the volumes, open the pdf file located in: `preprocessing/qc_text/quad/qc.pdf`. On the 6th page you'll see a chart indicating the number of outliers in each volume. A good idea is to suppress the volumes having too many outliers (high peaks on top of the chart).
+You can also visualize by hand the volumes by typing in the terminal `mrview path/to/img.mif` and decide which volume to remove.  
+Volumes where the head is tilted or that contain dark bands are good candidates for removal.
 
 
 
-## Important Notes
 
-* The processed output will be stored in the `derivatives` directory.
-* **Respect the BIDS format**: Ensure that your input files are in the correct BIDS format, as incorrect formatting may cause errors or incorrect results.
-* Don't try to run the program on a subject that do not have any diffusion images, this could create derivatives wich are ompletely false.
-* The program runs with only diffusion acquired in one direction. If you have both you need to delete one of the direction from the subject file. Make sure that you have the pepolar fmap for the remaining acquisition.
-* Global correction using both AP and PA is possible but must be done manually. 
 
