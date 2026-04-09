@@ -1,5 +1,5 @@
 """
-Functions to do "JHU analysis" (registration to MNI):
+Functions to do "JHU analysis" (registration to MNI)
 
 """
 
@@ -15,6 +15,13 @@ from termcolor import colored
 def register_to_MNI_using_T1w(in_t1, in_t1_brain, mean_b0, in_fa, out_dir):
     """
     FA registation to MNI (FSL MNI152_T1_2mm_brain) using T1w and b0.
+
+    Parameters:
+    - in_t1 (string): path to T1 image (.nii.gz)
+    - in_t1_brain: path to t1 brain masked image (.nii.gz)
+    - mean_b0: path to mean b0 image (.nii.gz)
+    - in_fa: path to FA image (.nii.gz)
+    - out_dir (string): output path directory
     """
     fsl_dir = os.environ.get("FSLDIR")
     template = f"{fsl_dir}/data/standard/MNI152_T1_2mm_brain.nii.gz"
@@ -190,7 +197,8 @@ def map_in_MNI_applywarp(map_to_register, T12MNI_warp, b0_to_T1_mat, out_dir):
 
     Parameters:
     - map_to_register: path to the map to register in MNI
-    - warp: path to warp
+    - T12MNI_warp: path to warp 
+    - b0_to_T1_mat: path to prematrice 
     - out_dir: output directory path 
 
     """

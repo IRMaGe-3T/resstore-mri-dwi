@@ -21,16 +21,14 @@ EXT_NIFTI = {"NIFTI_GZ": "nii.gz", "NIFTI": "nii"}
 EXT_MIF = {"MIF": "mif"}
 
 
-def run_tractseg(peaks, Tract_dir):
+def run_tractseg(peaks, tract_dir):
     """
     Run all the commands from TractSeg software.
 
     Parameters:
-    peaks (str): Path to the peaks image in NIfTI format.
+    - peaks (string): Path to the peaks image in NIfTI format.
+    - tract_dir (string): path to output directory
 
-    Returns:
-    tuple: A tuple containing a status code (1 for success, 0 for failure)
-           and a message indicating the result or error.
     """
 
     # Check if peaks has the right format
@@ -41,8 +39,8 @@ def run_tractseg(peaks, Tract_dir):
         return 0, msg
 
     # Copy peaks into the tracto directory
-    peaks_tracto = os.path.join(Tract_dir, "peaks.nii")
-    tractseg_out_dir = os.path.join(Tract_dir, "tractseg_output")
+    peaks_tracto = os.path.join(tract_dir, "peaks.nii")
+    tractseg_out_dir = os.path.join(tract_dir, "tractseg_output")
     bundle = os.path.join(tractseg_out_dir, "bundle_segmentations")
     if not verify_file(bundle):
         if not verify_file(peaks_tracto):
@@ -53,7 +51,7 @@ def run_tractseg(peaks, Tract_dir):
                 return 0, msg
 
     # Run all usefull TractSeg commands
-    tractseg_out_dir = os.path.join(Tract_dir, "tractseg_output")
+    tractseg_out_dir = os.path.join(tract_dir, "tractseg_output")
     bundle = os.path.join(tractseg_out_dir, "bundle_segmentations")
     ending_segm = os.path.join(tractseg_out_dir, "endings_segmentations")
     uncertainty = os.path.join(tractseg_out_dir, "bundle_uncertainties")
@@ -103,14 +101,13 @@ def run_tractseg(peaks, Tract_dir):
     return 1, msg
 
 
-# def replace_dots_with_commas(value):
-#     if isinstance(value, str):
-#         return value.replace('.', ',')
-#     return value
-
-def tractometry_postprocess(map, Tract_dir):
+def tractometry_postprocess(map, tract_dir):
     """
     Tractometry
+
+    Parameters:
+    - map (string): path to map (FA, NDI, ODI..) in NIfTI format
+    - tract_dir (string): path to output directory
 
     """
 
@@ -136,10 +133,10 @@ def tractometry_postprocess(map, Tract_dir):
                 print("\n map already exist in nii format.\n")
 
     # Create paths
-    tractseg_out_dir = os.path.join(Tract_dir, "tractseg_output")
+    tractseg_out_dir = os.path.join(tract_dir, "tractseg_output")
     ending_segm = os.path.join(tractseg_out_dir, "endings_segmentations")
     TOM_trackings = os.path.join(tractseg_out_dir, "TOM_trackings")
-    peaks_tracto = os.path.join(Tract_dir, "peaks.nii")
+    peaks_tracto = os.path.join(tract_dir, "peaks.nii")
 
     # Run tractometry to create csv file
     if (os.path.exists(TOM_trackings) and os.path.exists(ending_segm)):
@@ -192,26 +189,6 @@ def tractometry_postprocess(map, Tract_dir):
             return 0, msg
 
     plot_cst_data(tracto_csv, map_name)
-
-    # df = pd.read_csv(tracto_csv)
-    # df = df.applymap(replace_dots_with_commas)
-    # df.to_csv(tracto_csv, index=False)
-
-
-    # # Read the CSV file and process it line by line
-    # with open(tracto_csv, 'r', newline='', encoding='utf-8') as csvfile:
-    #     reader = csv.reader(csvfile)
-    #     lines = list(reader)
-
-    # # Write the processed lines to a TSV file
-    # with open(tsv_file_path, 'w', newline='', encoding='utf-8') as tsvfile:
-    #     writer = csv.writer(tsvfile, delimiter='\t')
-    #     writer.writerows(lines)
-
-    # # Remove the original CSV file
-    # os.remove(tracto_csv)
-
-
     msg = "\nRun postprocessing for tractometry done"
     print(colored(msg, "cyan"))
     return 1, msg
@@ -222,10 +199,8 @@ def download_template(dir_name):
     Function to download the template file if it doesn't exist
 
     Parameters:
-    - dir_name: directory where the template will be downloaded
+    - dir_name (string): directory where the template will be downloaded
 
-    Returns:
-    - template_path
     """
 
     github_repo_url = "https://github.com/IRMaGe-3T/resstore-mri-dwi/raw/1f0fbd5ff4809cf0f89be36548d1c4b7bc2c5f04/resstore-mri-dwi/resources/MNI_FA_template.nii.gz"
@@ -250,13 +225,9 @@ def register_to_MNI_FA(in_dwi, in_fa, MNI_dir):
     Aligning image to MNI space
 
     Parameters:
-    - in_dwi: input file .mif format to be preprocessed, mif format.
-    - in_fa: input Fractional Anisotropy Map to be preprocessed, mif format.
+    - in_dwi (string): input file .mif format to be preprocessed, mif format.
+    - in_fa (string): input Fractional Anisotropy Map to be preprocessed, mif format.
 
-    Returns:
-    - int 1 success, 0 failure
-    - msg
-    - info_mni
     """
 
     # Get files name
@@ -398,6 +369,8 @@ def register_to_MNI_FA(in_dwi, in_fa, MNI_dir):
         if not verify_file(dwi_mask):
             convert_nifti_to_mif(dwi_mask_nii, MNI_dir, diff=False)    
 
+    # Remove template path
+    os.remove(template_path)
 
     info_mni = {"dwi_preproc_mni": diffusion_mni_mif,
                 "dwi_mask_mni": dwi_mask, "FA_MNI": fa_mni}

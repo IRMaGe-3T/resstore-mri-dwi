@@ -10,6 +10,12 @@ from termcolor import colored
 def mrtrix_DTI(in_dwi, mask, FA_dir):
     """
     Fit DTI using mrtrix
+    
+    Parameters:
+    - in_dwi (string): diffusion path (.mif)
+    - mask (string): brain mask path
+    - FA_dir (string): output path directory
+    
     """
     info = {}
     # Get files name

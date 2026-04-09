@@ -15,7 +15,15 @@ import nibabel as nib
 
 
 def dipy_DTI(dwi_unbias_mif, dwi_mask_nii, DTI_dir):
-    """Fit DTI model with dipy"""
+    """
+    Fit DTI model with dipy 
+
+    Parameters:
+    - dwi_unbias_mif (string): diffusion path (.mif)
+    - dwi_mask_nii: brain mask path (.nii.gz)
+    - DTI_dir (string): output path directory
+    
+    """
 
     dwi_unbias_nii = dwi_unbias_mif.replace(".mif", ".nii.gz")
     dwi_bval = dwi_unbias_nii.replace(".nii.gz", ".bval")
@@ -52,7 +60,16 @@ def dipy_DTI(dwi_unbias_mif, dwi_mask_nii, DTI_dir):
 
 
 def dipy_DKI(dwi_unbias_mif, dwi_mask_nii, DKI_dir):
-    """Fit DKI model with dipy"""
+    """
+    Fit DKI model with dipy
+
+    Parameters:
+    - dwi_unbias_mif (string): diffusion path (.mif)
+    - dwi_mask_nii: brain mask path (.nii.gz)
+    - DKI_dir (string): output path directory
+    
+    
+    """
 
     dwi_unbias_nii = dwi_unbias_mif.replace(".mif", ".nii.gz")
     dwi_bval = dwi_unbias_nii.replace(".nii.gz", ".bval")

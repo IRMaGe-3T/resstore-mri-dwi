@@ -3,8 +3,15 @@ from useful import execute_command, convert_mif_to_nifti, verify_file
 from termcolor import colored
 
 
-def t1_bet(in_t1,out_dir):
-    """ use BET (FSL)"""
+def t1_bet(in_t1, out_dir):
+    """ 
+    Use BET (FSL)
+
+    Parameters:
+    - in_t1 (string): path to anat image
+    - out_dit (string): path to output directory
+    
+    """
     info = {}
     t1_brain = os.path.join(out_dir, "T1_brain.nii.gz")
     if not verify_file(t1_brain):
@@ -23,18 +30,9 @@ def run_preproc_t1(in_t1_nifti, in_dwi):
     Coregister T1w to DWI
 
     Parameters:
-    -----------
-    in_t1_nifti : str
-        Path to the T1-weighted image in NIfTI format.
-    in_dwi : str
-        Path to the diffusion-weighted image (DWI) in MIF format.
+    - in_t1_nifti (string): Path to the T1-weighted image in NIfTI format.
+    - in_dwi (string): Path to the diffusion-weighted image (DWI) in MIF format.
 
-    Returns:
-    --------
-    tuple
-        A tuple containing the execution status (0 if an error occurred, 1 otherwise),
-        a message describing the execution result, and an information dictionary (info).
-        If the status is 1, info will contain the path to the coregistered T1 image.
     """
 
     # Get name directory and create info

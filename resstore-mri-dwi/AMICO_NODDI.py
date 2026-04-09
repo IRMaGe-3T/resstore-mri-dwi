@@ -8,7 +8,11 @@ from useful import delete_directory, verify_file
 
 def NODDI(dwi, mask):
     """
-    Run AMICO
+    Run AMICO to fit NODDI model 
+
+    Parameters:
+    - dwi (string): path to diffusion (.nii.gz)
+    - mask (string): path to brain mask (.nii.gz)
     """
 
     # Paths

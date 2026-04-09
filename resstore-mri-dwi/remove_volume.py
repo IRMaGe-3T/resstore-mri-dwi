@@ -3,6 +3,14 @@ from useful import delete_directory
 
 
 def remove_volumes(input_file, output_file, volumes_to_remove_file):
+    """
+    Remove volumes
+
+    Parameters:
+    - input_file (string): path to input diffusion
+    - output_file (string): path to output diffusion
+    - volume_to_remove (string): path to text file  with list of volumes to remove
+    """
     # Créer un répertoire temporaire
     dir_name = os.path.dirname(input_file)
     temp_dir = os.path.join(dir_name, "_temp")

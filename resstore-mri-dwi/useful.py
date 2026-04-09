@@ -259,7 +259,7 @@ def delete_directory(dir_name):
     """
     Remove a directory and all its contents recursively.
 
-    Args:
+    Parameters:
     - dir_name (str): Path to the directory to be deleted.
 
     Returns:
@@ -268,10 +268,6 @@ def delete_directory(dir_name):
     Raises:
     - OSError: If the directory or any of its contents cannot be removed.
 
-    This function attempts to delete the specified directory and all its contents.
-    It first checks if the directory exists, and if so, proceeds to delete all files
-    and subdirectories within it recursively. Finally, it removes the directory itself.
-    Any errors encountered during the deletion process are caught and printed as an error message.
     """
     try:
         # Check if the directory exists
@@ -299,6 +295,10 @@ def delete_directory(dir_name):
 def plot_cst_data(file_path, map_name):
     """
     Plot CST data
+
+    Parameters:
+    - file_path (string): path to csv tracto file
+    - map_name (string): name of the map (FA..)
     
     """
     # Read CSV file with the correct separator

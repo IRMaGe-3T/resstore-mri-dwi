@@ -48,6 +48,11 @@ if __name__ == "__main__":
         "--volumes", required=None,
         help="list of volumes to remove (.txt)"
     )
+    parser.add_argument(
+        "--average_fod", required=None,
+        action="store_true",
+        help="used average FOD"
+    )
 
     # Set path
     args = parser.parse_args()
@@ -56,6 +61,7 @@ if __name__ == "__main__":
     sessions = args.sessions
     acquisitions = args.acquisitions
     volumes = args.volumes
+    average_fod = args.average_fod
     layout = BIDSLayout(bids_path)
 
     if subjects == ["all"]:
@@ -279,7 +285,12 @@ if __name__ == "__main__":
                 if not os.path.exists(FOD_dir):
                     os.mkdir(FOD_dir)
                 _, msg, peaks = FOD(
-                    info_mni["dwi_preproc_mni"], info_mni["dwi_mask_mni"], FOD_dir, multishell=SHELL)
+                    info_mni["dwi_preproc_mni"],
+                    info_mni["dwi_mask_mni"],
+                    FOD_dir,
+                    multishell=SHELL,
+                    average=average_fod
+                )
 
                 # Tractography
                 Tract_dir = os.path.join(tractseg_dir, "Tracto")
