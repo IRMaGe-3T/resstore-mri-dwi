@@ -32,31 +32,40 @@ The MRI protocol, processing pipeline, and validation (test–retest on healthy 
 
 
 <a name="installation"></a>
-# Installation and configuration
+# Installation
 
-### Clone this repository
-
-```bash
-git clone  https://github.com/IRMaGe-3T/resstore-mri-dwi.git
+## Clone the repository
 ```
-## Requirements
-To use the program, you'll need the following software and libraries. The versions indicated work with this code, other versions might cause issue. 
-- MRtrix 3.0.4
-- dcm2bids 3.1.1
-- ANTs 2.5.2
-- FSL 6.0.7.11
-- TractSeg 2.9
-- Xvfb 2:21.1.4
-- PyTorch 2.3.1
-- dmri-AMICO 2.0.3
-- NumPy 1.26.4
-- SciPy 1.14.0
-- NiBabel 5.2.1
-- Dipy 1.9.0
-- Termcolor 2.4.0
-- Pandas 2.2.2
+git clone https://github.com/IRMaGe-3T/resstore-mri-dwi.git
+cd resstore-mri-dwi
+```
 
-Tested on Linux (Ubuntu 24.04). Compatibility with other systems is not guaranteed.
+## Create a Python virtual environment
+
+We recommend using a virtual environment to avoid dependency conflicts.
+
+```
+python3 -m venv resstore-env
+source resstore-env/bin/activate
+```
+
+## Install Python dependencies
+```
+pip install --upgrade pip
+pip install -r requirements.txt
+``` 
+
+## External dependencies
+
+The following tools must be installed separately (not included in requirements.txt):
+
+- MRtrix (tested with 3.0.4)
+- FSL (tested with 6.0.7.11)
+- ANTs (tested with 2.5.2)
+- TractSeg (tested with 2.9)
+- Xvfb
+
+Make sure these tools are available in your system PATH.
 
 
 <a name="how-it-works"></a>
