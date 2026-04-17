@@ -15,7 +15,6 @@ The MRI protocol, processing pipeline, and validation (test–retest on healthy 
 
 ## What this repository provides
 
-- A clinically validated diffusion MRI acquisition protocol
 - A complete processing pipeline for multi-shell diffusion data
 - Quantitative outputs including DTI, DKI, NODDI, and tract-based analysis
 
@@ -45,7 +44,7 @@ cd resstore-mri-dwi
 We recommend using a virtual environment to avoid dependency conflicts.
 
 ```
-python3 -m venv resstore-env
+python -m venv resstore-env
 source resstore-env/bin/activate
 ```
 
@@ -66,7 +65,6 @@ The following tools must be installed separately (not included in requirements.t
 - Xvfb
 
 Make sure these tools are available in your system PATH.
-
 
 <a name="how-it-works"></a>
 # How it works
